@@ -27,6 +27,13 @@ const observerUpgradeData = {
     reality_scripts: { name: "Reality Scripts", baseCost: 58, costMult: 2.65, description: "+9% U-II to U-V route speed per level." },
     universe_briefing: { name: "Universe Briefing", baseCost: 78, costMult: 2.8, description: "Subjects handle later universes faster." },
     threshold_maps: { name: "Threshold Maps", baseCost: 125, costMult: 3.05, description: "+7% U-VI to U-X speed and OP per level." },
+    gentle_push: { name: "Gentle Push", baseCost: 26, costMult: 2.35, description: "+9% speed in Prime, Amulet, and early Evil per level." },
+    mistake_recovery: { name: "Mistake Recovery", baseCost: 38, costMult: 2.5, description: "-10% progress rollback from mistakes per level, capped at -65%." },
+    better_instincts: { name: "Better Instincts", baseCost: 42, costMult: 2.55, description: "Improves route choices and route quality for every subject." },
+    quiet_patronage: { name: "Quiet Patronage", baseCost: 52, costMult: 2.55, description: "Improves subject shopping, reserves, and waste recovery." },
+    character_refinement: { name: "Character Refinement", baseCost: 68, costMult: 2.75, description: "-12% Refine rank cost per level, capped at -72%." },
+    deep_simulation: { name: "Deep Simulation", baseCost: 95, costMult: 2.85, description: "+11% OP from Multiverse and higher stages per level." },
+    threshold_tutoring: { name: "Threshold Tutoring", baseCost: 145, costMult: 3.1, description: "+8% speed and -4% mistakes in U-VIII to U-X per level." },
 }
 
 const observerSubjectStages = [
@@ -303,7 +310,8 @@ function getObserverRankUpgradeCost(subject) {
     if (index < 0 || index >= order.length - 1)
         return Infinity
 
-    return 85 * Math.pow(3.25, index) * (1 + subject.completed_universe_x * 0.45)
+    const refinementDiscount = Math.max(0.28, 1 - getObserverUpgradeLevel("character_refinement") * 0.12)
+    return 85 * Math.pow(3.25, index) * (1 + subject.completed_universe_x * 0.45) * refinementDiscount
 }
 
 function improveObserverSubjectRank(id) {
@@ -578,7 +586,8 @@ function getObserverSubjectRouteQuality(subject) {
     const property = getObserverBotProperty(subject)
     const itemQuality = getObserverBotItemQuality(subject)
     const mistakePenalty = Math.max(0.72, 1 - Math.min(0.28, subject.mistakes * 0.0035))
-    const quality = (0.56 + jobFit * 0.19 + skillFit * 0.22 + property.quality + itemQuality) * mistakePenalty
+    const instinctBonus = getObserverUpgradeLevel("better_instincts") * 0.035
+    const quality = (0.56 + jobFit * 0.19 + skillFit * 0.22 + property.quality + itemQuality + instinctBonus) * mistakePenalty
     subject.bot_route_quality = getSafeObserverNumber(Math.max(0.52, Math.min(1.85, quality)), 1)
     return subject.bot_route_quality
 }
@@ -599,11 +608,12 @@ function updateObserverSubjectDecision(subject, dt) {
     const rank = getObserverBotRank(subject)
     const personality = getObserverSubjectPersonality(subject)
     const aiBonus = Math.min(0.28, Math.log2(subject.ai_level + 1) * 0.035)
-    const rightChoiceChance = Math.min(0.98, rank.choice + personality.choice + aiBonus)
+    const instinctBonus = getObserverUpgradeLevel("better_instincts") * 0.035
+    const rightChoiceChance = Math.min(0.98, rank.choice + personality.choice + aiBonus + instinctBonus)
     const oldJob = subject.bot_focus_job
     const oldSkill = subject.bot_focus_skill
 
-    if (Math.random() < rank.wrongRoute * Math.max(0.35, 1 - aiBonus)) {
+    if (Math.random() < rank.wrongRoute * Math.max(0.24, 1 - aiBonus - instinctBonus)) {
         subject.bot_focus_job = getObserverBotWrongRouteName(subject, "job")
         subject.bot_focus_skill = getObserverBotWrongRouteName(subject, "skill")
     } else if (Math.random() < rightChoiceChance) {
@@ -659,7 +669,8 @@ function getObserverBotPurchaseReserve(subject) {
     const rank = getObserverBotRank(subject)
     const personality = getObserverSubjectPersonality(subject)
     const stage = getObserverSubjectStage(subject)
-    return Math.max(120, getObserverBotIncome(subject) * (1.2 + stage.difficulty * 0.22) / Math.max(0.4, rank.thrift * personality.purchase))
+    const patronage = 1 + getObserverUpgradeLevel("quiet_patronage") * 0.08
+    return Math.max(120, getObserverBotIncome(subject) * (1.2 + stage.difficulty * 0.22) / Math.max(0.4, rank.thrift * personality.purchase * patronage))
 }
 
 function updateObserverSubjectPurchases(subject, dt) {
@@ -677,7 +688,7 @@ function updateObserverSubjectPurchases(subject, dt) {
         subject.bot_property_index += 1
         subject.last_action = "Bought " + nextProperty.name + " for a safer route."
         pushObserverSubjectLog(subject, subject.last_action)
-        subject.bot_next_purchase = Math.max(1.5, 8 - rank.purchase * personality.purchase * 4)
+        subject.bot_next_purchase = Math.max(1.5, 8 - rank.purchase * personality.purchase * (1 + getObserverUpgradeLevel("quiet_patronage") * 0.07) * 4)
         return
     }
 
@@ -690,18 +701,18 @@ function updateObserverSubjectPurchases(subject, dt) {
             subject.bot_items.push(item.name)
             subject.last_action = "Bought " + item.name + "."
             pushObserverSubjectLog(subject, subject.last_action)
-            subject.bot_next_purchase = Math.max(1.5, 8.5 - rank.purchase * personality.purchase * 4)
+            subject.bot_next_purchase = Math.max(1.5, 8.5 - rank.purchase * personality.purchase * (1 + getObserverUpgradeLevel("quiet_patronage") * 0.07) * 4)
             return
         }
     }
 
-    if (rank.debtLoss > 0.2 && Math.random() < rank.debtLoss * 0.018) {
-        subject.bot_coins = Math.max(0, subject.bot_coins * 0.82)
+    if (rank.debtLoss > 0.2 && Math.random() < rank.debtLoss * Math.max(0.35, 1 - getObserverUpgradeLevel("quiet_patronage") * 0.09) * 0.018) {
+        subject.bot_coins = Math.max(0, subject.bot_coins * (0.82 + Math.min(0.13, getObserverUpgradeLevel("quiet_patronage") * 0.018)))
         subject.last_action = "Wasted gold on a bad purchase and recovered the route."
         pushObserverSubjectLog(subject, subject.last_action)
     }
 
-    subject.bot_next_purchase = Math.max(2.5, 10 - rank.purchase * personality.purchase * 3.2)
+    subject.bot_next_purchase = Math.max(2.5, 10 - rank.purchase * personality.purchase * (1 + getObserverUpgradeLevel("quiet_patronage") * 0.07) * 3.2)
 }
 
 function pushObserverSubjectLog(subject, message) {
@@ -767,12 +778,16 @@ function getObserverPhaseSpeedMultiplier(stage) {
 
     if (band == "early")
         multiplier *= 1 + getObserverUpgradeLevel("early_guidance") * 0.12
+    if (band == "early" || band == "evil")
+        multiplier *= 1 + getObserverUpgradeLevel("gentle_push") * 0.09
     if (band == "evil" || band == "void")
         multiplier *= 1 + getObserverUpgradeLevel("void_protocols") * 0.1
     if (band == "reality")
         multiplier *= 1 + getObserverUpgradeLevel("reality_scripts") * 0.09
     if (band == "late" || band == "threshold")
         multiplier *= 1 + getObserverUpgradeLevel("threshold_maps") * 0.07
+    if (stage.universe >= 8)
+        multiplier *= 1 + getObserverUpgradeLevel("threshold_tutoring") * 0.08
 
     return multiplier
 }
@@ -783,6 +798,8 @@ function getObserverPhaseOpMultiplier(stage) {
 
     if (band == "evil" || band == "void")
         multiplier *= 1 + getObserverUpgradeLevel("void_protocols") * 0.08
+    if (band == "multiverse" || band == "reality" || band == "late" || band == "threshold")
+        multiplier *= 1 + getObserverUpgradeLevel("deep_simulation") * 0.11
     if (band == "late" || band == "threshold")
         multiplier *= 1 + getObserverUpgradeLevel("threshold_maps") * 0.07
 
@@ -817,6 +834,8 @@ function getObserverPhaseMistakeMultiplier(stage) {
         reduction += getObserverUpgradeLevel("reality_scripts") * 0.02
     if (band == "late" || band == "threshold")
         reduction += getObserverUpgradeLevel("threshold_maps") * 0.025
+    if (stage.universe >= 8)
+        reduction += getObserverUpgradeLevel("threshold_tutoring") * 0.04
 
     return Math.max(0.45, 1 - reduction)
 }
@@ -964,11 +983,12 @@ function applyObserverSubjectMistake(subject) {
     const stage = getObserverSubjectStage(subject)
     const previousThreshold = getObserverPreviousThreshold(subject.stage_index)
     const stageSpan = stage.threshold - previousThreshold
-    const rollback = stageSpan * (0.08 + observerRankData[subject.rank].mistake * 0.025)
+    const recovery = Math.max(0.35, 1 - getObserverUpgradeLevel("mistake_recovery") * 0.1)
+    const rollback = stageSpan * (0.08 + observerRankData[subject.rank].mistake * 0.025) * recovery
 
     subject.progress = Math.max(previousThreshold, subject.progress - rollback)
 
-    if (observerRankData[subject.rank].mistake > 2 && Math.random() < 0.16 && subject.stage_index > 0) {
+    if (observerRankData[subject.rank].mistake > 2 && Math.random() < 0.16 * recovery && subject.stage_index > 0) {
         subject.stage_index -= 1
         subject.progress = Math.min(subject.progress, getObserverSubjectStage(subject).threshold - 1)
         subject.route_resets += 1
@@ -1101,7 +1121,11 @@ function renderObserver() {
         * (1 + getObserverUpgradeLevel("early_guidance") * 0.06)
         * (1 + getObserverUpgradeLevel("void_protocols") * 0.08)
         * (1 + getObserverUpgradeLevel("reality_scripts") * 0.06)
-        * (1 + getObserverUpgradeLevel("threshold_maps") * 0.07),
+        * (1 + getObserverUpgradeLevel("threshold_maps") * 0.07)
+        * (1 + getObserverUpgradeLevel("gentle_push") * 0.04)
+        * (1 + getObserverUpgradeLevel("better_instincts") * 0.035)
+        * (1 + getObserverUpgradeLevel("deep_simulation") * 0.06)
+        * (1 + getObserverUpgradeLevel("threshold_tutoring") * 0.05),
     2)
 
     const subjectCost = getObserverSubjectCost()
