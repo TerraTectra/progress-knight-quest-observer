@@ -147,14 +147,14 @@ function getMultiverseXpGain() {
     if (!isMultiverseUnlocked())
         return 1
 
-    return getUniverseInfo().xpMult * (1 + getMultiverseUpgradeLevel("stable_memory") * 0.08)
+    return getUniverseInfo().xpMult * (1 + getMultiverseUpgradeLevel("stable_memory") * 0.08) * getUniverseSevenXpGain()
 }
 
 function getMultiverseIncomeGain() {
     if (!isMultiverseUnlocked())
         return 1
 
-    return getUniverseInfo().incomeMult * (1 + getMultiverseUpgradeLevel("universal_labor") * 0.1) * getUniverseTwoIncomeGain() * getUniverseFiveIncomeGain()
+    return getUniverseInfo().incomeMult * (1 + getMultiverseUpgradeLevel("universal_labor") * 0.1) * getUniverseTwoIncomeGain() * getUniverseFiveIncomeGain() * getUniverseSevenIncomeGain()
 }
 
 function getMultiverseExpenseGain() {
@@ -242,6 +242,9 @@ function getUniverseParameterName(id = getCurrentUniverseId()) {
     if (id == 6)
         return "Dimming resonance"
 
+    if (id == 7)
+        return "Causal stability"
+
     if (id == 1)
         return "Prime stability"
 
@@ -266,6 +269,9 @@ function getUniverseParameterGain(id = getCurrentUniverseId()) {
 
     if (id == 6)
         return getUniverseSixDimmingResonanceGain()
+
+    if (id == 7)
+        return getUniverseSevenCausalStabilityGain()
 
     return 1
 }
@@ -483,6 +489,47 @@ function getUniverseSixSkillsXpGain() {
 
     const nullContinuity = gameData.taskData["Null Continuity"]
     return nullContinuity == null ? 1 : 1 + nullContinuity.level * 0.008
+}
+
+function getUniverseSevenCausalStabilityGain() {
+    const causalThreading = gameData.taskData["Causal Threading"]
+    const retroactiveTraining = gameData.taskData["Retroactive Training"]
+    const paradoxAnchor = getBindedItemEffect("Paradox Anchor")
+    const breakMemory = 1 + Math.sqrt(getMultiverseState().universe_breaks) * 0.035
+
+    const threadingGain = causalThreading == null ? 1 : 1 + causalThreading.level * causalThreading.baseData.effect
+    const retroactiveGain = retroactiveTraining == null ? 1 : 1 + retroactiveTraining.level * retroactiveTraining.baseData.effect
+    return threadingGain * retroactiveGain * breakMemory * paradoxAnchor()
+}
+
+function getUniverseSevenXpGain() {
+    if (!isMultiverseUnlocked() || getCurrentUniverseId() != 7)
+        return 1
+
+    const causalThreading = gameData.taskData["Causal Threading"]
+    const paradoxDiscipline = gameData.taskData["Paradox Discipline"]
+    const paradoxAnchor = getBindedItemEffect("Paradox Anchor")
+    const threadingGain = causalThreading == null ? 1 : 1 + causalThreading.level * 0.0035
+    const disciplineGain = paradoxDiscipline == null ? 1 : 1 + paradoxDiscipline.level * 0.0025
+    return threadingGain * disciplineGain * paradoxAnchor()
+}
+
+function getUniverseSevenIncomeGain() {
+    if (!isMultiverseUnlocked() || getCurrentUniverseId() != 7)
+        return 1
+
+    const paradoxDiscipline = gameData.taskData["Paradox Discipline"]
+    const paradoxAnchor = getBindedItemEffect("Paradox Anchor")
+    const disciplineGain = paradoxDiscipline == null ? 1 : 1 + paradoxDiscipline.level * 0.004
+    return disciplineGain * paradoxAnchor()
+}
+
+function getUniverseSevenSkillsXpGain() {
+    if (!isMultiverseUnlocked())
+        return 1
+
+    const retroactiveTraining = gameData.taskData["Retroactive Training"]
+    return retroactiveTraining == null ? 1 : 1 + retroactiveTraining.level * 0.008
 }
 
 function getMultiverseVoidResonance() {

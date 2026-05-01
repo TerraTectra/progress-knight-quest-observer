@@ -105,6 +105,9 @@ function addMultipliers() {
         } else if (skillCategories["Universe VI Void Studies"].includes(task.name)) {
             task.xpMultipliers.push(getBindedItemEffect("Dimmed Compass"))
             task.xpMultipliers.push(getUniverseSixSkillsXpGain)
+        } else if (skillCategories["Universe VII Causality"].includes(task.name)) {
+            task.xpMultipliers.push(getBindedItemEffect("Causality Needle"))
+            task.xpMultipliers.push(getUniverseSevenSkillsXpGain)
         }
     }
 

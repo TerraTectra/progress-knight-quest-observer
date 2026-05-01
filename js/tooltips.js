@@ -233,6 +233,11 @@ const tooltips = {
     "Null Continuity": "Hold a thin thread of identity through the nothingness. This restores part of Universe VI lifespan pressure and improves Void Studies training.",
     "Dimmed Compass": "A compass that only points toward places reality forgot. It improves Universe VI Void Studies training.",
     "Null Contract": "An agreement signed with the absence between worlds. It improves Universe VI MP, Evil, and Essence gain.",
+    "Causal Threading": "Hostile Causality breaks the link between effort and result. Thread causes back together to recover XP and passive MP gain.",
+    "Paradox Discipline": "Train yourself to act before the reason exists. This stabilizes Universe VII income and XP pressure.",
+    "Retroactive Training": "Make past training count twice by proving it happened later. This improves Causal stability and late skill training.",
+    "Causality Needle": "A needle used to stitch broken cause-and-effect chains. It improves Universe VII Causality training.",
+    "Paradox Anchor": "An anchor thrown backward through time. It improves Universe VII MP gain, XP recovery, and income recovery.",
 
     "Strong Hope": "Another Faint Hope buff?!",
     "Ruler of the Metaverse": "Now you are thinking with portals",
