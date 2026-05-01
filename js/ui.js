@@ -663,7 +663,7 @@ function renderMultiverseSources() {
     document.getElementById("multiverseSourceVoidJobs").textContent = format(getMultiverseVoidJobSource(), 2)
     document.getElementById("multiverseSourceVoidSkills").textContent = format(getMultiverseVoidSkillSource(), 2)
     document.getElementById("multiverseSourceDarkLayer").textContent = format(getMultiverseDarkLayerSource(), 2)
-    document.getElementById("multiverseSourceUniverse").textContent = format(getMultiverseUniverseSource(), 2)
+    document.getElementById("multiverseSourceUniverse").textContent = format(getTotalUniversePassiveWeight(), 2)
 
     const rewardState = document.getElementById("multiverseBreakRewardState")
     if (rewardState != null)
@@ -703,6 +703,8 @@ function renderMultiverseUniverses() {
         state.observer_signal_prepared ? 1 : 0,
         canBreak ? 1 : 0,
         format(getUniverseParameterGain(), 2),
+        format(getMultiversePointGain(), 4),
+        format(getTotalUniversePassiveWeight(), 2),
         format(getObserverSignalStrength(), 2),
     ].join("|")
 
@@ -718,6 +720,8 @@ function renderMultiverseUniverses() {
         const cardState = current ? "current" : (unlocked ? "unlocked" : "locked")
         const chipClass = current ? "rb-current" : (unlocked ? "rb-unlocked" : "rb-locked")
         const chipText = current ? "Current" : (unlocked ? "Unlocked" : "Locked")
+        const passiveWeight = getUniversePassiveWeight(universe.id)
+        const passiveShare = getTotalUniversePassiveWeight() > 0 ? passiveWeight / getTotalUniversePassiveWeight() * getMultiversePointGain() : 0
         let button = ""
 
         if (current && universe.id == state.highest_universe && universe.id < 10) {
@@ -735,11 +739,11 @@ function renderMultiverseUniverses() {
         html +=
             `<div class="rb-universe-card ${cardState}">` +
                 `<div class="rb-universe-header">` +
-                    `<div><div class="rb-universe-name">${universe.id} - ${universe.name}</div><div style="color:gray;">MP x${format(universe.mpMult, 1)}</div></div>` +
+                    `<div><div class="rb-universe-name">${universe.id} - ${universe.name}</div><div style="color:gray;">MP x${format(universe.mpMult, 1)}${unlocked ? " / +" + format(passiveShare, 4) + "/s" : ""}</div></div>` +
                     `<span class="rb-chip ${chipClass}">${chipText}</span>` +
                 `</div>` +
                 `<div class="rb-universe-rule">${universe.rule}</div>` +
-                `<div class="rb-distortion-list">XP <b>x${format(universe.xpMult, 2)}</b> / Income <b>x${format(universe.incomeMult, 2)}</b><br>Expenses <b>x${format(universe.expenseMult, 2)}</b> / Lifespan <b>x${format(universe.lifespanMult, 2)}</b><br>${getUniverseParameterName(universe.id)} <b>x${format(getUniverseParameterGain(universe.id), 2)}</b></div>` +
+                `<div class="rb-distortion-list">XP <b>x${format(universe.xpMult, 2)}</b> / Income <b>x${format(universe.incomeMult, 2)}</b><br>Expenses <b>x${format(universe.expenseMult, 2)}</b> / Lifespan <b>x${format(universe.lifespanMult, 2)}</b><br>${getUniverseParameterName(universe.id)} <b>x${format(getUniverseParameterGain(universe.id), 2)}</b>${unlocked ? "<br>Passive MP weight <b>x" + format(passiveWeight, 2) + "</b>" : ""}</div>` +
                 `<div style="margin-top:0.7em;">${button}</div>` +
             `</div>`
     }

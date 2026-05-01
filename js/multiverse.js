@@ -1,14 +1,14 @@
 const multiverseUniverses = [
-    { id: 1, name: "Prime World", mpMult: 1, xpMult: 1, incomeMult: 1, expenseMult: 1, lifespanMult: 1, unlockCost: 0, rule: "The original rules remain stable." },
-    { id: 2, name: "Strained Kingdom", mpMult: 2.5, xpMult: 0.96, incomeMult: 0.92, expenseMult: 1.08, lifespanMult: 0.98, unlockCost: 25, rule: "Work pays less and upkeep bites harder." },
-    { id: 3, name: "Taxed Arcana", mpMult: 5, xpMult: 0.94, incomeMult: 0.88, expenseMult: 1.18, lifespanMult: 0.98, unlockCost: 120, rule: "Magic remains powerful, but every shortcut has a cost." },
-    { id: 4, name: "Thin Time", mpMult: 9, xpMult: 0.9, incomeMult: 0.88, expenseMult: 1.25, lifespanMult: 0.92, unlockCost: 450, rule: "Life is shorter; lifespan upgrades matter more." },
-    { id: 5, name: "Greedy Stars", mpMult: 16, xpMult: 0.86, incomeMult: 0.82, expenseMult: 1.4, lifespanMult: 0.9, unlockCost: 1500, rule: "Economy pressure becomes the main enemy." },
-    { id: 6, name: "Dimming Void", mpMult: 28, xpMult: 0.8, incomeMult: 0.78, expenseMult: 1.55, lifespanMult: 0.86, unlockCost: 5000, rule: "Void progress feeds MP, but ordinary progress slows." },
-    { id: 7, name: "Hostile Causality", mpMult: 48, xpMult: 0.72, incomeMult: 0.72, expenseMult: 1.8, lifespanMult: 0.8, unlockCost: 16000, rule: "Runs need careful preparation before every break." },
-    { id: 8, name: "Broken Ladder", mpMult: 80, xpMult: 0.62, incomeMult: 0.68, expenseMult: 2.15, lifespanMult: 0.72, unlockCost: 50000, rule: "Old growth routes no longer carry the run alone." },
-    { id: 9, name: "Quiet Collapse", mpMult: 130, xpMult: 0.5, incomeMult: 0.6, expenseMult: 2.7, lifespanMult: 0.62, unlockCost: 160000, rule: "Only layered meta upgrades keep the world playable." },
-    { id: 10, name: "Observer Threshold", mpMult: 220, xpMult: 0.38, incomeMult: 0.5, expenseMult: 3.4, lifespanMult: 0.5, unlockCost: 500000, rule: "The final universe is unstable enough to reveal the Observer." },
+    { id: 1, name: "Prime World", mpMult: 0.45, xpMult: 1, incomeMult: 1, expenseMult: 1, lifespanMult: 1, unlockCost: 0, rule: "The original rules remain stable." },
+    { id: 2, name: "Strained Kingdom", mpMult: 2.2, xpMult: 0.96, incomeMult: 0.92, expenseMult: 1.08, lifespanMult: 0.98, unlockCost: 30, rule: "Work pays less and upkeep bites harder." },
+    { id: 3, name: "Taxed Arcana", mpMult: 4.8, xpMult: 0.94, incomeMult: 0.88, expenseMult: 1.18, lifespanMult: 0.98, unlockCost: 140, rule: "Magic remains powerful, but every shortcut has a cost." },
+    { id: 4, name: "Thin Time", mpMult: 8.8, xpMult: 0.9, incomeMult: 0.88, expenseMult: 1.25, lifespanMult: 0.92, unlockCost: 420, rule: "Life is shorter; lifespan upgrades matter more." },
+    { id: 5, name: "Greedy Stars", mpMult: 15, xpMult: 0.86, incomeMult: 0.82, expenseMult: 1.4, lifespanMult: 0.9, unlockCost: 1200, rule: "Economy pressure becomes the main enemy." },
+    { id: 6, name: "Dimming Void", mpMult: 26, xpMult: 0.8, incomeMult: 0.78, expenseMult: 1.55, lifespanMult: 0.86, unlockCost: 3600, rule: "Void progress feeds MP, but ordinary progress slows." },
+    { id: 7, name: "Hostile Causality", mpMult: 44, xpMult: 0.72, incomeMult: 0.72, expenseMult: 1.8, lifespanMult: 0.8, unlockCost: 11000, rule: "Runs need careful preparation before every break." },
+    { id: 8, name: "Broken Ladder", mpMult: 74, xpMult: 0.62, incomeMult: 0.68, expenseMult: 2.15, lifespanMult: 0.72, unlockCost: 34000, rule: "Old growth routes no longer carry the run alone." },
+    { id: 9, name: "Quiet Collapse", mpMult: 120, xpMult: 0.5, incomeMult: 0.6, expenseMult: 2.7, lifespanMult: 0.62, unlockCost: 105000, rule: "Only layered meta upgrades keep the world playable." },
+    { id: 10, name: "Observer Threshold", mpMult: 205, xpMult: 0.38, incomeMult: 0.5, expenseMult: 3.4, lifespanMult: 0.5, unlockCost: 330000, rule: "The final universe is unstable enough to reveal the Observer." },
 ]
 
 const multiverseUpgradeData = {
@@ -271,7 +271,7 @@ function getMultiverseDarkLayerSource() {
 }
 
 function getMultiverseUniverseSource() {
-    return getSafeMultiverseNumber(getUniverseInfo().mpMult * getUniverseParameterGain(getCurrentUniverseId()))
+    return getSafeMultiverseNumber(getTotalUniversePassiveWeight())
 }
 
 function getMultiverseBreakRewardGain() {
@@ -318,7 +318,10 @@ function getUniverseParameterGain(id = getCurrentUniverseId()) {
 
     let gain = 1
 
-    if (id == 2)
+    if (id == 1)
+        gain = getUniverseOnePrimeStabilityGain()
+
+    else if (id == 2)
         gain = getUniverseTwoBureaucraticOrderGain()
 
     else if (id == 3)
@@ -346,6 +349,45 @@ function getUniverseParameterGain(id = getCurrentUniverseId()) {
         gain = getUniverseTenObserverSignalGain()
 
     return getSafeMultiverseNumber(softcapMultiverseSource(gain))
+}
+
+function getUniverseOnePrimeStabilityGain() {
+    const voidJobs = getMultiverseVoidJobSource()
+    const voidSkills = getMultiverseVoidSkillSource()
+    const darkLayer = getMultiverseDarkLayerSource()
+    const lifetime = 1 + Math.log10(Math.max(0, gameData.multiverse_points_lifetime) + 10) * 0.015
+
+    return getSafeMultiverseNumber(Math.pow(voidJobs * voidSkills, 0.35) * Math.pow(darkLayer, 0.25) * lifetime)
+}
+
+function getUniversePassiveWeight(id) {
+    if (!isMultiverseUnlocked())
+        return 0
+
+    if (id > getHighestUniverseId())
+        return 0
+
+    const universe = getUniverseInfo(id)
+    if (universe == null)
+        return 0
+
+    const parameter = getUniverseParameterGain(id)
+    const breakMemory = 1 + Math.sqrt(getMultiverseState().universe_breaks) * 0.035
+    const activeBonus = id == getCurrentUniverseId() ? 1.15 : 1
+    const ageFalloff = 1 / Math.pow(id, 0.28)
+
+    return getSafeMultiverseNumber(universe.mpMult * parameter * breakMemory * activeBonus * ageFalloff, 0, 1e300)
+}
+
+function getTotalUniversePassiveWeight() {
+    let total = 0
+    const highest = getHighestUniverseId()
+
+    for (let id = 1; id <= highest; id++) {
+        total += getUniversePassiveWeight(id)
+    }
+
+    return getSafeMultiverseNumber(total, 0, 1e300)
 }
 
 function getUniverseTwoBureaucraticOrderGain() {
@@ -844,7 +886,8 @@ function getMultiversePointGain() {
         return 0
 
     const cartography = 1 + getMultiverseUpgradeLevel("void_cartography") * 0.18
-    return getSafeMultiverseNumber(0.001 * getMultiverseVoidResonance() * getMultiverseUniverseSource() * cartography * getMultiverseBreakRewardGain(), 0, 1e300)
+    const voidResonance = Math.pow(getMultiverseVoidResonance(), 0.55)
+    return getSafeMultiverseNumber(0.003 * voidResonance * getTotalUniversePassiveWeight() * cartography * getMultiverseBreakRewardGain(), 0, 1e300)
 }
 
 function breakUniverseAltarCost() {
