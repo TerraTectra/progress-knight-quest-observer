@@ -587,6 +587,27 @@ async function runScenario(browser, name, setup) {
             if (!(getObserverLoopMemoryMistakeMultiplier(loopExperienced) < getObserverLoopMemoryMistakeMultiplier(loopBase)))
                 failures.push("Loop memory does not reduce mistake pressure")
 
+            gameData.multiverse_unlocked = true
+            gameData.multiverse.current_universe = 10
+            gameData.multiverse.highest_universe = 10
+            gameData.multiverse.universe_mastery = { "5": 1 }
+            if (typeof getMultiverseState == "function")
+                getMultiverseState()
+            const u5Stage = observerSubjectStages[8]
+            const u5BaseSpeed = getObserverPhaseSpeedMultiplier(u5Stage)
+            const u5BaseOp = getObserverPhaseOpMultiplier(u5Stage)
+            const u5BaseMistake = getObserverPhaseMistakeMultiplier(u5Stage)
+            gameData.multiverse.universe_mastery["5"] = 64
+            const u5MasteredSpeed = getObserverPhaseSpeedMultiplier(u5Stage)
+            const u5MasteredOp = getObserverPhaseOpMultiplier(u5Stage)
+            const u5MasteredMistake = getObserverPhaseMistakeMultiplier(u5Stage)
+            if (!(u5MasteredSpeed > u5BaseSpeed))
+                failures.push("Universe mastery does not help Observer subject speed")
+            if (!(u5MasteredOp > u5BaseOp))
+                failures.push("Universe mastery does not help Observer subject OP")
+            if (!(u5MasteredMistake < u5BaseMistake))
+                failures.push("Universe mastery does not reduce Observer subject mistakes")
+
             const loopClear = {
                 id: 9016,
                 rank: "rare",

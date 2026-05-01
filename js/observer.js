@@ -1217,6 +1217,16 @@ function getObserverRankStageMistake(subject) {
     }, 1)
 }
 
+function getObserverUniverseMasteryAssist(stage) {
+    if (stage == null || stage.universe == null || stage.universe <= 1)
+        return 1
+    if (typeof getRememberedUniverseParameter != "function")
+        return 1
+
+    const mastery = getRememberedUniverseParameter(stage.universe)
+    return 1 + Math.min(0.42, Math.log2(Math.max(1, mastery)) * 0.075)
+}
+
 function getObserverPhaseSpeedMultiplier(stage) {
     const band = getObserverStageBand(stage)
     let multiplier = 1
@@ -1235,6 +1245,7 @@ function getObserverPhaseSpeedMultiplier(stage) {
         multiplier *= 1 + getObserverUpgradeLevel("threshold_tutoring") * 0.08
     if (stage.universe >= 8)
         multiplier *= 1 + getObserverUpgradeLevel("threshold_intuition") * 0.075
+    multiplier *= getObserverUniverseMasteryAssist(stage)
 
     return multiplier
 }
@@ -1251,6 +1262,7 @@ function getObserverPhaseOpMultiplier(stage) {
         multiplier *= 1 + getObserverUpgradeLevel("threshold_maps") * 0.07
     if (stage.universe >= 8)
         multiplier *= 1 + getObserverUpgradeLevel("threshold_intuition") * 0.09
+    multiplier *= 1 + (getObserverUniverseMasteryAssist(stage) - 1) * 0.55
 
     return multiplier
 }
@@ -1269,6 +1281,7 @@ function getObserverPhaseXpMultiplier(stage) {
         multiplier *= 1 + getObserverUpgradeLevel("threshold_maps") * 0.05
     if (stage.universe >= 8)
         multiplier *= 1 + getObserverUpgradeLevel("threshold_intuition") * 0.055
+    multiplier *= 1 + (getObserverUniverseMasteryAssist(stage) - 1) * 0.7
 
     return multiplier
 }
@@ -1289,6 +1302,7 @@ function getObserverPhaseMistakeMultiplier(stage) {
         reduction += getObserverUpgradeLevel("threshold_tutoring") * 0.04
     if (stage.universe >= 8)
         reduction += getObserverUpgradeLevel("threshold_intuition") * 0.045
+    reduction += Math.min(0.12, (getObserverUniverseMasteryAssist(stage) - 1) * 0.22)
 
     return Math.max(0.35, 1 - reduction)
 }
