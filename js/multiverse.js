@@ -162,7 +162,7 @@ function getMultiverseExpenseGain() {
         return 1
 
     const expenseReduction = Math.min(0.45, getMultiverseUpgradeLevel("soft_constants") * 0.03)
-    return getUniverseInfo().expenseMult * (1 - expenseReduction) * getUniverseTwoExpenseGain()
+    return getUniverseInfo().expenseMult * (1 - expenseReduction) * getUniverseTwoExpenseGain() * getUniverseThreeExpenseGain()
 }
 
 function getMultiverseLifespanGain() {
@@ -183,7 +183,7 @@ function getMultiverseEssenceGain() {
     if (!isMultiverseUnlocked())
         return 1
 
-    return 1 + getMultiverseUpgradeLevel("essence_prism") * 0.10
+    return (1 + getMultiverseUpgradeLevel("essence_prism") * 0.10) * getUniverseThreeEssenceGain()
 }
 
 function getMultiverseCategoryPower(category, scale) {
@@ -230,6 +230,9 @@ function getUniverseParameterName(id = getCurrentUniverseId()) {
     if (id == 2)
         return "Bureaucratic order"
 
+    if (id == 3)
+        return "Arcane compliance"
+
     if (id == 1)
         return "Prime stability"
 
@@ -242,6 +245,9 @@ function getUniverseParameterGain(id = getCurrentUniverseId()) {
 
     if (id == 2)
         return getUniverseTwoBureaucraticOrderGain()
+
+    if (id == 3)
+        return getUniverseThreeArcaneComplianceGain()
 
     return 1
 }
@@ -279,6 +285,53 @@ function getMultiverseSkillsXpGain() {
 
     const realitySurveying = gameData.taskData["Reality Surveying"]
     return realitySurveying == null ? 1 : 1 + realitySurveying.level * 0.01
+}
+
+function getUniverseThreeArcaneComplianceGain() {
+    const arcaneTaxation = gameData.taskData["Arcane Taxation"]
+    const spellAuditing = gameData.taskData["Spell Auditing"]
+    const arcaneAbacus = getBindedItemEffect("Arcane Abacus")
+
+    const taxationGain = arcaneTaxation == null ? 1 : 1 + arcaneTaxation.level * arcaneTaxation.baseData.effect
+    const auditingGain = spellAuditing == null ? 1 : 1 + spellAuditing.level * spellAuditing.baseData.effect
+    return taxationGain * auditingGain * arcaneAbacus()
+}
+
+function getUniverseThreeMagicGain() {
+    if (!isMultiverseUnlocked() || getCurrentUniverseId() != 3)
+        return 1
+
+    const arcaneTaxation = gameData.taskData["Arcane Taxation"]
+    const spellAuditing = gameData.taskData["Spell Auditing"]
+    const arcaneAbacus = getBindedItemEffect("Arcane Abacus")
+    const taxationGain = arcaneTaxation == null ? 1 : 1 + arcaneTaxation.level * 0.005
+    const auditingGain = spellAuditing == null ? 1 : 1 + spellAuditing.level * 0.003
+    return taxationGain * auditingGain * arcaneAbacus()
+}
+
+function getUniverseThreeExpenseGain() {
+    if (!isMultiverseUnlocked() || getCurrentUniverseId() != 3)
+        return 1
+
+    const manaTariff = gameData.taskData["Mana Tariff"]
+    const reduction = manaTariff == null ? 0 : Math.min(0.30, Math.abs(manaTariff.level * manaTariff.baseData.effect))
+    return 1 - reduction
+}
+
+function getUniverseThreeEssenceGain() {
+    if (!isMultiverseUnlocked() || getCurrentUniverseId() != 3)
+        return 1
+
+    const spellAuditing = gameData.taskData["Spell Auditing"]
+    return spellAuditing == null ? 1 : 1 + spellAuditing.level * 0.004
+}
+
+function getUniverseThreeSkillsXpGain() {
+    if (!isMultiverseUnlocked())
+        return 1
+
+    const spellAuditing = gameData.taskData["Spell Auditing"]
+    return spellAuditing == null ? 1 : 1 + spellAuditing.level * 0.008
 }
 
 function getMultiverseVoidResonance() {

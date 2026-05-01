@@ -213,6 +213,11 @@ const tooltips = {
     "Reality Surveying": "Map the distortions of the Strained Kingdom and turn them into better Multiverse skill training and MP gain.",
     "Royal Ledger": "A self-balancing ledger from Universe II. It records impossible taxes and improves Multiverse skill training.",
     "Tax Seal": "An official seal from the Strained Kingdom. It makes the local universe parameter feed more Multiverse Points.",
+    "Arcane Taxation": "Universe III taxes every shortcut. Learn the law of taxed mana and turn those rules into MP and magic progress.",
+    "Mana Tariff": "Negotiate which spells are exempt from reality fees, reducing the expense pressure of Taxed Arcana.",
+    "Spell Auditing": "Audit unstable rituals before they are cast. This improves Arcane compliance and Essence flow in Universe III.",
+    "Taxed Grimoire": "A grimoire stamped by the auditors of Taxed Arcana. It improves Universe III Arts training.",
+    "Arcane Abacus": "A counting tool for impossible mana debts. It improves Universe III MP gain and magic progress.",
 
     "Strong Hope": "Another Faint Hope buff?!",
     "Ruler of the Metaverse": "Now you are thinking with portals",

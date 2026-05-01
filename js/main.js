@@ -64,12 +64,14 @@ function addMultipliers() {
             task.xpMultipliers.push(getBindedItemEffect("Observatory"))
             task.xpMultipliers.push(getBindedTaskEffect("Universal Ruler"))
             task.xpMultipliers.push(getTaaAndMagicXpGain)
+            task.xpMultipliers.push(getUniverseThreeMagicGain)
         } else if (skillCategories["Void Manipulation"].includes(task.name)) {
             task.xpMultipliers.push(getBindedItemEffect("Void Necklace"))
             task.xpMultipliers.push(getBindedItemEffect("Void Orb"))
         } else if (jobCategories["The Arcane Association"].includes(task.name)) {
             task.xpMultipliers.push(getBindedTaskEffect("Mana Control"))
             task.xpMultipliers.push(getTaaAndMagicXpGain)
+            task.xpMultipliers.push(getUniverseThreeMagicGain)
             task.incomeMultipliers.push(getBindedTaskEffect("All Seeing Eye"))
         } else if (jobCategories["The Void"].includes(task.name)) {
             task.xpMultipliers.push(getBindedTaskEffect("Void Amplification"))
@@ -89,6 +91,9 @@ function addMultipliers() {
         } else if (skillCategories["Multiverse Skills"].includes(task.name)) {
             task.xpMultipliers.push(getBindedItemEffect("Royal Ledger"))
             task.xpMultipliers.push(getMultiverseSkillsXpGain)
+        } else if (skillCategories["Universe III Arts"].includes(task.name)) {
+            task.xpMultipliers.push(getBindedItemEffect("Taxed Grimoire"))
+            task.xpMultipliers.push(getUniverseThreeSkillsXpGain)
         }
     }
 
