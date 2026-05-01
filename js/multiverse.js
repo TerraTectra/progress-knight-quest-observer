@@ -197,6 +197,25 @@ function getMultiverseFractureMemoryRelief() {
     return Math.min(data.cap, getMultiverseUpgradeLevel("fracture_memory") * data.effect)
 }
 
+function getUniverseUnlockCost(id) {
+    const universe = getUniverseInfo(id)
+    if (universe == null || universe.unlockCost == null)
+        return Infinity
+
+    const safeId = Math.max(1, Math.min(10, Math.floor(id)))
+    if (safeId <= 1)
+        return 0
+
+    const previousUniverse = safeId - 1
+    const baseCost = universe.unlockCost
+    const fractureDiscount = Math.min(0.28, getMultiverseFractureMemoryRelief() * 0.58)
+    const breakRecordDiscount = Math.min(0.22, getUniverseBreakRecord(previousUniverse) * 0.055)
+    const masteryDiscount = Math.min(0.18, Math.max(0, Math.log2(getBestUniverseParameterGain(previousUniverse))) * 0.022)
+    const totalDiscount = Math.min(0.52, fractureDiscount + breakRecordDiscount + masteryDiscount)
+
+    return getSafeMultiverseNumber(baseCost * (1 - totalDiscount), 0, baseCost)
+}
+
 function getMultiverseObserverSignalUpgradeGain() {
     return getMultiverseUpgradeMultiplier("threshold_prism")
 }
@@ -297,13 +316,15 @@ function getUniverseBreakRequirementText(id = getCurrentUniverseId()) {
 function canBreakCurrentUniverse() {
     const state = getMultiverseState()
     const nextUniverse = getUniverseInfo(state.current_universe + 1)
+    const unlockCost = getUniverseUnlockCost(state.current_universe + 1)
 
     return isMultiverseUnlocked()
         && state.universe_break_unlocked
         && state.current_universe == state.highest_universe
         && state.highest_universe < 10
         && isUniverseBreakRequirementCompleted(state.current_universe)
-        && gameData.multiverse_points >= nextUniverse.unlockCost
+        && nextUniverse != null
+        && gameData.multiverse_points >= unlockCost
 }
 
 function breakCurrentUniverse() {
@@ -312,10 +333,11 @@ function breakCurrentUniverse() {
 
     const state = getMultiverseState()
     const nextUniverse = getUniverseInfo(state.current_universe + 1)
+    const unlockCost = getUniverseUnlockCost(state.current_universe + 1)
 
     rememberUniverseParameter(state.current_universe)
     recordUniverseBreak(state.current_universe)
-    gameData.multiverse_points -= nextUniverse.unlockCost
+    gameData.multiverse_points -= unlockCost
     state.highest_universe += 1
     state.current_universe = state.highest_universe
     state.universe_breaks += 1

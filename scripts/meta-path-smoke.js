@@ -98,6 +98,21 @@ async function main() {
 
         setupBase()
 
+        gameData.multiverse.current_universe = 8
+        gameData.multiverse.highest_universe = 8
+        train(8)
+        const baseU9Cost = getUniverseInfo(9).unlockCost
+        const costBeforeMemory = getUniverseUnlockCost(9)
+        gameData.multiverse.universe_break_records["8"] = 3
+        gameData.multiverse.universe_mastery["8"] = Math.max(gameData.multiverse.universe_mastery["8"] || 1, 16)
+        const costAfterMemory = getUniverseUnlockCost(9)
+        if (!(costBeforeMemory <= baseU9Cost && costBeforeMemory > baseU9Cost * 0.45))
+            failures.push("dynamic U-IX cost is outside the expected range")
+        if (!(costAfterMemory < costBeforeMemory && costAfterMemory > baseU9Cost * 0.45))
+            failures.push("universe memory does not lower repeated break cost safely")
+
+        setupBase()
+
         for (let universeId = 2; universeId <= 9; universeId++) {
             gameData.multiverse.current_universe = universeId
             gameData.multiverse.highest_universe = universeId
