@@ -75,6 +75,8 @@ function lateSetup() {
     gameData.multiverse.current_universe = 10
     gameData.multiverse.highest_universe = 10
     gameData.multiverse.universe_break_unlocked = true
+    gameData.multiverse.universe_mastery = { "5": 42, "9": 70 }
+    gameData.multiverse.universe_break_records = { "5": 2, "9": 1 }
     gameData.multiverse.observer_signal_prepared = true
     for (const key in gameData.multiverse.upgrades)
         gameData.multiverse.upgrades[key] = 3
@@ -224,6 +226,10 @@ async function runLateScenario(browser) {
             failures.push("late save did not preserve MP")
         if (!(gameData.multiverse && gameData.multiverse.highest_universe >= 10))
             failures.push("late save did not preserve highest universe")
+        if (!(gameData.multiverse && gameData.multiverse.universe_mastery && gameData.multiverse.universe_mastery["5"] >= 42))
+            failures.push("late save did not preserve universe mastery memory")
+        if (!(gameData.multiverse && gameData.multiverse.universe_break_records && gameData.multiverse.universe_break_records["5"] >= 2))
+            failures.push("late save did not preserve universe break records")
         if (gameData.observer && gameData.observer.active)
             failures.push("late save unexpectedly activated Observer")
         return failures
