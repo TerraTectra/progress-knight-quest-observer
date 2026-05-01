@@ -1,14 +1,42 @@
 function getEvilPerksGeneration()
 {
-	if (gameData.evil == 0) return 0
-	let essence_perk_buff_mult = 1e9
-	if (gameData.essence == 0)
-		essence_perk_buff_mult = 10
-	else if (gameData.essence<1e308/essence_perk_buff_mult)
-		essence_perk_buff_mult *= gameData.essence
-	else
-		essence_perk_buff_mult = 1e308
-	return math.log10(gameData.evil + 1) * math.log10(essence_perk_buff_mult) / 365	
+	if (gameData.evil <= 0) return 0
+
+	const evilPower = math.log10(Math.max(1, gameData.evil) + 1)
+	const essence = Math.max(0, gameData.essence || 0)
+	const essencePower = essence > 0 ? math.log10(essence + 10) : 1
+	const essenceBoost = 2 + Math.sqrt(Math.max(1, essencePower))
+	const generation = evilPower * essenceBoost / 365
+
+	if (!Number.isFinite(generation) || generation <= 0)
+		return 0
+	return Math.min(generation, 1e308)
+}
+
+function getEvilPerkLevel(evilperknum){
+	switch (evilperknum){
+	case 1: return gameData.evil_perks.reduce_eye_requirement
+	case 2: return gameData.evil_perks.reduce_evil_requirement
+	case 3: return gameData.evil_perks.reduce_the_void_requirement
+	case 4: return gameData.evil_perks.reduce_celestial_requirement
+	case 5: return gameData.evil_perks.receive_essence
+	default: return 0
+	}
+}
+
+function getEvilPerkMaxLevel(evilperknum){
+	switch (evilperknum){
+	case 1: return 10
+	case 2: return 14
+	case 3: return 9
+	case 4: return 9
+	case 5: return gameData.essence >= 1e308 ? gameData.evil_perks.receive_essence : Infinity
+	default: return 0
+	}
+}
+
+function isEvilPerkMaxed(evilperknum){
+	return getEvilPerkLevel(evilperknum) >= getEvilPerkMaxLevel(evilperknum)
 }
 
 function getEyeRequirement(){
@@ -43,67 +71,58 @@ function getEssenceRewardPercent(){
 }
 
 function getEvilPerkCost(evilperknum){
+	if (isEvilPerkMaxed(evilperknum))
+		return Infinity
+
 	switch (evilperknum){
 	case 1:
-		if (gameData.evil_perks.reduce_eye_requirement == 10)
-			return Infinity
 		return math.pow(2, gameData.evil_perks.reduce_eye_requirement + 1) + 4.6
 	case 2:
-		if (gameData.evil_perks.reduce_evil_requirement == 14)
-			return Infinity
 		return math.pow(3, gameData.evil_perks.reduce_evil_requirement + 1) + 66.6-3
 	case 3: 
-		if (gameData.evil_perks.reduce_the_void_requirement == 9)
-			return Infinity
 		return math.pow(5, gameData.evil_perks.reduce_the_void_requirement + 1) + 666.6-5
 	case 4:
-		if (gameData.evil_perks.reduce_celestial_requirement == 9)
-			return Infinity
 		return math.pow(5, gameData.evil_perks.reduce_celestial_requirement + 1) + 6666-5
 	case 5:
-		if (gameData.essence >= 1e308)
-			return Infinity
 		return math.pow(10, gameData.evil_perks.receive_essence) * 6.66e9
 	}	
+	return Infinity
+}
+
+function canBuyEvilPerk(evilperknum){
+	const cost = getEvilPerkCost(evilperknum)
+	return Number.isFinite(cost) && gameData.evil_perks_points >= cost
 }
 
 function buyEvilPerk(evilperknum){
+	const cost = getEvilPerkCost(evilperknum)
+	if (!canBuyEvilPerk(evilperknum))
+		return
+
 	switch (evilperknum){
 		case 1:
-			if (gameData.evil_perks_points >= getEvilPerkCost(1))
-			{
-				gameData.evil_perks_points -= getEvilPerkCost(1)
-				gameData.evil_perks.reduce_eye_requirement += 1
-			}
+			gameData.evil_perks_points -= cost
+			gameData.evil_perks.reduce_eye_requirement += 1
 			break;
 		case 2:
-			if (gameData.evil_perks_points >= getEvilPerkCost(2))
-			{
-				gameData.evil_perks_points -= getEvilPerkCost(2)
-				gameData.evil_perks.reduce_evil_requirement += 1
-			}
+			gameData.evil_perks_points -= cost
+			gameData.evil_perks.reduce_evil_requirement += 1
 			break;
 		case 3:
-			if (gameData.evil_perks_points >= getEvilPerkCost(3))
-			{
-				gameData.evil_perks_points -= getEvilPerkCost(3)
-				gameData.evil_perks.reduce_the_void_requirement += 1
-			}
+			gameData.evil_perks_points -= cost
+			gameData.evil_perks.reduce_the_void_requirement += 1
 			break;
 		case 4:
-			if (gameData.evil_perks_points >= getEvilPerkCost(4))
-			{
-				gameData.evil_perks_points -= getEvilPerkCost(4)
-				gameData.evil_perks.reduce_celestial_requirement += 1
-			}
+			gameData.evil_perks_points -= cost
+			gameData.evil_perks.reduce_celestial_requirement += 1
 			break;
 		case 5:
-			if (gameData.evil_perks_points >= getEvilPerkCost(5))
-			{
-				gameData.evil_perks_points -= getEvilPerkCost(5)
-				gameData.evil_perks.receive_essence += 1
-				gameData.essence += getEssenceReward()
-			}
+			const essenceReward = getEssenceReward()
+			gameData.evil_perks_points -= cost
+			gameData.evil_perks.receive_essence += 1
+			gameData.essence += essenceReward
+			if (!Number.isFinite(gameData.essence) || gameData.essence > 1e308)
+				gameData.essence = 1e308
 			break;
 	}
 }

@@ -460,15 +460,20 @@ function renderEvilPerks() {
     document.getElementById("evilperkCost5").textContent = format(getEvilPerkCost(5))
     
     for (var i = 1; i <= 5; i++) {
-        if (gameData.evil_perks_points >= getEvilPerkCost(i)){
-            document.getElementById("evilperk"+i).classList.remove("evilperkoff")
-            document.getElementById("evilperk"+i).classList.remove("evilperkbought")
+        const evilPerkElement = document.getElementById("evilperk"+i)
+        if (evilPerkElement == null)
+            continue
+
+        evilPerkElement.classList.remove("evilperkoff")
+        evilPerkElement.classList.remove("evilperkbought")
+        evilPerkElement.disabled = !canBuyEvilPerk(i)
+
+        if (isEvilPerkMaxed(i)) {
+            evilPerkElement.classList.add("evilperkbought")
         }
-        else if (hasEvilPerk(i)){
-            document.getElementById("evilperk"+i).classList.add("evilperkbought")            
+        else if (!canBuyEvilPerk(i)) {
+            evilPerkElement.classList.add("evilperkoff")
         }
-        else
-            document.getElementById("evilperk"+i).classList.add("evilperkoff")
     }
 }
 
