@@ -544,6 +544,73 @@ async function runScenario(browser, name, setup) {
             if (!(getObserverSubjectOpGain(visionaryInsight) > visionaryBaseOp))
                 failures.push("Visionary insight does not improve late OP gain")
 
+            const loopBase = {
+                id: 9014,
+                rank: "rare",
+                personality: "methodical",
+                stage_index: 10,
+                progress: 5600,
+                ai_level: 14,
+                character_level: 6,
+                completed_universe_x: 0,
+                loop_memory: 0,
+                bot_job_level: 60,
+                bot_skill_level: 60,
+                bot_items: [],
+                milestones: {},
+                insights: {},
+                bot_log: [],
+            }
+            const loopExperienced = {
+                id: 9015,
+                rank: "rare",
+                personality: "methodical",
+                stage_index: 10,
+                progress: 5600,
+                ai_level: 14,
+                character_level: 6,
+                completed_universe_x: 4,
+                loop_memory: 5,
+                bot_job_level: 60,
+                bot_skill_level: 60,
+                bot_items: [],
+                milestones: {},
+                insights: {},
+                bot_log: [],
+            }
+            normalizeObserverSubject(loopBase)
+            normalizeObserverSubject(loopExperienced)
+            if (!(getObserverEffectiveSpeedMultiplier(loopExperienced) > getObserverEffectiveSpeedMultiplier(loopBase)))
+                failures.push("Loop memory does not improve subject speed")
+            if (!(getObserverSubjectOpGain(loopExperienced) > getObserverSubjectOpGain(loopBase)))
+                failures.push("Loop memory does not improve subject OP gain")
+            if (!(getObserverLoopMemoryMistakeMultiplier(loopExperienced) < getObserverLoopMemoryMistakeMultiplier(loopBase)))
+                failures.push("Loop memory does not reduce mistake pressure")
+
+            const loopClear = {
+                id: 9016,
+                rank: "rare",
+                personality: "methodical",
+                stage_index: observerSubjectStages.length - 1,
+                progress: observerSubjectStages[observerSubjectStages.length - 1].threshold + 10,
+                ai_level: 20,
+                character_level: 8,
+                completed_universe_x: 0,
+                loop_memory: 0,
+                bot_job_level: 1,
+                bot_skill_level: 1,
+                bot_items: [],
+                milestones: { first_rebirth: true, first_evil: true, first_void: true, multiverse_signal: true, universe_ii: true, universe_v: true, universe_x: true },
+                insights: { methodical_routine: true },
+                bot_log: [],
+            }
+            normalizeObserverSubject(loopClear)
+            advanceObserverSubject(loopClear)
+            if (!(loopClear.completed_universe_x >= 1 && loopClear.loop_memory > 1))
+                failures.push("Universe X clear does not build loop memory")
+            if (!(loopClear.bot_job_level > Math.floor(loopClear.ai_level * 0.6)))
+                failures.push("Universe X clear does not improve next-run starting levels")
+
             subject.bot_evil = 0
             subject.stage_index = 1
             subject.progress = observerSubjectStages[1].threshold + 1

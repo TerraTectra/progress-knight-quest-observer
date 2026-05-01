@@ -212,6 +212,8 @@ function normalizeObserverSubject(subject, state = null) {
         subject.best_clean_time = subject.clean_time
     if (subject.completed_universe_x == null || isNaN(subject.completed_universe_x))
         subject.completed_universe_x = 0
+    if (subject.loop_memory == null || isNaN(subject.loop_memory))
+        subject.loop_memory = subject.completed_universe_x
     if (subject.ai_level == null || isNaN(subject.ai_level))
         subject.ai_level = 1
     if (subject.ai_xp == null || isNaN(subject.ai_xp))
@@ -499,6 +501,7 @@ function createObserverSubject(freeSubject) {
         clean_time: 0,
         best_clean_time: 0,
         completed_universe_x: 0,
+        loop_memory: 0,
         ai_level: 1,
         ai_xp: 0,
         route_resets: 0,
@@ -796,6 +799,42 @@ function getObserverSubjectMilestoneMultiplier(subject, type) {
             bonus += observerSubjectMilestoneData[key][type] || 0
     }
     return type == "mistake" ? Math.max(0.48, 1 - bonus) : 1 + bonus
+}
+
+function getObserverLoopMemoryPower(subject) {
+    normalizeObserverSubject(subject)
+    const memory = Math.max(0, subject.loop_memory || 0)
+    const clears = Math.max(0, subject.completed_universe_x || 0)
+    const rankIndex = Math.max(0, getObserverRankOrder().indexOf(subject.rank))
+    const personality = subject.personality || "methodical"
+    let personalityBonus = 1
+
+    if (personality == "methodical")
+        personalityBonus = 1.12
+    else if (personality == "visionary")
+        personalityBonus = 1.18
+    else if (personality == "studious")
+        personalityBonus = 1.08
+    else if (personality == "impulsive")
+        personalityBonus = 0.96
+
+    return Math.min(1.65, (Math.log2(memory + 1) * 0.22 + Math.sqrt(clears) * 0.055 + rankIndex * 0.025) * personalityBonus)
+}
+
+function getObserverLoopMemorySpeedBonus(subject) {
+    return 1 + getObserverLoopMemoryPower(subject) * 0.18
+}
+
+function getObserverLoopMemoryOpBonus(subject) {
+    return 1 + getObserverLoopMemoryPower(subject) * 0.24
+}
+
+function getObserverLoopMemoryXpBonus(subject) {
+    return 1 + getObserverLoopMemoryPower(subject) * 0.16
+}
+
+function getObserverLoopMemoryMistakeMultiplier(subject) {
+    return Math.max(0.7, 1 - getObserverLoopMemoryPower(subject) * 0.14)
 }
 
 function shouldUnlockObserverSubjectInsight(subject, key) {
@@ -1285,8 +1324,9 @@ function getObserverSpeedMultiplier(subject) {
     const instructions = 1 + getObserverUpgradeLevel("clear_instructions") * 0.1
     const briefing = 1 + Math.max(0, stage.universe - 1) * getObserverUpgradeLevel("universe_briefing") * 0.03
     const cleanBonus = getObserverCleanSpeedBonus(subject)
-    const repeatClearDrag = 1 + Math.sqrt(subject.completed_universe_x) * 0.12
-    return getSafeObserverNumber(rank.speed * getObserverRankStageSpeed(subject) * personality.speed * personalityProfile.speed * getObserverSubjectMilestoneMultiplier(subject, "speed") * instructions * briefing * getObserverPhaseSpeedMultiplier(stage) * cleanBonus * getObserverAiLevelSpeed(subject) / (stage.difficulty * repeatClearDrag), 0)
+    const loopMemory = getObserverLoopMemoryPower(subject)
+    const repeatClearDrag = 1 + Math.sqrt(subject.completed_universe_x) * 0.08 / (1 + loopMemory * 0.3)
+    return getSafeObserverNumber(rank.speed * getObserverRankStageSpeed(subject) * personality.speed * personalityProfile.speed * getObserverSubjectMilestoneMultiplier(subject, "speed") * instructions * briefing * getObserverPhaseSpeedMultiplier(stage) * cleanBonus * getObserverAiLevelSpeed(subject) * getObserverLoopMemorySpeedBonus(subject) / (stage.difficulty * repeatClearDrag), 0)
 }
 
 function getObserverEffectiveSpeedMultiplier(subject) {
@@ -1317,7 +1357,7 @@ function getObserverSubjectOpGain(subject) {
     const routeQuality = getObserverSubjectRouteQuality(subject)
     const levelDepth = 1 + Math.min(0.55, Math.log2((subject.bot_job_level || 1) + (subject.bot_skill_level || 1)) * 0.045)
     const adaptationValue = 0.84 + getObserverSubjectAdaptation(subject) * 0.16
-    return getSafeObserverNumber(stageValue * progressValue * universeDepth * rank.op * getObserverRankStageOp(subject) * personality.op * personalityProfile.op * getObserverSubjectMilestoneMultiplier(subject, "op") * memory * getObserverPhaseOpMultiplier(stage) * cleanBonus * clearBonus * getObserverAiLevelOp(subject) * getObserverRosterSupportBonus() * routeQuality * levelDepth * adaptationValue, 0)
+    return getSafeObserverNumber(stageValue * progressValue * universeDepth * rank.op * getObserverRankStageOp(subject) * personality.op * personalityProfile.op * getObserverSubjectMilestoneMultiplier(subject, "op") * memory * getObserverPhaseOpMultiplier(stage) * cleanBonus * clearBonus * getObserverLoopMemoryOpBonus(subject) * getObserverAiLevelOp(subject) * getObserverRosterSupportBonus() * routeQuality * levelDepth * adaptationValue, 0)
 }
 
 function getObserverPointsGain() {
@@ -1344,7 +1384,7 @@ function getObserverAiXpGain(subject) {
     const personalityProfile = getObserverPersonalityStageProfile(subject, stage)
     const briefing = 1 + getObserverUpgradeLevel("universe_briefing") * 0.04 * Math.max(0, stage.universe - 1)
     const drills = 1 + getObserverUpgradeLevel("route_drills") * 0.14
-    return getSafeObserverNumber((0.12 + stage.universe * 0.03 + subject.stage_index * 0.01) * rank.xp * personality.xp * personalityProfile.aiXp * getObserverSubjectMilestoneMultiplier(subject, "xp") * getObserverCleanXpBonus(subject) * briefing * drills * getObserverPhaseXpMultiplier(stage), 0)
+    return getSafeObserverNumber((0.12 + stage.universe * 0.03 + subject.stage_index * 0.01) * rank.xp * personality.xp * personalityProfile.aiXp * getObserverSubjectMilestoneMultiplier(subject, "xp") * getObserverCleanXpBonus(subject) * briefing * drills * getObserverPhaseXpMultiplier(stage) * getObserverLoopMemoryXpBonus(subject), 0)
 }
 
 function updateObserver() {
@@ -1398,7 +1438,7 @@ function updateObserverSubjects() {
         const stage = getObserverSubjectStage(subject)
         const personalityProfile = getObserverPersonalityStageProfile(subject, stage)
         const adaptationMistakeRelief = Math.max(0.55, 1 - Math.min(0.45, (getObserverSubjectAdaptation(subject) - 0.65) * 0.28))
-        const mistakeChance = 0.000045 * rank.mistake * getObserverRankStageMistake(subject) * personality.mistake * personalityProfile.mistake * getObserverSubjectMilestoneMultiplier(subject, "mistake") * stage.difficulty * getObserverAiLevelMistake(subject) * getObserverMistakeMultiplier() * getObserverPhaseMistakeMultiplier(stage) * adaptationMistakeRelief
+        const mistakeChance = 0.000045 * rank.mistake * getObserverRankStageMistake(subject) * personality.mistake * personalityProfile.mistake * getObserverSubjectMilestoneMultiplier(subject, "mistake") * stage.difficulty * getObserverAiLevelMistake(subject) * getObserverMistakeMultiplier() * getObserverPhaseMistakeMultiplier(stage) * getObserverLoopMemoryMistakeMultiplier(subject) * adaptationMistakeRelief
         if (Math.random() < mistakeChance) {
             applyObserverSubjectMistake(subject)
         }
@@ -1540,6 +1580,8 @@ function advanceObserverSubject(subject) {
     while (subject.progress >= getObserverSubjectStage(subject).threshold) {
         if (subject.stage_index >= observerSubjectStages.length - 1) {
             subject.completed_universe_x += 1
+            subject.loop_memory = Math.max(0, subject.loop_memory || 0) + 1 + getObserverSubjectMilestoneCount(subject) * 0.06 + getObserverSubjectInsightCount(subject) * 0.12
+            const restartLevel = Math.max(1, Math.floor(subject.ai_level * 0.6 + getObserverLoopMemoryPower(subject) * 5))
             subject.stage_index = 0
             subject.progress = 0
             subject.clean_time = 0
@@ -1548,8 +1590,8 @@ function advanceObserverSubject(subject) {
             subject.bot_age_days = 365 * 14
             subject.bot_coins = 0
             subject.bot_rebirths += 1
-            subject.bot_job_level = Math.max(1, Math.floor(subject.ai_level * 0.6))
-            subject.bot_skill_level = Math.max(1, Math.floor(subject.ai_level * 0.6))
+            subject.bot_job_level = restartLevel
+            subject.bot_skill_level = restartLevel
             subject.bot_job_xp = 0
             subject.bot_skill_xp = 0
             subject.bot_property_index = 0
@@ -1558,7 +1600,7 @@ function advanceObserverSubject(subject) {
             subject.bot_focus_skill = getObserverSubjectStage(subject).skill
             subject.bot_next_decision = 0
             subject.bot_next_purchase = 0
-            subject.last_action = "Completed Universe X and restarted from zero."
+            subject.last_action = "Completed Universe X and restarted with deeper loop memory."
             pushObserverSubjectLog(subject, subject.last_action)
             return
         }
@@ -1769,7 +1811,7 @@ function renderObserverSubjects() {
                 `<div class="rb-observer-mini-row"><span>Clean streak</span><b>${formatTime(subject.clean_time, true)}</b></div>` +
                 `<div class="rb-observer-mini-row"><span>OP/sec</span><b>${format(getObserverSubjectOpGain(subject), 3)}</b></div>` +
                 `<div class="rb-observer-mini-row"><span>Mistakes</span><b>${formatWhole(subject.mistakes)}</b></div>` +
-                `<div class="rb-observer-mini-row"><span>U-X clears</span><b>${formatWhole(subject.completed_universe_x)}</b></div>` +
+                `<div class="rb-observer-mini-row"><span>U-X clears</span><b>${formatWhole(subject.completed_universe_x)} · memory x${format(getObserverLoopMemorySpeedBonus(subject), 2)}</b></div>` +
                 `<div class="rb-observer-note">${subject.last_action}</div>` +
                 `<div class="rb-observer-actions">` +
                     `<button class="w3-button button" onclick="observeObserverSubject(${subject.id})">Observe</button>` +
@@ -1854,7 +1896,8 @@ function renderObservedObserverSubject() {
         `<tr><td>Current universe</td><td>U-${stage.universe}</td></tr>` +
         `<tr><td>Multiverse signal</td><td>${subject.stage_index >= 4 ? "Known" : "Locked"}</td></tr>` +
         `<tr><td>Bot MP</td><td>${format(subject.bot_mp, 2)}</td></tr>` +
-        `<tr><td>Universe X clears</td><td>${formatWhole(subject.completed_universe_x)}</td></tr>`
+        `<tr><td>Universe X clears</td><td>${formatWhole(subject.completed_universe_x)}</td></tr>` +
+        `<tr><td>Loop memory</td><td>x${format(getObserverLoopMemorySpeedBonus(subject), 2)} speed / x${format(getObserverLoopMemoryOpBonus(subject), 2)} OP</td></tr>`
 
     document.getElementById("observerWatchDecisionState").innerHTML =
         `<b>Last decision:</b> ${subject.last_action}<br>` +
