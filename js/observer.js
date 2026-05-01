@@ -327,19 +327,45 @@ function enterObserverLayer() {
     return true
 }
 
+function getObserverEntryLegacyBonus(signal) {
+    const safeSignal = getSafeObserverNumber(signal, 0)
+    const multiverse = typeof getMultiverseState === "function" ? getMultiverseState() : null
+    const breaks = multiverse == null ? 0 : Math.max(0, multiverse.universe_breaks || 0)
+    const records = multiverse == null || multiverse.universe_break_records == null ? {} : multiverse.universe_break_records
+    let recordedBreaks = 0
+
+    for (const key in records) {
+        if (!isNaN(records[key]))
+            recordedBreaks += Math.max(0, records[key])
+    }
+
+    const signalBonus = Math.sqrt(Math.max(1, safeSignal)) * 2.15
+    const breakBonus = Math.min(150, breaks * 14 + Math.sqrt(recordedBreaks) * 18)
+    const lifetimeBonus = Math.min(180, Math.log10(Math.max(0, gameData.multiverse_points_lifetime || 0) + 10) * 13)
+
+    return getSafeObserverNumber(Math.min(520, Math.max(25, signalBonus + breakBonus + lifetimeBonus)), 25, 520)
+}
+
 function grantObserverEntryLegacy(multiverse) {
     const state = getObserverState()
     const signal = typeof getObserverSignalStrength === "function" ? getObserverSignalStrength() : 0
-    const bonusPoints = Math.min(140, Math.max(10, Math.sqrt(Math.max(1, signal)) * 1.8))
+    const bonusPoints = getObserverEntryLegacyBonus(signal)
 
     state.points += bonusPoints
     state.lifetime_points += bonusPoints
     state.upgrades.clear_instructions = Math.max(state.upgrades.clear_instructions || 0, 1)
+    if (bonusPoints >= 120)
+        state.upgrades.early_guidance = Math.max(state.upgrades.early_guidance || 0, 1)
+    if (bonusPoints >= 240)
+        state.upgrades.route_drills = Math.max(state.upgrades.route_drills || 0, 1)
 
     if (state.subjects.length == 0) {
         const subject = createObserverSubject(true)
-        subject.ai_xp += Math.min(45, signal * 0.08)
-        subject.last_action = "Inherited a fragment of the Observer Signal."
+        subject.ai_xp += Math.min(180, signal * 0.11 + bonusPoints * 0.28)
+        subject.character_level = Math.max(subject.character_level || 0, Math.min(3, Math.floor(bonusPoints / 155)))
+        subject.bot_mp += Math.min(5000, signal * 0.35)
+        subject.last_action = "Inherited a fragment of the Observer Signal and started the first watched run."
+        pushObserverSubjectLog(subject, subject.last_action)
     }
 
     multiverse.observer_entry_claimed = true

@@ -975,12 +975,24 @@ async function runScenario(browser, name, setup) {
                 failures.push("Observer signal could not be prepared with U-X route")
             if (!canEnterObserverLayer())
                 failures.push("Observer layer cannot be entered after signal preparation")
+            const pointsBeforeEntry = gameData.observer.points || 0
             if (!enterObserverLayer())
                 failures.push("Observer layer did not enter after signal preparation")
             if (!gameData.observer.active)
                 failures.push("Observer layer did not activate")
             if (!(gameData.observer.subjects && gameData.observer.subjects.length > 0))
                 failures.push("Observer entry did not create first subject")
+            if (!(gameData.observer.points > pointsBeforeEntry))
+                failures.push("Observer entry did not grant signal legacy OP")
+            if (!((gameData.observer.upgrades.clear_instructions || 0) >= 1))
+                failures.push("Observer entry did not grant starter instructions")
+            if (gameData.observer.subjects && gameData.observer.subjects[0]) {
+                const subject = gameData.observer.subjects[0]
+                if (subject.rank != "trash")
+                    failures.push("Observer first subject is not Trash after entry")
+                if (!((subject.ai_xp || 0) > 0))
+                    failures.push("Observer first subject did not inherit signal AI XP")
+            }
 
             updateUI()
             const visibleButtons = Array.from(document.querySelectorAll(".tabButton"))
