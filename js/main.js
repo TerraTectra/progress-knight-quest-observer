@@ -1256,6 +1256,25 @@ function normalizeMetaLayerUnlocks() {
 
     if (gameData.settings.selectedTab == "observer" && (typeof isObserverUnlocked !== "function" || !isObserverUnlocked()))
         gameData.settings.selectedTab = "jobs"
+
+    const gatedTabs = {
+        evilperks: "Evil perks",
+        challenges: "Challenges",
+        milestones: "Milestones",
+        rebirth: "Rebirth tab",
+        darkMatter: "Dark Matter",
+    }
+    const selectedRequirement = gatedTabs[gameData.settings.selectedTab]
+    if (selectedRequirement != null) {
+        const requirement = gameData.requirements[selectedRequirement]
+        try {
+            if (requirement == null || !requirement.isCompleted())
+                gameData.settings.selectedTab = "jobs"
+        } catch (error) {
+            console.error("Selected tab normalization failed:", selectedRequirement, error)
+            gameData.settings.selectedTab = "jobs"
+        }
+    }
 }
 
 function replaceSaveDict(dict, saveDict) {
