@@ -844,6 +844,104 @@ button:focus {
     background-color: #9b5cff;
 }
 
+.rb-observer-actions {
+    display: flex;
+    gap: 0.45em;
+    margin-top: 0.65em;
+}
+
+.rb-observer-watch-title {
+    display: flex;
+    justify-content: space-between;
+    gap: 1em;
+    align-items: flex-start;
+    border-bottom: 0.1em solid rgb(73, 73, 73);
+    padding-bottom: 0.8em;
+    margin-bottom: 1em;
+}
+
+.rb-observer-watch-grid {
+    display: grid;
+    grid-template-columns: 230px minmax(0, 1fr);
+    gap: 0.8em;
+}
+
+.rb-observer-bot-sidebar {
+    background-color: rgb(38, 38, 38);
+    border: 1px solid rgb(73, 73, 73);
+    padding: 0.75em;
+}
+
+.rb-observer-bot-stat {
+    border-top: 1px solid rgb(58, 58, 58);
+    margin-top: 0.45em;
+    padding-top: 0.45em;
+}
+
+.rb-observer-bot-stat span {
+    color: rgb(165, 165, 165);
+}
+
+.rb-observer-bot-stat b {
+    display: block;
+    color: white;
+}
+
+.rb-observer-bot-tabs {
+    display: flex;
+    background-color: rgb(38, 38, 38);
+    border: 1px solid rgb(73, 73, 73);
+    margin-bottom: 0.7em;
+}
+
+.rb-observer-bot-tabs div {
+    padding: 0.45em 0.75em;
+    border-right: 1px solid rgb(73, 73, 73);
+    color: white;
+}
+
+.rb-observer-bot-tabs .active {
+    background-color: #18d2d9;
+}
+
+.rb-observer-bot-table th {
+    color: white;
+}
+
+.rb-observer-bot-table td,
+.rb-observer-bot-table th {
+    border-color: rgb(65, 65, 65) !important;
+}
+
+.rb-observer-bot-row-active {
+    background-color: rgb(46, 148, 231);
+}
+
+.rb-observer-bot-row-muted {
+    color: rgb(135, 135, 135);
+}
+
+.rb-observer-decision-state {
+    border: 1px solid rgb(73, 73, 73);
+    background-color: rgb(38, 38, 38);
+    padding: 0.6em 0.75em;
+    margin-top: 0.8em;
+}
+
+.rb-observer-ai-log {
+    border: 1px solid rgb(73, 73, 73);
+    background-color: rgb(34, 34, 34);
+    padding: 0.55em 0.7em;
+    margin-top: 0.8em;
+    min-height: 8em;
+}
+
+.rb-observer-ai-log div {
+    border-bottom: 1px solid rgb(55, 55, 55);
+    padding: 0.22em 0;
+    color: rgb(210, 210, 210);
+}
+
 body.rb-observer-active #tabcolumn {
     border-color: #9b5cff;
 }
@@ -864,13 +962,15 @@ body.rb-observer-active #maincolumn {
     .rb-observer-title,
     .rb-observer-summary,
     .rb-observer-command-grid,
-    .rb-observer-subject-grid {
+    .rb-observer-subject-grid,
+    .rb-observer-watch-grid {
         display: block;
     }
 
     .rb-observer-stat,
     .rb-observer-command,
-    .rb-observer-subject {
+    .rb-observer-subject,
+    .rb-observer-bot-sidebar {
         margin-bottom: 0.7em;
     }
 }

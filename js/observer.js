@@ -68,6 +68,8 @@ function getObserverState() {
         state.command = "balanced"
     if (state.next_subject_id == null)
         state.next_subject_id = state.subjects.length + 1
+    if (state.observed_subject_id == null || isNaN(state.observed_subject_id))
+        state.observed_subject_id = null
     if (state.upgrades == null)
         state.upgrades = {}
 
@@ -115,6 +117,18 @@ function normalizeObserverSubject(subject, state = null) {
         subject.ai_xp = 0
     if (subject.route_resets == null || isNaN(subject.route_resets))
         subject.route_resets = 0
+    if (subject.bot_age_days == null || isNaN(subject.bot_age_days))
+        subject.bot_age_days = 365 * 14
+    if (subject.bot_coins == null || isNaN(subject.bot_coins))
+        subject.bot_coins = 0
+    if (subject.bot_evil == null || isNaN(subject.bot_evil))
+        subject.bot_evil = 0
+    if (subject.bot_mp == null || isNaN(subject.bot_mp))
+        subject.bot_mp = 0
+    if (subject.bot_rebirths == null || isNaN(subject.bot_rebirths))
+        subject.bot_rebirths = 0
+    if (subject.bot_log == null || !Array.isArray(subject.bot_log))
+        subject.bot_log = ["Started a fresh Progress Knight run."]
     if (subject.last_action == null)
         subject.last_action = "Waking up in Prime World."
 
@@ -238,6 +252,38 @@ function buyObserverSubject() {
     return true
 }
 
+function getObservedObserverSubject() {
+    const state = getObserverState()
+    if (state.observed_subject_id == null)
+        return null
+
+    for (const subject of state.subjects) {
+        if (subject.id == state.observed_subject_id)
+            return subject
+    }
+
+    state.observed_subject_id = null
+    return null
+}
+
+function observeObserverSubject(id) {
+    const state = getObserverState()
+    for (const subject of state.subjects) {
+        if (subject.id == id) {
+            state.observed_subject_id = id
+            renderObserver()
+            return true
+        }
+    }
+
+    return false
+}
+
+function stopObservingObserverSubject() {
+    getObserverState().observed_subject_id = null
+    renderObserver()
+}
+
 function createObserverSubject(freeSubject) {
     const state = getObserverState()
     const id = state.next_subject_id++
@@ -256,6 +302,12 @@ function createObserverSubject(freeSubject) {
         ai_level: 1,
         ai_xp: 0,
         route_resets: 0,
+        bot_age_days: 365 * 14,
+        bot_coins: 0,
+        bot_evil: 0,
+        bot_mp: 0,
+        bot_rebirths: 0,
+        bot_log: ["Started a fresh Progress Knight run."],
         last_action: "Started a fresh Progress Knight run.",
     }
 
@@ -328,6 +380,52 @@ function getObserverSubjectGoal(subject) {
     const progress = getObserverStageProgress(subject)
     const label = progress >= 96 ? "Finishing " : "Reach "
     return label + stage.name + " (" + formatTime(eta, true) + ")"
+}
+
+function getObserverSubjectRankStyle(subject) {
+    const rank = observerRankData[subject.rank]
+    if (subject.rank == "trash")
+        return "Overbuys, swaps focus late, and loses clean streaks."
+    if (subject.rank == "common")
+        return "Runs a safe simple route with weak late-universe adaptation."
+    if (subject.rank == "skilled")
+        return "Keeps a stable route through Evil, Void, and early universes."
+    if (subject.rank == "rare")
+        return "Plans around unlock chains and avoids most bad purchases."
+    if (subject.rank == "epic")
+        return "Adapts quickly to distorted universe rules."
+    if (subject.rank == "legendary")
+        return "Near-optimal route toward U-X and Observer Signal."
+
+    return rank.description
+}
+
+function getObserverBotIncome(subject) {
+    const stage = getObserverSubjectStage(subject)
+    const rank = observerRankData[subject.rank]
+    const stageValue = Math.pow(stage.threshold + 10, 1.18) * (1 + stage.universe * 0.45)
+    const rankValue = Math.max(0.25, rank.speed * rank.op)
+    return getSafeObserverNumber(stageValue * rankValue * getObserverAiLevelSpeed(subject), 0, 1e300)
+}
+
+function getObserverBotSkillLevel(subject) {
+    const stage = getObserverSubjectStage(subject)
+    const previous = getObserverPreviousThreshold(subject.stage_index)
+    const stageSpan = Math.max(1, stage.threshold - previous)
+    const localProgress = Math.max(0, subject.progress - previous) / stageSpan
+    return Math.max(1, Math.floor(subject.stage_index * 11 + localProgress * 35 + subject.ai_level * 0.8))
+}
+
+function pushObserverSubjectLog(subject, message) {
+    if (subject.bot_log == null || !Array.isArray(subject.bot_log))
+        subject.bot_log = []
+
+    const day = Math.floor(subject.bot_age_days % 365)
+    const year = Math.floor(subject.bot_age_days / 365)
+    subject.bot_log.unshift(year + "y " + day + "d - " + message)
+
+    while (subject.bot_log.length > 8)
+        subject.bot_log.pop()
 }
 
 function getObserverRankPhaseTable(subject, table, fallback) {
@@ -538,6 +636,10 @@ function updateObserverSubjects() {
         subject.best_clean_time = Math.max(subject.best_clean_time, subject.clean_time)
         subject.progress += getSafeObserverNumber(getObserverSpeedMultiplier(subject) / updateSpeed, 0)
         subject.ai_xp += getSafeObserverNumber(getObserverAiXpGain(subject) / updateSpeed, 0)
+        subject.bot_age_days += getSafeObserverNumber((0.55 + getObserverSpeedMultiplier(subject) * 0.18) / updateSpeed, 0)
+        subject.bot_coins += getSafeObserverNumber(getObserverBotIncome(subject) / updateSpeed, 0, 1e300)
+        subject.bot_evil += getSafeObserverNumber((subject.stage_index >= 2 ? getObserverSubjectOpGain(subject) * 0.015 : 0) / updateSpeed, 0, 1e300)
+        subject.bot_mp += getSafeObserverNumber((subject.stage_index >= 4 ? getObserverSubjectOpGain(subject) * 0.01 * getObserverSubjectStage(subject).universe : 0) / updateSpeed, 0, 1e300)
 
         let levelGuard = 0
         while (subject.ai_xp >= getObserverAiXpToNext(subject) && levelGuard < 100) {
@@ -545,6 +647,7 @@ function updateObserverSubjects() {
             subject.ai_level += 1
             levelGuard += 1
             subject.last_action = "Improved routing discipline to AI level " + subject.ai_level + "."
+            pushObserverSubjectLog(subject, subject.last_action)
         }
 
         const rank = observerRankData[subject.rank]
@@ -574,10 +677,14 @@ function applyObserverSubjectMistake(subject) {
         subject.progress = Math.min(subject.progress, getObserverSubjectStage(subject).threshold - 1)
         subject.route_resets += 1
         subject.last_action = "Ruined the route and slipped back one phase."
+        subject.bot_coins = Math.max(0, subject.bot_coins * 0.72)
+        pushObserverSubjectLog(subject, subject.last_action)
         return
     }
 
     subject.last_action = "Made a bad route choice and lost the clean streak."
+    subject.bot_coins = Math.max(0, subject.bot_coins * 0.88)
+    pushObserverSubjectLog(subject, subject.last_action)
 }
 
 function advanceObserverSubject(subject) {
@@ -589,7 +696,11 @@ function advanceObserverSubject(subject) {
             subject.progress = 0
             subject.clean_time = 0
             subject.route_resets = 0
+            subject.bot_age_days = 365 * 14
+            subject.bot_coins = 0
+            subject.bot_rebirths += 1
             subject.last_action = "Completed Universe X and restarted from zero."
+            pushObserverSubjectLog(subject, subject.last_action)
             return
         }
 
@@ -597,8 +708,11 @@ function advanceObserverSubject(subject) {
         advanced = true
     }
 
-    if (advanced)
+    if (advanced) {
         subject.last_action = "Reached " + getObserverSubjectStage(subject).name + "."
+        subject.bot_rebirths += getObserverSubjectStage(subject).id == "rebirth" ? 1 : 0
+        pushObserverSubjectLog(subject, subject.last_action)
+    }
 }
 
 function getObserverSubjectStage(subject) {
@@ -683,6 +797,7 @@ function renderObserver() {
     renderObserverCommands()
     renderObserverSubjects()
     renderObserverUpgrades()
+    renderObservedObserverSubject()
 }
 
 function renderObserverCommands() {
@@ -738,10 +853,68 @@ function renderObserverSubjects() {
                 `<div class="rb-observer-mini-row"><span>Mistakes</span><b>${formatWhole(subject.mistakes)}</b></div>` +
                 `<div class="rb-observer-mini-row"><span>U-X clears</span><b>${formatWhole(subject.completed_universe_x)}</b></div>` +
                 `<div class="rb-observer-note">${subject.last_action}</div>` +
+                `<div class="rb-observer-actions"><button class="w3-button button" onclick="observeObserverSubject(${subject.id})">Observe</button></div>` +
             `</div>`
     }
 
     grid.innerHTML = html
+}
+
+function renderObservedObserverSubject() {
+    const roster = document.getElementById("observerRosterView")
+    const watch = document.getElementById("observerWatchView")
+    if (roster == null || watch == null)
+        return
+
+    const subject = getObservedObserverSubject()
+    roster.classList.toggle("hidden", subject != null)
+    watch.classList.toggle("hidden", subject == null)
+
+    if (subject == null)
+        return
+
+    const rank = observerRankData[subject.rank]
+    const stage = getObserverSubjectStage(subject)
+    const previousStage = observerSubjectStages[Math.max(0, subject.stage_index - 1)]
+    const nextStage = observerSubjectStages[Math.min(observerSubjectStages.length - 1, subject.stage_index + 1)]
+    const skillLevel = getObserverBotSkillLevel(subject)
+    const progress = getObserverStageProgress(subject)
+
+    document.getElementById("observerWatchName").textContent = subject.name
+    document.getElementById("observerWatchRank").textContent = rank.name
+    document.getElementById("observerWatchAge").textContent = format(Math.floor(subject.bot_age_days / 365), 0) + " Day " + formatWhole(Math.floor(subject.bot_age_days % 365))
+    document.getElementById("observerWatchUniverse").textContent = "U-" + stage.universe
+    document.getElementById("observerWatchCoins").textContent = format(subject.bot_coins, 2)
+    document.getElementById("observerWatchMeta").textContent = format(subject.bot_evil, 2) + " / " + format(subject.bot_mp, 2)
+    document.getElementById("observerWatchOp").textContent = format(getObserverSubjectOpGain(subject), 3)
+
+    document.getElementById("observerWatchTable").innerHTML =
+        `<tr style="background:#4caf50;"><th>Route</th><th>Level</th><th>State</th><th>Progress</th></tr>` +
+        `<tr class="rb-observer-bot-row-muted"><td>${previousStage.job}</td><td>${Math.max(1, skillLevel - 16)}</td><td>Completed</td><td>Max</td></tr>` +
+        `<tr class="rb-observer-bot-row-active"><td>${stage.job}</td><td>${skillLevel}</td><td>Current job</td><td>${format(progress, 1)}%</td></tr>` +
+        `<tr><td>${nextStage.job}</td><td>${Math.max(1, skillLevel - 7)}</td><td>Next route</td><td>Locked</td></tr>` +
+        `<tr style="background:#18d2d9;"><th>Skill route</th><th>Level</th><th>State</th><th>Progress</th></tr>` +
+        `<tr class="rb-observer-bot-row-muted"><td>${previousStage.skill}</td><td>${Math.max(1, skillLevel - 14)}</td><td>Completed</td><td>Max</td></tr>` +
+        `<tr class="rb-observer-bot-row-active"><td>${stage.skill}</td><td>${skillLevel}</td><td>Current skill</td><td>${format(progress, 1)}%</td></tr>` +
+        `<tr><td>${nextStage.skill}</td><td>${Math.max(1, skillLevel - 6)}</td><td>Next unlock</td><td>Waiting</td></tr>`
+
+    document.getElementById("observerWatchDecisionState").innerHTML =
+        `<b>AI decision state</b><br>` +
+        `<span style="color:gray;">Goal:</span> ${getObserverSubjectGoal(subject)}<br>` +
+        `<span style="color:gray;">Rank behavior:</span> ${getObserverSubjectRankStyle(subject)}<br>` +
+        `<span style="color:gray;">Clean streak:</span> ${formatTime(subject.clean_time, true)}; ` +
+        `<span style="color:gray;">mistakes:</span> ${formatWhole(subject.mistakes)}; ` +
+        `<span style="color:gray;">rebirths:</span> ${formatWhole(subject.bot_rebirths)}`
+
+    let logHtml = ""
+    const log = subject.bot_log == null ? [] : subject.bot_log
+    for (const entry of log) {
+        logHtml += `<div>${entry}</div>`
+    }
+    if (logHtml == "")
+        logHtml = `<div>Started a fresh Progress Knight run.</div>`
+
+    document.getElementById("observerWatchLog").innerHTML = logHtml
 }
 
 function renderObserverUpgrades() {

@@ -2,404 +2,719 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>Observer mode preview</title>
+    <title>Observer tab preview</title>
     <link rel="stylesheet" href="../css/w3.css">
     <link rel="stylesheet" href="../css/styles.css">
     <link rel="stylesheet" href="../css/dark.css">
     <style>
         :root {
-            --pk-bg: rgb(32, 32, 32);
+            --pk-bg: rgb(31, 31, 31);
             --pk-panel: rgb(46, 46, 46);
-            --pk-panel-2: rgb(38, 38, 38);
-            --pk-border: rgb(73, 73, 73);
+            --pk-panel-dark: rgb(37, 37, 37);
+            --pk-row: rgb(41, 41, 41);
+            --pk-border: rgb(70, 70, 70);
             --pk-muted: rgb(165, 165, 165);
-            --observer: #18d2d9;
-            --observer-soft: #168aa5;
-            --void: #762b91;
-            --evil: #a72d34;
-            --gold: #d5c010;
-            --good: #55a630;
-            --warn: #ff7a1a;
-            --bad: #e63946;
+            --pk-blue: rgb(46, 148, 231);
+            --pk-cyan: rgb(34, 169, 193);
+            --pk-green: rgb(76, 175, 80);
+            --pk-red: rgb(226, 50, 63);
+            --pk-gold: rgb(213, 192, 16);
+            --pk-purple: rgb(118, 43, 145);
+            --pk-orange: rgb(255, 152, 0);
         }
 
         body.preview-body {
             background: var(--pk-bg);
             color: white;
-            padding: 24px;
+            padding: 22px;
         }
 
-        .preview-title-row {
+        .preview-title {
             display: flex;
             align-items: baseline;
-            gap: 1em;
-            margin-bottom: 12px;
+            gap: 0.9em;
+            margin-bottom: 0.8em;
         }
 
-        .preview-subtitle,
+        .preview-title h1 {
+            margin: 0;
+            font-size: 30px;
+        }
+
         .muted {
             color: var(--pk-muted);
         }
 
-        .observer-shell {
-            display: flex;
-            align-items: flex-start;
+        .observer-layout {
+            display: grid;
+            grid-template-columns: 260px minmax(900px, 1160px);
             gap: 0.8em;
+            align-items: start;
         }
 
-        .observer-sidebar {
-            width: 310px;
-            border-left: 0.3em solid var(--observer);
-        }
-
-        .observer-main {
-            min-width: 980px;
-            max-width: 1180px;
-        }
-
-        .tab-preview {
-            display: flex;
-            border-bottom: 1px solid var(--pk-border);
-        }
-
-        .tab-preview .baritem {
-            border-right: 1px solid var(--pk-border);
-        }
-
-        .tab-preview .disabled-tab {
-            color: #777;
-            opacity: 0.65;
-        }
-
-        .tab-preview .active-tab {
-            background: var(--observer-soft) !important;
+        .panel {
+            background-color: var(--pk-panel) !important;
             color: white !important;
+            border: 1px solid rgb(24, 24, 24);
         }
 
-        .section-title {
-            padding: 0.45em 0.7em;
-            color: white;
-            margin-bottom: 0.8em;
+        .sidebar {
+            padding: 0.8em;
         }
 
-        .section-title.observer { background: var(--observer-soft); }
-        .section-title.subjects { background: #4f5d75; }
-        .section-title.commands { background: var(--void); }
-        .section-title.upgrades { background: var(--gold); color: purple; }
-
-        .stat-box {
-            margin-top: 1em;
-            padding: 0.7em 0.8em;
-            background: var(--pk-panel-2);
+        .sidebar-stat {
+            margin-top: 0.9em;
+            padding: 0.55em 0.65em;
+            background: var(--pk-panel-dark);
             border: 1px solid var(--pk-border);
         }
 
-        .stat-box.observer { border-left: 0.35em solid var(--observer); }
-        .stat-box.void { border-left: 0.35em solid var(--void); }
-        .stat-box.gold { border-left: 0.35em solid var(--gold); }
-        .stat-box.good { border-left: 0.35em solid var(--good); }
+        .sidebar-stat b {
+            color: white;
+            font-size: 1.15em;
+        }
+
+        .tabs {
+            display: flex;
+            background: var(--pk-panel);
+            border: 1px solid rgb(24, 24, 24);
+        }
+
+        .tabs .baritem {
+            border-right: 1px solid var(--pk-border);
+            color: rgb(130, 130, 130);
+            background: rgb(40, 40, 40);
+        }
+
+        .tabs .active {
+            background: rgb(96, 125, 139);
+            color: white;
+        }
+
+        .main-panel {
+            margin-top: 0.7em;
+            padding: 0.95em 1em 1.1em;
+        }
+
+        .section-title {
+            padding: 0.35em 0.65em;
+            margin: 0.9em 0 0.6em;
+            font-weight: bold;
+        }
+
+        .section-title:first-child {
+            margin-top: 0;
+        }
+
+        .section-title.observer { background: var(--pk-cyan); }
+        .section-title.subjects { background: rgb(79, 93, 117); }
+        .section-title.commands { background: var(--pk-purple); }
+        .section-title.upgrades { background: var(--pk-gold); color: purple; }
+
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 0.6em;
+        }
+
+        .summary-cell {
+            background: var(--pk-row);
+            border: 1px solid var(--pk-border);
+            padding: 0.55em 0.65em;
+            min-height: 76px;
+        }
+
+        .summary-cell .label {
+            color: var(--pk-muted);
+            font-size: 0.92em;
+        }
+
+        .summary-cell .value {
+            color: white;
+            font-size: 1.35em;
+            font-weight: bold;
+        }
 
         .subject-grid {
             display: grid;
             grid-template-columns: repeat(2, minmax(0, 1fr));
-            gap: 0.8em;
+            gap: 0.7em;
         }
 
-        .subject-card {
-            background: var(--pk-panel-2);
+        .subject {
+            background: var(--pk-row);
             border: 1px solid var(--pk-border);
-            padding: 0.8em;
+            border-left-width: 0.35em;
+            padding: 0.7em;
         }
 
-        .subject-card.active { border-left: 0.35em solid var(--observer); }
-        .subject-card.trash { border-left: 0.35em solid #777; }
-        .subject-card.common { border-left: 0.35em solid #bdbdbd; }
-        .subject-card.skilled { border-left: 0.35em solid var(--good); }
-        .subject-card.rare { border-left: 0.35em solid #4ea5ff; }
-        .subject-card.epic { border-left: 0.35em solid #b14cff; }
-        .subject-card.legendary { border-left: 0.35em solid var(--gold); }
+        .subject.trash { border-left-color: #777; }
+        .subject.common { border-left-color: #d0d0d0; }
+        .subject.rare { border-left-color: var(--pk-blue); }
+        .subject.epic { border-left-color: #b14cff; }
+        .subject.legendary { border-left-color: var(--pk-gold); }
 
-        .subject-header {
+        .subject-head {
             display: flex;
             justify-content: space-between;
-            align-items: start;
             gap: 0.8em;
-        }
-
-        .subject-name {
-            font-weight: bold;
-            color: white;
         }
 
         .rank {
-            display: inline-block;
             border: 1px solid currentColor;
-            padding: 0.12em 0.45em;
-            font-size: 0.9em;
+            padding: 0.1em 0.45em;
             white-space: nowrap;
+            align-self: start;
         }
 
-        .rank-trash { color: #aaa; }
-        .rank-common { color: white; }
-        .rank-skilled { color: var(--good); }
-        .rank-rare { color: #4ea5ff; }
-        .rank-epic { color: #b14cff; }
-        .rank-legendary { color: var(--gold); }
+        .rank.trash { color: #aaa; }
+        .rank.common { color: white; }
+        .rank.rare { color: var(--pk-blue); }
+        .rank.epic { color: #b14cff; }
+        .rank.legendary { color: var(--pk-gold); }
 
-        .subject-stats {
-            display: grid;
-            grid-template-columns: repeat(3, minmax(0, 1fr));
-            gap: 0.45em;
-            margin-top: 0.7em;
+        .subject-table {
+            width: 100%;
+            margin-top: 0.55em;
+            border-collapse: collapse;
         }
 
-        .mini-stat {
-            background: rgb(33, 33, 33);
+        .subject-table td {
+            border-top: 1px solid rgb(58, 58, 58);
+            padding: 0.28em 0;
+        }
+
+        .subject-table td:first-child {
+            color: var(--pk-muted);
+            width: 38%;
+        }
+
+        .meter {
+            height: 13px;
             border: 1px solid var(--pk-border);
-            padding: 0.45em 0.55em;
-            min-height: 54px;
+            background: rgb(24, 24, 24);
+            margin-top: 0.6em;
         }
 
-        .mini-stat b {
-            display: block;
-            color: white;
-        }
-
-        .progress-shell {
-            height: 14px;
-            background: rgb(26, 26, 26);
-            border: 1px solid var(--pk-border);
-            margin-top: 0.7em;
-        }
-
-        .progress-fill {
+        .meter div {
             height: 100%;
-            background: var(--observer);
+            background: var(--pk-cyan);
         }
 
-        .progress-fill.bad { background: var(--bad); }
-        .progress-fill.good { background: var(--good); }
-        .progress-fill.gold { background: var(--gold); }
+        .meter .bad { background: var(--pk-red); }
+        .meter .good { background: var(--pk-green); }
+        .meter .gold { background: var(--pk-gold); }
 
-        .command-row {
+        .command-grid {
             display: grid;
             grid-template-columns: repeat(4, minmax(0, 1fr));
-            gap: 0.8em;
+            gap: 0.6em;
         }
 
-        .command-card {
-            background: var(--pk-panel-2);
+        .command {
+            background: var(--pk-row);
             border: 1px solid var(--pk-border);
-            padding: 0.75em;
+            padding: 0.65em;
+            min-height: 88px;
         }
 
-        .command-card.active {
-            border-color: var(--observer);
-            box-shadow: inset 0 0 0 1px rgba(24, 210, 217, 0.18);
+        .command.active {
+            border-color: var(--pk-cyan);
+            box-shadow: inset 0 0 0 1px rgba(34, 169, 193, 0.3);
         }
 
         .upgrade-table {
-            margin-top: 0.6em;
+            margin-top: 0.4em;
+        }
+
+        .upgrade-table th {
+            background: rgb(39, 39, 39);
+        }
+
+        .upgrade-table td,
+        .upgrade-table th {
+            border-color: rgb(65, 65, 65) !important;
         }
 
         .upgrade-table tr:nth-child(even) {
             background: rgba(255, 255, 255, 0.025);
         }
 
-        .observer-note {
+        .subject-actions {
+            display: flex;
+            gap: 0.5em;
+            margin-top: 0.65em;
+        }
+
+        .observe-screen {
+            display: none;
+        }
+
+        .observe-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 1em;
+            margin-bottom: 0.8em;
+        }
+
+        .observe-game {
+            display: grid;
+            grid-template-columns: 230px minmax(0, 1fr);
+            gap: 0.8em;
+        }
+
+        .bot-sidebar {
+            background: var(--pk-panel-dark);
             border: 1px solid var(--pk-border);
-            border-left: 0.35em solid var(--observer);
-            background: var(--pk-panel-2);
-            padding: 0.8em;
-            margin-bottom: 1em;
+            padding: 0.75em;
+        }
+
+        .bot-stat {
+            border-top: 1px solid rgb(58, 58, 58);
+            padding-top: 0.45em;
+            margin-top: 0.45em;
+        }
+
+        .bot-tabs {
+            display: flex;
+            border: 1px solid var(--pk-border);
+            background: var(--pk-panel-dark);
+            margin-bottom: 0.7em;
+        }
+
+        .bot-tabs div {
+            padding: 0.45em 0.75em;
+            border-right: 1px solid var(--pk-border);
+            color: white;
+        }
+
+        .bot-tabs .active {
+            background: var(--pk-cyan);
+        }
+
+        .bot-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .bot-table th {
+            color: white;
+            padding: 0.35em 0.55em;
+            text-align: left;
+        }
+
+        .bot-table td {
+            border-bottom: 1px solid rgb(58, 58, 58);
+            padding: 0.32em 0.55em;
+        }
+
+        .bot-row-active {
+            background: rgb(46, 148, 231);
+        }
+
+        .bot-row-waiting {
+            color: rgb(135, 135, 135);
+        }
+
+        .ai-log {
+            margin-top: 0.75em;
+            border: 1px solid var(--pk-border);
+            background: rgb(34, 34, 34);
+            padding: 0.55em 0.7em;
+            min-height: 120px;
+        }
+
+        .ai-log div {
+            border-bottom: 1px solid rgb(55, 55, 55);
+            padding: 0.22em 0;
+            color: rgb(210, 210, 210);
+        }
+
+        .tier-table {
+            margin-top: 0.8em;
+        }
+
+        .tier-table td,
+        .tier-table th {
+            border-color: rgb(65, 65, 65) !important;
+        }
+
+        .button {
+            background: rgb(36, 36, 36) !important;
+            color: white !important;
+            border: 1px solid white !important;
+        }
+
+        .button[disabled] {
+            color: rgb(125, 125, 125) !important;
+            border-color: rgb(90, 90, 90) !important;
         }
     </style>
 </head>
 <body class="dark preview-body">
-    <div class="preview-title-row">
-        <h1>Progress Knight</h1>
-        <div class="preview-subtitle">Observer v0 preview - unlocks after Universe X, then replaces normal play with watched runs.</div>
+    <div class="preview-title">
+        <h1>Progress Knight Quest</h1>
+        <span class="muted">Observer preview - original style, denser subject management</span>
     </div>
 
-    <div class="observer-shell">
-        <div class="panel w3-padding observer-sidebar">
-            <div class="text-caption">Observer Layer</div>
-            <div class="muted">Normal tabs are sealed.</div>
+    <div class="observer-layout">
+        <div class="panel sidebar">
+            <div class="text-caption">Observer</div>
+            <div class="muted">All normal tabs are sealed after entry.</div>
 
-            <div class="stat-box observer">
-                <div><span style="color: var(--observer);">Observer Points:</span> <b>128.40</b></div>
-                <div class="muted">+0.84/s from subjects</div>
+            <div class="sidebar-stat">
+                <div><span style="color: var(--pk-cyan);">Observer Points</span></div>
+                <b>214.72</b>
+                <div class="muted">+1.246/s from subjects</div>
             </div>
 
-            <div class="stat-box void">
-                <div><span style="color: var(--void);">Active subjects:</span> <b>3 / 6</b></div>
-                <div class="muted">First subject is free.</div>
+            <div class="sidebar-stat">
+                <div><span style="color: var(--pk-gold);">Best subject run</span></div>
+                <b>Universe VIII</b>
+                <div class="muted">Target: clear U-X</div>
             </div>
 
-            <div class="stat-box gold">
-                <div><span style="color: var(--gold);">Best run:</span> <b>Universe VI</b></div>
-                <div class="muted">Target: reach Universe X again.</div>
+            <div class="sidebar-stat">
+                <div><span style="color: var(--pk-green);">Subjects</span></div>
+                <b>4 active</b>
+                <div class="muted">First subject is free Trash</div>
             </div>
 
-            <div class="stat-box good">
-                <div><span style="color: var(--good);">Global subject boost:</span> <b>x1.18</b></div>
-                <div class="muted">From Observer upgrades.</div>
+            <div class="sidebar-stat">
+                <div><span style="color: var(--pk-purple);">Guidance</span></div>
+                <b>x1.46</b>
+                <div class="muted">From Observer upgrades</div>
             </div>
         </div>
 
-        <div class="observer-main">
-            <div class="panel tab-preview">
-                <div class="w3-button w3-bar-item baritem disabled-tab">Jobs</div>
-                <div class="w3-button w3-bar-item baritem disabled-tab">Skills</div>
-                <div class="w3-button w3-bar-item baritem disabled-tab">Shop</div>
-                <div class="w3-button w3-bar-item baritem disabled-tab">Multiverse</div>
-                <div class="w3-button w3-bar-item baritem active-tab">Observer</div>
+        <div>
+            <div class="tabs">
+                <div class="w3-button w3-bar-item baritem">Hero</div>
+                <div class="w3-button w3-bar-item baritem">Skills</div>
+                <div class="w3-button w3-bar-item baritem">Shop</div>
+                <div class="w3-button w3-bar-item baritem">Multiverse</div>
+                <div class="w3-button w3-bar-item baritem active">Observer</div>
             </div>
 
-            <div class="panel w3-margin-top w3-padding">
-                <div class="section-title observer text-caption"><b>Observer</b></div>
-                <div class="observer-note">
-                    After the Observer threshold, the player no longer advances one life directly. Subjects run their own Progress Knight timelines from zero, and their progress generates Observer Points.
+            <div id="observerRosterPreview" class="panel main-panel">
+                <div class="section-title observer">Observer state</div>
+                <div class="summary-grid">
+                    <div class="summary-cell">
+                        <div class="label">OP/sec</div>
+                        <div class="value">1.246</div>
+                        <div class="muted">not affected by Time Warp</div>
+                    </div>
+                    <div class="summary-cell">
+                        <div class="label">Current command</div>
+                        <div class="value">Study focus</div>
+                        <div class="muted">AI XP and cleaner routes</div>
+                    </div>
+                    <div class="summary-cell">
+                        <div class="label">Next subject</div>
+                        <div class="value">274 OP</div>
+                        <div class="muted">rank odds from Talent Shaping</div>
+                    </div>
+                    <div class="summary-cell">
+                        <div class="label">Observer Signal</div>
+                        <div class="value">Sealed</div>
+                        <div class="muted">old world is no longer playable</div>
+                    </div>
                 </div>
 
-                <div class="section-title subjects text-caption"><b>Subjects</b></div>
+                <div class="section-title subjects">Subjects</div>
                 <div class="subject-grid">
-                    <div class="subject-card trash">
-                        <div class="subject-header">
+                    <div class="subject trash">
+                        <div class="subject-head">
                             <div>
-                                <div class="subject-name">Subject 01 - First Echo</div>
-                                <div class="muted">Style: confused, wasteful, slow rebirths</div>
+                                <b>Echo 1</b><br>
+                                <span class="muted">makes poor purchases and loses streaks</span>
                             </div>
-                            <span class="rank rank-trash">Trash</span>
+                            <span class="rank trash">Trash</span>
                         </div>
-                        <div class="subject-stats">
-                            <div class="mini-stat"><span class="muted">Stage</span><b>Evil</b></div>
-                            <div class="mini-stat"><span class="muted">Universe</span><b>I / X</b></div>
-                            <div class="mini-stat"><span class="muted">OP/sec</span><b>0.06</b></div>
-                            <div class="mini-stat"><span class="muted">Job</span><b>Merchant 42</b></div>
-                            <div class="mini-stat"><span class="muted">Skill</span><b>Evil Control 18</b></div>
-                            <div class="mini-stat"><span class="muted">Mistakes</span><b>37</b></div>
+                        <table class="subject-table">
+                            <tr><td>Phase</td><td>Void approach</td></tr>
+                            <tr><td>Goal</td><td>Reach Multiverse signal (21m)</td></tr>
+                            <tr><td>Job</td><td>Void slave</td></tr>
+                            <tr><td>Skill</td><td>Void manipulation</td></tr>
+                            <tr><td>AI level</td><td>3</td></tr>
+                            <tr><td>OP/sec</td><td>0.048</td></tr>
+                            <tr><td>Mistakes</td><td>64</td></tr>
+                        </table>
+                        <div class="meter"><div class="bad" style="width: 31%;"></div></div>
+                        <div class="subject-actions">
+                            <button class="w3-button button" onclick="openSubjectPreview('Echo 1', 'Trash', 'Void approach', 'I', 'Merchant', 'Void manipulation', '0.048')">Observe</button>
                         </div>
-                        <div class="progress-shell"><div class="progress-fill bad" style="width: 18%;"></div></div>
-                        <div class="muted">Progress to next layer: 18%</div>
                     </div>
 
-                    <div class="subject-card skilled active">
-                        <div class="subject-header">
+                    <div class="subject common">
+                        <div class="subject-head">
                             <div>
-                                <div class="subject-name">Subject 02 - Stable Runner</div>
-                                <div class="muted">Style: balanced, safe economy, steady routing</div>
+                                <b>Trace 2</b><br>
+                                <span class="muted">slow, but reliable through early layers</span>
                             </div>
-                            <span class="rank rank-skilled">Skilled</span>
+                            <span class="rank common">Common</span>
                         </div>
-                        <div class="subject-stats">
-                            <div class="mini-stat"><span class="muted">Stage</span><b>Multiverse</b></div>
-                            <div class="mini-stat"><span class="muted">Universe</span><b>IV / X</b></div>
-                            <div class="mini-stat"><span class="muted">OP/sec</span><b>0.31</b></div>
-                            <div class="mini-stat"><span class="muted">Job</span><b>Abyss God 27</b></div>
-                            <div class="mini-stat"><span class="muted">Skill</span><b>Temporal Anchoring 16</b></div>
-                            <div class="mini-stat"><span class="muted">Mistakes</span><b>8</b></div>
+                        <table class="subject-table">
+                            <tr><td>Phase</td><td>Universe III</td></tr>
+                            <tr><td>Goal</td><td>Reach Universe IV (13m)</td></tr>
+                            <tr><td>Job</td><td>Arcane auditor</td></tr>
+                            <tr><td>Skill</td><td>Spell Auditing</td></tr>
+                            <tr><td>AI level</td><td>6</td></tr>
+                            <tr><td>OP/sec</td><td>0.162</td></tr>
+                            <tr><td>Mistakes</td><td>18</td></tr>
+                        </table>
+                        <div class="meter"><div style="width: 48%;"></div></div>
+                        <div class="subject-actions">
+                            <button class="w3-button button" onclick="openSubjectPreview('Trace 2', 'Common', 'Universe III', 'III', 'Arcane auditor', 'Spell Auditing', '0.162')">Observe</button>
                         </div>
-                        <div class="progress-shell"><div class="progress-fill" style="width: 52%;"></div></div>
-                        <div class="muted">Progress to next universe: 52%</div>
                     </div>
 
-                    <div class="subject-card legendary">
-                        <div class="subject-header">
+                    <div class="subject epic">
+                        <div class="subject-head">
                             <div>
-                                <div class="subject-name">Subject 03 - Golden Line</div>
-                                <div class="muted">Style: near-optimal, rushes unlocks, avoids bad purchases</div>
+                                <b>Mirror 3</b><br>
+                                <span class="muted">adapts well to distorted universes</span>
                             </div>
-                            <span class="rank rank-legendary">Legendary</span>
+                            <span class="rank epic">Epic</span>
                         </div>
-                        <div class="subject-stats">
-                            <div class="mini-stat"><span class="muted">Stage</span><b>Multiverse</b></div>
-                            <div class="mini-stat"><span class="muted">Universe</span><b>VII / X</b></div>
-                            <div class="mini-stat"><span class="muted">OP/sec</span><b>0.47</b></div>
-                            <div class="mini-stat"><span class="muted">Job</span><b>One Above All 11</b></div>
-                            <div class="mini-stat"><span class="muted">Skill</span><b>Causal Threading 24</b></div>
-                            <div class="mini-stat"><span class="muted">Mistakes</span><b>1</b></div>
+                        <table class="subject-table">
+                            <tr><td>Phase</td><td>Universe VIII</td></tr>
+                            <tr><td>Goal</td><td>Reach Quiet Collapse (7m)</td></tr>
+                            <tr><td>Job</td><td>Broken climber</td></tr>
+                            <tr><td>Skill</td><td>Recursive Promotion</td></tr>
+                            <tr><td>AI level</td><td>13</td></tr>
+                            <tr><td>OP/sec</td><td>0.421</td></tr>
+                            <tr><td>Mistakes</td><td>5</td></tr>
+                        </table>
+                        <div class="meter"><div class="good" style="width: 74%;"></div></div>
+                        <div class="subject-actions">
+                            <button class="w3-button button" onclick="openSubjectPreview('Mirror 3', 'Epic', 'Universe VIII', 'VIII', 'Broken climber', 'Recursive Promotion', '0.421')">Observe</button>
                         </div>
-                        <div class="progress-shell"><div class="progress-fill gold" style="width: 76%;"></div></div>
-                        <div class="muted">Progress to next universe: 76%</div>
                     </div>
 
-                    <div class="subject-card common">
-                        <div class="subject-header">
+                    <div class="subject legendary">
+                        <div class="subject-head">
                             <div>
-                                <div class="subject-name">Empty subject slot</div>
-                                <div class="muted">Next subject cost scales with owned subjects and rank upgrades.</div>
+                                <b>Witness 4</b><br>
+                                <span class="muted">near-optimal route toward U-X</span>
                             </div>
-                            <span class="rank rank-common">Free slot</span>
+                            <span class="rank legendary">Legendary</span>
                         </div>
-                        <div style="margin-top: 0.8em;">
-                            <button class="w3-button button">Buy subject - 75 OP</button>
-                            <button class="w3-button button">First subject free</button>
+                        <table class="subject-table">
+                            <tr><td>Phase</td><td>Universe X</td></tr>
+                            <tr><td>Goal</td><td>Finishing Observer Threshold (3m)</td></tr>
+                            <tr><td>Job</td><td>Threshold witness</td></tr>
+                            <tr><td>Skill</td><td>Observer Alignment</td></tr>
+                            <tr><td>AI level</td><td>18</td></tr>
+                            <tr><td>OP/sec</td><td>0.615</td></tr>
+                            <tr><td>Mistakes</td><td>1</td></tr>
+                        </table>
+                        <div class="meter"><div class="gold" style="width: 92%;"></div></div>
+                        <div class="subject-actions">
+                            <button class="w3-button button" onclick="openSubjectPreview('Witness 4', 'Legendary', 'Universe X', 'X', 'Threshold witness', 'Observer Alignment', '0.615')">Observe</button>
                         </div>
                     </div>
                 </div>
 
-                <div style="border-bottom: 0.1em solid var(--observer); padding-top: 1.6em;"></div>
-
-                <div style="padding-top:1em"></div>
-                <div class="section-title commands text-caption"><b>Global Commands</b></div>
-                <div class="command-row">
-                    <div class="command-card active">
+                <div class="section-title commands">Commands</div>
+                <div class="command-grid">
+                    <div class="command">
                         <b>Balanced</b>
-                        <div class="muted">No modifier. Subjects choose safe routes.</div>
+                        <div class="muted">No strong bias. Best default when roster is mixed.</div>
                     </div>
-                    <div class="command-card">
-                        <b>Rush unlocks</b>
-                        <div class="muted">More speed, more mistakes, faster universe attempts.</div>
-                    </div>
-                    <div class="command-card">
+                    <div class="command">
                         <b>Safe economy</b>
-                        <div class="muted">Slower, but fewer bankruptcies and bad shop choices.</div>
+                        <div class="muted">Lower mistake rate. Trash/Common subjects waste less.</div>
                     </div>
-                    <div class="command-card">
-                        <b>Meta focus</b>
-                        <div class="muted">Subjects prioritize MP, Evil, Essence and universe breaks.</div>
+                    <div class="command">
+                        <b>Rush breaks</b>
+                        <div class="muted">More speed, more mistakes. Better for high ranks.</div>
+                    </div>
+                    <div class="command active">
+                        <b>Study focus</b>
+                        <div class="muted">AI XP growth and cleaner long-term routing.</div>
                     </div>
                 </div>
 
-                <div style="border-bottom: 0.1em solid var(--observer); padding-top: 1.6em;"></div>
-
-                <div style="padding-top:1em"></div>
-                <div class="section-title upgrades text-caption"><b>Observer Upgrades</b></div>
+                <div class="section-title upgrades">Observer upgrades</div>
                 <table class="w3-table w3-bordered upgrade-table">
                     <tr>
                         <th>Upgrade</th>
-                        <th>Level</th>
+                        <th>Lvl</th>
                         <th>Cost</th>
+                        <th>Role</th>
                         <th></th>
                     </tr>
                     <tr>
-                        <td><b style="color: var(--observer);">Clear Instructions</b><br><span class="muted">Subjects make fewer route mistakes.</span></td>
+                        <td><b style="color:var(--pk-cyan);">Clear Instructions</b></td>
                         <td>2</td>
-                        <td>95 OP</td>
+                        <td>61 OP</td>
+                        <td class="muted">general speed</td>
                         <td><button class="w3-button button">Buy</button></td>
                     </tr>
                     <tr>
-                        <td><b style="color: var(--good);">Shared Memory</b><br><span class="muted">All subjects gain more XP and preserve better heuristics.</span></td>
+                        <td><b style="color:var(--pk-green);">Early Guidance</b></td>
                         <td>1</td>
-                        <td>140 OP</td>
+                        <td>35 OP</td>
+                        <td class="muted">Prime and Evil setup</td>
                         <td><button class="w3-button button">Buy</button></td>
                     </tr>
                     <tr>
-                        <td><b style="color: var(--gold);">Talent Shaping</b><br><span class="muted">Improves odds for Skilled, Rare, Epic and Legendary subjects.</span></td>
-                        <td>0</td>
-                        <td>220 OP</td>
+                        <td><b style="color:var(--pk-purple);">Void Protocols</b></td>
+                        <td>1</td>
+                        <td>87 OP</td>
+                        <td class="muted">Evil/Void route</td>
                         <td><button class="w3-button button">Buy</button></td>
                     </tr>
                     <tr>
-                        <td><b style="color: var(--warn);">Universe Briefing</b><br><span class="muted">Subjects adapt faster to U-II through U-X distortions.</span></td>
+                        <td><b style="color:var(--pk-blue);">Reality Scripts</b></td>
                         <td>0</td>
-                        <td>300 OP</td>
+                        <td>58 OP</td>
+                        <td class="muted">U-II to U-V</td>
+                        <td><button class="w3-button button">Buy</button></td>
+                    </tr>
+                    <tr>
+                        <td><b style="color:var(--pk-orange);">Threshold Maps</b></td>
+                        <td>0</td>
+                        <td>125 OP</td>
+                        <td class="muted">U-VI to U-X</td>
+                        <td><button class="w3-button button">Buy</button></td>
+                    </tr>
+                    <tr>
+                        <td><b style="color:var(--pk-gold);">Talent Shaping</b></td>
+                        <td>0</td>
+                        <td>45 OP</td>
+                        <td class="muted">better rank odds</td>
                         <td><button class="w3-button button">Buy</button></td>
                     </tr>
                 </table>
+
+                <div class="section-title subjects">Rank behavior</div>
+                <table class="w3-table w3-bordered tier-table">
+                    <tr>
+                        <th>Rank</th>
+                        <th>Routing style</th>
+                        <th>Bonus / drawback</th>
+                    </tr>
+                    <tr>
+                        <td><span class="rank trash">Trash</span></td>
+                        <td>Overbuys, swaps focus late, loses clean streaks.</td>
+                        <td class="muted">Bad early decisions, but still produces a little OP.</td>
+                    </tr>
+                    <tr>
+                        <td><span class="rank common">Common</span></td>
+                        <td>Simple safe route, slow multiverse adaptation.</td>
+                        <td class="muted">Stable Prime/Evil progress, weak U-VI+ scaling.</td>
+                    </tr>
+                    <tr>
+                        <td><span class="rank rare">Rare</span></td>
+                        <td>Plans around unlock chains and avoids most bad purchases.</td>
+                        <td class="muted">Good U-II to U-V tempo and fewer route resets.</td>
+                    </tr>
+                    <tr>
+                        <td><span class="rank epic">Epic</span></td>
+                        <td>Adapts to distorted universe rules.</td>
+                        <td class="muted">Strong late-universe speed and AI XP growth.</td>
+                    </tr>
+                    <tr>
+                        <td><span class="rank legendary">Legendary</span></td>
+                        <td>Near-optimal route toward U-X and Observer Signal.</td>
+                        <td class="muted">High OP/sec, very low mistake chance, expensive to roll.</td>
+                    </tr>
+                </table>
+            </div>
+
+            <div id="subjectObservePreview" class="panel main-panel observe-screen">
+                <div class="observe-header">
+                    <div>
+                        <div class="section-title observer" style="margin:0 0 0.45em;">Watching subject run</div>
+                        <div><b id="observedName">Mirror 3</b> <span id="observedRank" class="rank epic">Epic</span></div>
+                        <div class="muted">This is not manual control. The subject is playing its own Progress Knight run.</div>
+                    </div>
+                    <button class="w3-button button" onclick="closeSubjectPreview()">Stop observing</button>
+                </div>
+
+                <div class="observe-game">
+                    <div class="bot-sidebar">
+                        <div class="text-caption">Bot status</div>
+                        <div class="bot-stat"><span class="muted">Age</span><br><b>36 Day 142</b></div>
+                        <div class="bot-stat"><span class="muted">Universe</span><br><b id="observedUniverse">VIII</b></div>
+                        <div class="bot-stat"><span class="muted">Balance</span><br><b style="color:var(--pk-gold);">8.42e44 coins</b></div>
+                        <div class="bot-stat"><span class="muted">Current job</span><br><b id="observedJob">Broken climber</b></div>
+                        <div class="bot-stat"><span class="muted">Current skill</span><br><b id="observedSkill">Recursive Promotion</b></div>
+                        <div class="bot-stat"><span class="muted">OP/sec for you</span><br><b id="observedOp" style="color:var(--pk-cyan);">0.421</b></div>
+                    </div>
+
+                    <div>
+                        <div class="bot-tabs">
+                            <div class="active">Hero</div>
+                            <div>Skills</div>
+                            <div>Shop</div>
+                            <div>Amulet</div>
+                            <div>Multiverse</div>
+                            <div>AI Log</div>
+                        </div>
+
+                        <table class="bot-table">
+                            <tr style="background:var(--pk-green);"><th>Common work</th><th>Level</th><th>Income</th><th>XP left</th></tr>
+                            <tr><td>Beggar</td><td>64</td><td>2.1e31</td><td>Max</td></tr>
+                            <tr><td>Merchant</td><td>92</td><td>1.8e36</td><td>Max</td></tr>
+                            <tr class="bot-row-waiting"><td>Chairman</td><td>18</td><td>3.6e39</td><td>12%</td></tr>
+                            <tr style="background:var(--pk-purple);"><th>The Void</th><th>Level</th><th>Income</th><th>XP left</th></tr>
+                            <tr><td>Void slave</td><td>74</td><td>7.4e41</td><td>Max</td></tr>
+                            <tr><td>Void explorer</td><td>51</td><td>1.2e43</td><td>24%</td></tr>
+                            <tr style="background:var(--pk-orange);"><th>Universe route</th><th>Level</th><th>Income</th><th>XP left</th></tr>
+                            <tr class="bot-row-active"><td id="observedJobRow">Broken climber</td><td>31</td><td>5.4e44</td><td>46%</td></tr>
+                        </table>
+
+                        <table class="bot-table" style="margin-top:0.8em;">
+                            <tr style="background:var(--pk-cyan);"><th>AI decision state</th><th>Value</th><th>Effect</th></tr>
+                            <tr><td>Current route goal</td><td>Break current universe</td><td>Prioritizes required universe skill</td></tr>
+                            <tr><td>Clean streak</td><td>14m 08s</td><td>More AI XP until next mistake</td></tr>
+                            <tr><td>Rank behavior</td><td id="observedStyle">Adapts to distorted universe rules</td><td>Lower mistake chance in late universes</td></tr>
+                            <tr><td>Next expected action</td><td>Buy universe item safely</td><td>Only if Net/day remains positive</td></tr>
+                        </table>
+
+                        <div class="ai-log">
+                            <div>36y 138d - Switched skill focus to Recursive Promotion for U-VIII break.</div>
+                            <div>36y 139d - Refused unsafe shop purchase: expense reserve too low.</div>
+                            <div>36y 141d - Bought Ascension Map after income stabilized.</div>
+                            <div>36y 142d - Current plan: reach Recursive Promotion lvl 42, then break universe.</div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
+
+    <script>
+        function openSubjectPreview(name, rank, phase, universe, job, skill, op) {
+            document.getElementById("observerRosterPreview").style.display = "none"
+            document.getElementById("subjectObservePreview").style.display = "block"
+            document.getElementById("observedName").textContent = name
+            document.getElementById("observedRank").textContent = rank
+            document.getElementById("observedRank").className = "rank " + rank.toLowerCase()
+            document.getElementById("observedUniverse").textContent = universe
+            document.getElementById("observedJob").textContent = job
+            document.getElementById("observedSkill").textContent = skill
+            document.getElementById("observedOp").textContent = op
+            document.getElementById("observedJobRow").textContent = job
+
+            const styleMap = {
+                trash: "Makes bad purchases, loses streaks, but still teaches the Observer.",
+                common: "Runs a safe simple route with weak late-universe adaptation.",
+                rare: "Plans around unlock chains and avoids most bad purchases.",
+                epic: "Adapts to distorted universe rules.",
+                legendary: "Near-optimal route toward U-X and Observer Signal.",
+            }
+            document.getElementById("observedStyle").textContent = styleMap[rank.toLowerCase()] || phase
+        }
+
+        function closeSubjectPreview() {
+            document.getElementById("subjectObservePreview").style.display = "none"
+            document.getElementById("observerRosterPreview").style.display = "block"
+        }
+    </script>
 </body>
 </html>

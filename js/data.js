@@ -48,6 +48,7 @@
         subjects: [],
         command: "balanced",
         next_subject_id: 1,
+        observed_subject_id: null,
         upgrades: {
             clear_instructions: 0,
             early_guidance: 0,

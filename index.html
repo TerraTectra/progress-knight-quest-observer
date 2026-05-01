@@ -912,41 +912,78 @@
 										</div>
 										<button class="w3-button button" id="buyObserverSubjectButton" onclick="buyObserverSubject()">Add subject</button>
 									</div>
-									<div class="rb-observer-summary">
-										<div class="rb-observer-stat">
-											<div class="rb-observer-label">Observer Points</div>
-											<div class="rb-observer-value" id="observerPointsDisplay">0</div>
-											<div class="rb-observer-note">+<span id="observerPointsGainDisplay">0</span>/s</div>
+									<div id="observerRosterView">
+										<div class="rb-observer-summary">
+											<div class="rb-observer-stat">
+												<div class="rb-observer-label">Observer Points</div>
+												<div class="rb-observer-value" id="observerPointsDisplay">0</div>
+												<div class="rb-observer-note">+<span id="observerPointsGainDisplay">0</span>/s</div>
+											</div>
+											<div class="rb-observer-stat">
+												<div class="rb-observer-label">Subjects</div>
+												<div class="rb-observer-value" id="observerSubjectCountDisplay">0</div>
+												<div class="rb-observer-note">first subject is free</div>
+											</div>
+											<div class="rb-observer-stat">
+												<div class="rb-observer-label">Best subject run</div>
+												<div class="rb-observer-value" id="observerBestRunDisplay">U-I</div>
+												<div class="rb-observer-note">target: Universe X</div>
+											</div>
+											<div class="rb-observer-stat">
+												<div class="rb-observer-label">Global guidance</div>
+												<div class="rb-observer-value" id="observerGlobalBoostDisplay">x1.00</div>
+												<div class="rb-observer-note">from Observer upgrades</div>
+											</div>
 										</div>
-										<div class="rb-observer-stat">
-											<div class="rb-observer-label">Subjects</div>
-											<div class="rb-observer-value" id="observerSubjectCountDisplay">0</div>
-											<div class="rb-observer-note">first subject is free</div>
+										<div class="rb-observer-section">
+											<div class="rb-section-title text-caption"><b>Command doctrine</b></div>
+											<div id="observerCommandRows" class="rb-observer-command-grid"></div>
 										</div>
-										<div class="rb-observer-stat">
-											<div class="rb-observer-label">Best subject run</div>
-											<div class="rb-observer-value" id="observerBestRunDisplay">U-I</div>
-											<div class="rb-observer-note">target: Universe X</div>
+										<div class="rb-observer-section">
+											<div class="rb-section-title text-caption"><b>Subjects</b></div>
+											<div id="observerSubjectGrid" class="rb-observer-subject-grid"></div>
 										</div>
-										<div class="rb-observer-stat">
-											<div class="rb-observer-label">Global guidance</div>
-											<div class="rb-observer-value" id="observerGlobalBoostDisplay">x1.00</div>
-											<div class="rb-observer-note">from Observer upgrades</div>
+										<div class="rb-observer-section">
+											<div class="rb-section-title text-caption"><b>Observer upgrades</b></div>
+											<table class="w3-table w3-bordered rb-upgrade-table">
+												<tbody id="observerUpgradeRows"></tbody>
+											</table>
 										</div>
 									</div>
-									<div class="rb-observer-section">
-										<div class="rb-section-title text-caption"><b>Command doctrine</b></div>
-										<div id="observerCommandRows" class="rb-observer-command-grid"></div>
-									</div>
-									<div class="rb-observer-section">
-										<div class="rb-section-title text-caption"><b>Subjects</b></div>
-										<div id="observerSubjectGrid" class="rb-observer-subject-grid"></div>
-									</div>
-									<div class="rb-observer-section">
-										<div class="rb-section-title text-caption"><b>Observer upgrades</b></div>
-										<table class="w3-table w3-bordered rb-upgrade-table">
-											<tbody id="observerUpgradeRows"></tbody>
-										</table>
+									<div id="observerWatchView" class="rb-observer-watch hidden">
+										<div class="rb-observer-watch-title">
+											<div>
+												<div class="text-caption"><b>Watching subject run</b></div>
+												<div style="color:gray;">The subject is playing its own Progress Knight route from zero. You only observe.</div>
+											</div>
+											<button class="w3-button button" onclick="stopObservingObserverSubject()">Stop observing</button>
+										</div>
+										<div class="rb-observer-watch-grid">
+											<div class="rb-observer-bot-sidebar">
+												<div class="text-caption" id="observerWatchName">Subject</div>
+												<div class="rb-observer-bot-stat"><span>Rank</span><b id="observerWatchRank">Trash</b></div>
+												<div class="rb-observer-bot-stat"><span>Age</span><b id="observerWatchAge">14</b></div>
+												<div class="rb-observer-bot-stat"><span>Universe</span><b id="observerWatchUniverse">I</b></div>
+												<div class="rb-observer-bot-stat"><span>Coins</span><b id="observerWatchCoins">0</b></div>
+												<div class="rb-observer-bot-stat"><span>Evil / MP</span><b id="observerWatchMeta">0 / 0</b></div>
+												<div class="rb-observer-bot-stat"><span>OP/sec</span><b id="observerWatchOp">0</b></div>
+											</div>
+											<div>
+												<div class="rb-observer-bot-tabs">
+													<div class="active">Hero</div>
+													<div>Skills</div>
+													<div>Shop</div>
+													<div>Amulet</div>
+													<div>Multiverse</div>
+													<div>AI Log</div>
+												</div>
+												<table class="w3-table w3-bordered rb-observer-bot-table">
+													<tbody id="observerWatchTable"></tbody>
+												</table>
+												<div id="observerWatchDecisionState" class="rb-observer-decision-state"></div>
+												<div id="observerWatchLog" class="rb-observer-ai-log"></div>
+											</div>
+										</div>
 									</div>
 								</div>
 							</div>
