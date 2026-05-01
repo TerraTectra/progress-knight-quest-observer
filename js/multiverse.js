@@ -4,11 +4,11 @@ const multiverseUniverses = [
     { id: 3, name: "Taxed Arcana", mpMult: 4.8, xpMult: 0.94, incomeMult: 0.88, expenseMult: 1.18, lifespanMult: 0.98, unlockCost: 140, rule: "Magic remains powerful, but every shortcut has a cost." },
     { id: 4, name: "Thin Time", mpMult: 8.8, xpMult: 0.9, incomeMult: 0.88, expenseMult: 1.25, lifespanMult: 0.92, unlockCost: 420, rule: "Life is shorter; lifespan upgrades matter more." },
     { id: 5, name: "Greedy Stars", mpMult: 15, xpMult: 0.86, incomeMult: 0.82, expenseMult: 1.4, lifespanMult: 0.9, unlockCost: 1200, rule: "Economy pressure becomes the main enemy." },
-    { id: 6, name: "Dimming Void", mpMult: 26, xpMult: 0.8, incomeMult: 0.78, expenseMult: 1.55, lifespanMult: 0.86, unlockCost: 3600, rule: "Void progress feeds MP, but ordinary progress slows." },
-    { id: 7, name: "Hostile Causality", mpMult: 44, xpMult: 0.72, incomeMult: 0.72, expenseMult: 1.8, lifespanMult: 0.8, unlockCost: 11000, rule: "Runs need careful preparation before every break." },
-    { id: 8, name: "Broken Ladder", mpMult: 74, xpMult: 0.62, incomeMult: 0.68, expenseMult: 2.15, lifespanMult: 0.72, unlockCost: 34000, rule: "Old growth routes no longer carry the run alone." },
-    { id: 9, name: "Quiet Collapse", mpMult: 120, xpMult: 0.5, incomeMult: 0.6, expenseMult: 2.7, lifespanMult: 0.62, unlockCost: 105000, rule: "Only layered meta upgrades keep the world playable." },
-    { id: 10, name: "Observer Threshold", mpMult: 205, xpMult: 0.38, incomeMult: 0.5, expenseMult: 3.4, lifespanMult: 0.5, unlockCost: 330000, rule: "The final universe is unstable enough to reveal the Observer." },
+    { id: 6, name: "Dimming Void", mpMult: 25, xpMult: 0.8, incomeMult: 0.78, expenseMult: 1.55, lifespanMult: 0.86, unlockCost: 4500, rule: "Void progress feeds MP, but ordinary progress slows." },
+    { id: 7, name: "Hostile Causality", mpMult: 41, xpMult: 0.72, incomeMult: 0.72, expenseMult: 1.8, lifespanMult: 0.8, unlockCost: 15000, rule: "Runs need careful preparation before every break." },
+    { id: 8, name: "Broken Ladder", mpMult: 68, xpMult: 0.62, incomeMult: 0.68, expenseMult: 2.15, lifespanMult: 0.72, unlockCost: 52000, rule: "Old growth routes no longer carry the run alone." },
+    { id: 9, name: "Quiet Collapse", mpMult: 108, xpMult: 0.5, incomeMult: 0.6, expenseMult: 2.7, lifespanMult: 0.62, unlockCost: 165000, rule: "Only layered meta upgrades keep the world playable." },
+    { id: 10, name: "Observer Threshold", mpMult: 178, xpMult: 0.38, incomeMult: 0.5, expenseMult: 3.4, lifespanMult: 0.5, unlockCost: 520000, rule: "The final universe is unstable enough to reveal the Observer." },
 ]
 
 const multiverseUpgradeData = {
@@ -18,7 +18,7 @@ const multiverseUpgradeData = {
     abyss_tithe: { name: "Abyss Tithe", baseCost: 12, costMult: 2.7, effect: 0.14, description: "+14% Evil gain per level and a small MP resonance bonus." },
     essence_prism: { name: "Essence Prism", baseCost: 16, costMult: 2.85, effect: 0.12, description: "+12% Essence gain per level and a small MP resonance bonus." },
     dark_singularity: { name: "Dark Singularity", baseCost: 22, costMult: 3.05, effect: 0.18, description: "+18% Dark Matter gain per level and improves MP income from the dark layer." },
-    void_cartography: { name: "Void Cartography", baseCost: 10, costMult: 2.75, effect: 0.16, description: "+16% Multiverse Point gain per level." },
+    void_cartography: { name: "Void Cartography", baseCost: 10, costMult: 2.75, effect: 0.14, description: "Increases Multiverse Point gain with diminishing returns." },
     soft_constants: { name: "Soft Constants", baseCost: 18, costMult: 3, effect: 0.04, cap: 0.50, description: "-4% expenses per level, capped at -50%." },
 }
 
@@ -166,10 +166,18 @@ function getMultiverseExpenseReduction() {
 function getMultiverseDarkLayerMpGain() {
     return getSafeMultiverseNumber(
         1
-        + getMultiverseUpgradeLevel("dark_singularity") * 0.06
-        + getMultiverseUpgradeLevel("abyss_tithe") * 0.025
-        + getMultiverseUpgradeLevel("essence_prism") * 0.025
+        + getMultiverseUpgradeLevel("dark_singularity") * 0.045
+        + getMultiverseUpgradeLevel("abyss_tithe") * 0.018
+        + getMultiverseUpgradeLevel("essence_prism") * 0.018
     )
+}
+
+function getMultiverseCartographyMpGain() {
+    const level = getMultiverseUpgradeLevel("void_cartography")
+    if (level <= 0)
+        return 1
+
+    return getSafeMultiverseNumber(1 + Math.sqrt(level) * 0.22 + level * 0.035)
 }
 
 function canEnterUniverse(id) {
@@ -463,9 +471,9 @@ function getUniversePassiveWeight(id) {
         return 0
 
     const parameter = getUniverseParameterGain(id)
-    const breakMemory = 1 + Math.sqrt(getMultiverseState().universe_breaks) * 0.035
-    const activeBonus = id == getCurrentUniverseId() ? 1.15 : 1
-    const ageFalloff = 1 / Math.pow(id, 0.28)
+    const breakMemory = 1 + Math.sqrt(getMultiverseState().universe_breaks) * 0.028
+    const activeBonus = id == getCurrentUniverseId() ? 1.1 : 1
+    const ageFalloff = 1 / Math.pow(id, 0.36)
 
     return getSafeMultiverseNumber(universe.mpMult * parameter * breakMemory * activeBonus * ageFalloff, 0, 1e300)
 }
@@ -1036,12 +1044,12 @@ function getMultiversePointGain() {
     if (!isMultiverseUnlocked())
         return 0
 
-    const cartography = getMultiverseUpgradeMultiplier("void_cartography")
+    const cartography = getMultiverseCartographyMpGain()
     const voidResonance = Math.pow(getMultiverseVoidResonance(), 0.52)
     const universeWeight = getTotalUniversePassiveWeight()
     const observerThreshold = getHighestUniverseId() >= 10 ? 1.12 : 1
 
-    return getSafeMultiverseNumber(0.0026 * voidResonance * universeWeight * cartography * getMultiverseBreakRewardGain() * observerThreshold, 0, 1e300)
+    return getSafeMultiverseNumber(0.0024 * voidResonance * universeWeight * cartography * getMultiverseBreakRewardGain() * observerThreshold, 0, 1e300)
 }
 
 function breakUniverseAltarCost() {

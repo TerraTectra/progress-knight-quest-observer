@@ -72,8 +72,6 @@ async function runScenario(browser, name, setup) {
             : [],
     }))
 
-    await page.close()
-
     const failures = []
     for (const report of reports) {
         if (report.hasErrorBanner)
@@ -92,8 +90,76 @@ async function runScenario(browser, name, setup) {
         failures.push(`${name}: tempData.hasError is true`)
     if (name == "observer" && (!globals.observerSubjects[0] || globals.observerSubjects[0].rank != "trash"))
         failures.push(`${name}: first observer subject must be free Trash rank`)
+    if (name == "late") {
+        const upgradeFailures = await page.evaluate(() => {
+            if (typeof multiverseUpgradeData == "undefined")
+                return ["Multiverse upgrade data is missing"]
+
+            const failures = []
+            gameData.multiverse_unlocked = true
+            gameData.multiverse.current_universe = 5
+            gameData.multiverse.highest_universe = 5
+            gameData.multiverse_points = 1000000
+            gameData.multiverse_points_lifetime = 10000000
+            gameData.evil = 1e45
+            gameData.essence = 1e35
+            gameData.dark_matter = 1e28
+            gameData.hypercubes = 1e26
+
+            for (const key in gameData.taskData) {
+                gameData.taskData[key].level = 220
+                gameData.taskData[key].maxLevel = 260
+            }
+
+            const checks = {
+                stable_memory: { metric: "xp", direction: "up" },
+                universal_labor: { metric: "income", direction: "up" },
+                long_echo: { metric: "lifespan", direction: "up" },
+                abyss_tithe: { metric: "evil", direction: "up" },
+                essence_prism: { metric: "essence", direction: "up" },
+                dark_singularity: { metric: "dm", direction: "up" },
+                void_cartography: { metric: "mp", direction: "up" },
+                soft_constants: { metric: "expense", direction: "down" },
+            }
+
+            function metrics() {
+                return {
+                    mp: getMultiversePointGain(),
+                    xp: getMultiverseXpGain(),
+                    income: getMultiverseIncomeGain(),
+                    expense: getMultiverseExpenseGain(),
+                    lifespan: getMultiverseLifespanGain(),
+                    evil: getMultiverseEvilGain(),
+                    essence: getMultiverseEssenceGain(),
+                    dm: getMultiverseDarkMatterGain(),
+                }
+            }
+
+            for (const upgrade in checks) {
+                for (const key in gameData.multiverse.upgrades)
+                    gameData.multiverse.upgrades[key] = 0
+
+                const base = metrics()
+                gameData.multiverse.upgrades[upgrade] = 5
+                const improved = metrics()
+                const check = checks[upgrade]
+                const changed = check.direction == "up"
+                    ? improved[check.metric] > base[check.metric]
+                    : improved[check.metric] < base[check.metric]
+
+                if (!changed)
+                    failures.push(`${upgrade} did not improve ${check.metric}`)
+            }
+
+            return failures
+        })
+
+        failures.push(...upgradeFailures.map(failure => `${name}: ${failure}`))
+    }
     for (const error of errors)
         failures.push(`${name}: ${error}`)
+
+    await page.close()
 
     return { name, globals, tabs: tabs.filter(tab => !tab.hidden && tab.display !== "none").map(tab => tab.text), reports, failures }
 }
