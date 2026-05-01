@@ -208,6 +208,12 @@ const tooltips = {
     "Dark Matter Millionaire": "This secret spell will help you reach your quest to become the first Dark Matter millionaire.",
     "The new Dark Matter": "Your amulet tears space and time through all multiverses. Welcome to Metaverse.",
 
+    "Royal Administration": "Study the laws of Universe II. Every solved contradiction turns its bureaucracy into passive Multiverse Point gain.",
+    "Paperwork Evasion": "Learn which forms can be ignored. This softens Universe II expense pressure without removing its identity.",
+    "Reality Surveying": "Map the distortions of the Strained Kingdom and turn them into better Multiverse skill training and MP gain.",
+    "Royal Ledger": "A self-balancing ledger from Universe II. It records impossible taxes and improves Multiverse skill training.",
+    "Tax Seal": "An official seal from the Strained Kingdom. It makes the local universe parameter feed more Multiverse Points.",
+
     "Strong Hope": "Another Faint Hope buff?!",
     "Ruler of the Metaverse": "Now you are thinking with portals",
     "A New Hope": "No more of this Faint Hope nonsense!!!",

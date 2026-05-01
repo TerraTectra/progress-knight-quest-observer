@@ -416,6 +416,47 @@ class MultiverseRequirement extends Requirement {
     }
 }
 
+class MultiverseUniverseRequirement extends Requirement {
+    constructor(querySelectors, requirements) {
+        super(querySelectors, requirements)
+        this.type = "multiverseUniverse"
+    }
+
+    getCondition(isHero, requirement) {
+        if (!isMultiverseUnlocked())
+            return false
+
+        if (requirement.universe != null)
+            return getHighestUniverseId() >= requirement.universe
+
+        if (requirement.currentUniverse != null)
+            return getCurrentUniverseId() == requirement.currentUniverse
+
+        if (requirement.task != null)
+            return gameData.taskData[requirement.task].level >= requirement.requirement
+
+        if (requirement.coins != null)
+            return gameData.coins >= requirement.coins
+
+        if (requirement.mp != null)
+            return gameData.multiverse_points >= requirement.mp
+
+        return true
+    }
+
+    isCompleted() {
+        if (this.completed)
+            return true
+
+        for (const requirement of this.requirements) {
+            if (!this.getCondition(false, requirement))
+                return false
+        }
+        this.completed = true
+        return true
+    }
+}
+
 class HypercubeRequirement extends Requirement {
     constructor(querySelectors, requirements) {
         super(querySelectors, requirements)

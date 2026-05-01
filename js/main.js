@@ -86,6 +86,9 @@ function addMultipliers() {
             task.xpMultipliers.push(getBindedItemEffect("Mind's Eye"))
         } else if (skillCategories["Darkness"].includes(task.name)) {
             task.xpMultipliers.push(getDarknessXpGain)
+        } else if (skillCategories["Multiverse Skills"].includes(task.name)) {
+            task.xpMultipliers.push(getBindedItemEffect("Royal Ledger"))
+            task.xpMultipliers.push(getMultiverseSkillsXpGain)
         }
     }
 
@@ -1159,6 +1162,8 @@ function assignMethods() {
             requirement = Object.assign(new MetaverseRequirement(requirement.querySelectors, requirement.requirements), requirement)
         } else if (requirement.type == "multiverse") {
             requirement = Object.assign(new MultiverseRequirement(requirement.querySelectors, requirement.requirements), requirement)
+        } else if (requirement.type == "multiverseUniverse") {
+            requirement = Object.assign(new MultiverseUniverseRequirement(requirement.querySelectors, requirement.requirements), requirement)
         } else if (requirement.type == "hypercube") {
             requirement = Object.assign(new HypercubeRequirement(requirement.querySelectors, requirement.requirements), requirement)
         } else if (requirement.type == "perkpoint") {

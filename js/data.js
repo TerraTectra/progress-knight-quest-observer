@@ -265,6 +265,10 @@ const skillBaseData = {
     "Dark Magician": { name: "Dark Magician", maxXp: 100, heroxp: 475, effect: 0.0000025, description: "Essence Gain" },
     "Universal Ruler": { name: "Universal Ruler", maxXp: 100, heroxp: 500, effect: 1, description: "Magic XP" },
     "Blinded By Darkness": { name: "Blinded By Darkness", maxXp: 100, heroxp: 550, effect: 1, description: "All XP" },
+
+    "Royal Administration": { name: "Royal Administration", maxXp: 1e7, heroxp: 610, effect: 0.006, description: "U-II MP + Income" },
+    "Paperwork Evasion": { name: "Paperwork Evasion", maxXp: 6e7, heroxp: 620, effect: -0.004, description: "U-II Expenses" },
+    "Reality Surveying": { name: "Reality Surveying", maxXp: 3e8, heroxp: 635, effect: 0.004, description: "U-II MP + Multiverse Skills XP" },
 }
 
 const itemBaseData = {
@@ -325,6 +329,8 @@ const itemBaseData = {
     "Desintegration": { name: "Desintegration", expense: 1e55, effect: 1, description: "Dark Matter Gain", heromult: 30, heroeffect: 100 },
     "Custom Galaxy": { name: "Custom Galaxy", expense: 1e64, effect: 1, description: "Skill XP", heromult: 30, heroeffect: 1e100 },
     "Hypersphere": { name: "Hypersphere", expense: 1e91, effect: 1, description: "Hypercube Gain", heromult: 30, heroeffect: 1e50 },
+    "Royal Ledger": { name: "Royal Ledger", expense: 4e20, effect: 1.8, description: "Multiverse Skills XP", heromult: 16, heroeffect: 1e8 },
+    "Tax Seal": { name: "Tax Seal", expense: 2e22, effect: 1.18, description: "U-II MP Gain", heromult: 17, heroeffect: 1e8 },
 }
 
 const requirementsBaseData = {
@@ -483,6 +489,12 @@ const requirementsBaseData = {
     "Universal Ruler": new DarkMatterRequirement([getQuerySelector("Universal Ruler")], [{ requirement: 1e3 }]),
     "Blinded By Darkness": new DarkMatterRequirement([getQuerySelector("Blinded By Darkness")], [{ requirement: 1e4 }]),
 
+    // Multiverse Skills
+    "Multiverse Skills": new MultiverseUniverseRequirement([removeSpaces(".Multiverse Skills")], [{ universe: 2 }]),
+    "Royal Administration": new MultiverseUniverseRequirement([getQuerySelector("Royal Administration")], [{ universe: 2 }]),
+    "Paperwork Evasion": new MultiverseUniverseRequirement([getQuerySelector("Paperwork Evasion")], [{ universe: 2 }, { task: "Royal Administration", requirement: 20 }]),
+    "Reality Surveying": new MultiverseUniverseRequirement([getQuerySelector("Reality Surveying")], [{ universe: 2 }, { task: "Paperwork Evasion", requirement: 35 }]),
+
     // Properties
     "Homeless": new CoinRequirement([getQuerySelector("Homeless")], [{ requirement: 0 }]),
     "Tent": new CoinRequirement([getQuerySelector("Tent")], [{ requirement: 0 }]),
@@ -539,6 +551,8 @@ const requirementsBaseData = {
     "Desintegration": new CoinRequirement([getQuerySelector("Desintegration")], [{ requirement: 1e122 }]),
     "Custom Galaxy": new CoinRequirement([getQuerySelector("Custom Galaxy")], [{ requirement: 1e134 }]),
     "Hypersphere": new CoinRequirement([getQuerySelector("Hypersphere")], [{ requirement: 1e160 }]),
+    "Royal Ledger": new MultiverseUniverseRequirement([getQuerySelector("Royal Ledger")], [{ universe: 2 }, { task: "Royal Administration", requirement: 10 }, { coins: itemBaseData["Royal Ledger"].expense * 100 }]),
+    "Tax Seal": new MultiverseUniverseRequirement([getQuerySelector("Tax Seal")], [{ universe: 2 }, { task: "Paperwork Evasion", requirement: 25 }, { coins: itemBaseData["Tax Seal"].expense * 100 }]),
     
 
     // Milestones
@@ -608,12 +622,13 @@ const skillCategories = {
     "Void Manipulation": ["Absolute Wish", "Void Amplification", "Mind Release", "Ceaseless Abyss", "Void Symbiosis", "Void Embodiment", "Abyss Manipulation"],
     "Celestial Powers": ["Cosmic Longevity", "Cosmic Recollection", "Essence Collector", "Galactic Command"],
     "Almightiness": ["Yin Yang", "Parallel Universe", "Higher Dimensions", "Epiphany"],
-    "Darkness": ["Dark Prince", "Dark Ruler", "Immortal Ruler", "Dark Magician", "Universal Ruler", "Blinded By Darkness"]
+    "Darkness": ["Dark Prince", "Dark Ruler", "Immortal Ruler", "Dark Magician", "Universal Ruler", "Blinded By Darkness"],
+    "Multiverse Skills": ["Royal Administration", "Paperwork Evasion", "Reality Surveying"]
 }
 
 const itemCategories = {
     "Properties": ["Homeless", "Tent", "Wooden Hut", "Cottage", "House", "Large House", "Small Palace", "Grand Palace", "Town Ruler", "City Ruler", "Nation Ruler", "Pocket Dimension", "Void Realm", "Void Universe", "Astral Realm", "Galactic Throne", "Spaceship", "Planet", "Ringworld", "Stellar Neighborhood", "Galaxy", "Supercluster", "Galaxy Filament", "Observable Universe", "Multiverse", "Quantum World", "Boötes Void"],
-    "Misc": ["Book", "Dumbbells", "Personal Squire", "Steel Longsword", "Butler", "Sapphire Charm", "Study Desk", "Library", "Observatory", "Mind's Eye", "Void Necklace", "Void Armor", "Void Blade", "Void Orb", "Void Dust", "Celestial Robe", "Universe Fragment", "Multiverse Fragment", "Stairway to heaven", "Highway to hell", "Tesseract", "Desintegration", "Custom Galaxy", "Hypersphere"]
+    "Misc": ["Book", "Dumbbells", "Personal Squire", "Steel Longsword", "Butler", "Sapphire Charm", "Study Desk", "Library", "Observatory", "Mind's Eye", "Void Necklace", "Void Armor", "Void Blade", "Void Orb", "Void Dust", "Celestial Robe", "Universe Fragment", "Multiverse Fragment", "Stairway to heaven", "Highway to hell", "Tesseract", "Desintegration", "Custom Galaxy", "Hypersphere", "Royal Ledger", "Tax Seal"]
 }
 
 const headerRowColors = {
@@ -628,6 +643,7 @@ const headerRowColors = {
     "Dark Magic": "#73000f",
     "Almightiness": "#18d2d9",
     "Darkness": "#8c6a0b",
+    "Multiverse Skills": "#168aa5",
     "Void Manipulation": "#762B91",
     "Celestial Powers": "#D5C010",
     "Properties_Auto": "#21cc5e",
@@ -653,6 +669,7 @@ const headerRowTextColors = {
     "Dark Magic": "pink",
     "Almightiness": "purple",
     "Darkness": "gold",
+    "Multiverse Skills": "white",
     "Void Manipulation": "white",
     "Celestial Powers": "purple",
     "Properties_Auto": "purple",

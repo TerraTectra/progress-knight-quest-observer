@@ -673,7 +673,7 @@ function renderMultiverseUniverses() {
 
     const summaryHtml =
         `<div class="rb-stat-box mp"><div><span class="color-hypercubes">Multiverse points:</span> <b>${format(gameData.multiverse_points, 2)}</b></div><div style="color:gray;">+${format(getMultiversePointGain(), 4)}/s real time</div></div>` +
-        `<div class="rb-stat-box void"><div><span class="rb-void">Current universe:</span> <b>${currentUniverse.id} - ${currentUniverse.name}</b></div><div style="color:gray;">Void resonance x${format(getMultiverseVoidResonance(), 2)}</div></div>` +
+        `<div class="rb-stat-box void"><div><span class="rb-void">Current universe:</span> <b>${currentUniverse.id} - ${currentUniverse.name}</b></div><div style="color:gray;">${getUniverseParameterName()} x${format(getUniverseParameterGain(), 2)}</div></div>` +
         `<div class="rb-stat-box gold"><div><span class="rb-gold">Highest universe:</span> <b>${state.highest_universe}/10</b></div><div style="color:gray;">Breaks: ${formatWhole(state.universe_breaks)}</div></div>` +
         `<div class="rb-stat-box red"><div><span class="rb-locked">Next break:</span> <b>${nextUniverse == null ? "Observer seal" : "U-" + nextUniverse.id}</b></div><div style="color:gray;">${nextUniverse == null ? "Observer layer prepared" : (state.universe_break_unlocked ? "Cost: " + format(nextUniverse.unlockCost, 2) + " MP" : "Sealed until Metaverse altar: Break Universe")}</div></div>`
 
@@ -690,6 +690,7 @@ function renderMultiverseUniverses() {
         state.universe_break_unlocked ? 1 : 0,
         state.observer_stub_unlocked ? 1 : 0,
         canBreak ? 1 : 0,
+        format(getUniverseParameterGain(), 2),
     ].join("|")
 
     if (grid.dataset.renderSignature == gridSignature) {
@@ -725,7 +726,7 @@ function renderMultiverseUniverses() {
                     `<span class="rb-chip ${chipClass}">${chipText}</span>` +
                 `</div>` +
                 `<div class="rb-universe-rule">${universe.rule}</div>` +
-                `<div class="rb-distortion-list">XP <b>x${format(universe.xpMult, 2)}</b> / Income <b>x${format(universe.incomeMult, 2)}</b><br>Expenses <b>x${format(universe.expenseMult, 2)}</b> / Lifespan <b>x${format(universe.lifespanMult, 2)}</b></div>` +
+                `<div class="rb-distortion-list">XP <b>x${format(universe.xpMult, 2)}</b> / Income <b>x${format(universe.incomeMult, 2)}</b><br>Expenses <b>x${format(universe.expenseMult, 2)}</b> / Lifespan <b>x${format(universe.lifespanMult, 2)}</b><br>${getUniverseParameterName(universe.id)} <b>x${format(getUniverseParameterGain(universe.id), 2)}</b></div>` +
                 `<div style="margin-top:0.7em;">${button}</div>` +
             `</div>`
     }
@@ -1148,6 +1149,18 @@ function updateRequiredRows(data, categoryType) {
                 } else if (requirementObject instanceof HypercubeRequirement) {
                     hypercubeElement.classList.remove("hiddenTask")
                     hypercubeElement.textContent = format(requirements[0].requirement) + " hypercubes"
+                } else if (requirementObject instanceof MultiverseUniverseRequirement) {
+                    levelElement.classList.remove("hiddenTask")
+                    for (const requirement of requirements) {
+                        if (requirement.universe != null && getHighestUniverseId() < requirement.universe)
+                            finalText += " Universe " + getHighestUniverseId() + "/" + requirement.universe + ","
+                        else if (requirement.task != null) {
+                            const task = gameData.taskData[requirement.task]
+                            if (task.level < requirement.requirement)
+                                finalText += " " + requirement.task + " " + formatLevel(task.level) + "/" + formatLevel(requirement.requirement) + ","
+                        }
+                    }
+                    finalText = finalText.substring(0, finalText.length - 1)
                 } else if (requirementObject instanceof AgeRequirement) {
                     essenceElement.classList.remove("hiddenTask")
                     essenceElement.textContent = "Age " + format(requirements[0].requirement)
@@ -1164,8 +1177,16 @@ function updateRequiredRows(data, categoryType) {
                 }
             }
             else if (data == gameData.itemData) {
-                coinElement.classList.remove("hiddenTask")
-                formatCoins(requirements[0].requirement, coinElement)
+                if (requirementObject instanceof MultiverseUniverseRequirement) {
+                    const coinRequirement = requirements.find(requirement => requirement.coins != null)
+                    if (coinRequirement != null) {
+                        coinElement.classList.remove("hiddenTask")
+                        formatCoins(coinRequirement.coins, coinElement)
+                    }
+                } else {
+                    coinElement.classList.remove("hiddenTask")
+                    formatCoins(requirements[0].requirement, coinElement)
+                }
 
                 const item = gameData.itemData[nextEntity.name]
                 

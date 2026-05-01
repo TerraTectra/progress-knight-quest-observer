@@ -154,7 +154,7 @@ function getMultiverseIncomeGain() {
     if (!isMultiverseUnlocked())
         return 1
 
-    return getUniverseInfo().incomeMult * (1 + getMultiverseUpgradeLevel("universal_labor") * 0.1)
+    return getUniverseInfo().incomeMult * (1 + getMultiverseUpgradeLevel("universal_labor") * 0.1) * getUniverseTwoIncomeGain()
 }
 
 function getMultiverseExpenseGain() {
@@ -162,7 +162,7 @@ function getMultiverseExpenseGain() {
         return 1
 
     const expenseReduction = Math.min(0.45, getMultiverseUpgradeLevel("soft_constants") * 0.03)
-    return getUniverseInfo().expenseMult * (1 - expenseReduction)
+    return getUniverseInfo().expenseMult * (1 - expenseReduction) * getUniverseTwoExpenseGain()
 }
 
 function getMultiverseLifespanGain() {
@@ -219,11 +219,66 @@ function getMultiverseDarkLayerSource() {
 }
 
 function getMultiverseUniverseSource() {
-    return getUniverseInfo().mpMult
+    return getUniverseInfo().mpMult * getUniverseParameterGain(getCurrentUniverseId())
 }
 
 function getMultiverseBreakRewardGain() {
     return getMultiverseState().universe_break_unlocked ? 1.25 : 1
+}
+
+function getUniverseParameterName(id = getCurrentUniverseId()) {
+    if (id == 2)
+        return "Bureaucratic order"
+
+    if (id == 1)
+        return "Prime stability"
+
+    return "Distortion control"
+}
+
+function getUniverseParameterGain(id = getCurrentUniverseId()) {
+    if (!isMultiverseUnlocked())
+        return 1
+
+    if (id == 2)
+        return getUniverseTwoBureaucraticOrderGain()
+
+    return 1
+}
+
+function getUniverseTwoBureaucraticOrderGain() {
+    const royalAdministration = gameData.taskData["Royal Administration"]
+    const realitySurveying = gameData.taskData["Reality Surveying"]
+    const taxSeal = getBindedItemEffect("Tax Seal")
+
+    const adminGain = royalAdministration == null ? 1 : 1 + royalAdministration.level * royalAdministration.baseData.effect
+    const surveyGain = realitySurveying == null ? 1 : 1 + realitySurveying.level * realitySurveying.baseData.effect
+    return adminGain * surveyGain * taxSeal()
+}
+
+function getUniverseTwoIncomeGain() {
+    if (!isMultiverseUnlocked() || getCurrentUniverseId() != 2)
+        return 1
+
+    const royalAdministration = gameData.taskData["Royal Administration"]
+    return royalAdministration == null ? 1 : 1 + royalAdministration.level * 0.003
+}
+
+function getUniverseTwoExpenseGain() {
+    if (!isMultiverseUnlocked() || getCurrentUniverseId() != 2)
+        return 1
+
+    const paperworkEvasion = gameData.taskData["Paperwork Evasion"]
+    const reduction = paperworkEvasion == null ? 0 : Math.min(0.35, Math.abs(paperworkEvasion.level * paperworkEvasion.baseData.effect))
+    return 1 - reduction
+}
+
+function getMultiverseSkillsXpGain() {
+    if (!isMultiverseUnlocked())
+        return 1
+
+    const realitySurveying = gameData.taskData["Reality Surveying"]
+    return realitySurveying == null ? 1 : 1 + realitySurveying.level * 0.01
 }
 
 function getMultiverseVoidResonance() {
