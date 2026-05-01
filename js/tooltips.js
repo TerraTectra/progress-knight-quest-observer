@@ -223,6 +223,11 @@ const tooltips = {
     "Entropy Calendar": "A calendar that records days before they happen. It improves Temporal anchor strength and Universe IV training.",
     "Broken Hourglass": "The sand falls in both directions. It improves Universe IV Chronology training.",
     "Chronal Compass": "A compass that points toward the longest timeline. It improves Universe IV MP gain and speed recovery.",
+    "Greed Accounting": "Greedy Stars turns every route into a balance sheet. Better accounting turns profit pressure into Multiverse Point gain.",
+    "Debt Transmutation": "Convert bad debt into structured debt. This reduces Universe V expense pressure without removing the world's greed.",
+    "Star Market": "Trade futures on stars that have not formed yet. This improves Greed index and Universe V Commerce training.",
+    "Star Ledger": "A ledger written in stellar debt. It improves Universe V Commerce training.",
+    "Debt Engine": "An engine that burns liabilities as fuel. It improves Universe V MP gain and income recovery.",
 
     "Strong Hope": "Another Faint Hope buff?!",
     "Ruler of the Metaverse": "Now you are thinking with portals",

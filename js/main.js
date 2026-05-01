@@ -97,6 +97,9 @@ function addMultipliers() {
         } else if (skillCategories["Universe IV Chronology"].includes(task.name)) {
             task.xpMultipliers.push(getBindedItemEffect("Broken Hourglass"))
             task.xpMultipliers.push(getUniverseFourSkillsXpGain)
+        } else if (skillCategories["Universe V Commerce"].includes(task.name)) {
+            task.xpMultipliers.push(getBindedItemEffect("Star Ledger"))
+            task.xpMultipliers.push(getUniverseFiveSkillsXpGain)
         }
     }
 

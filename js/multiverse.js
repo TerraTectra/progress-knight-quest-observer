@@ -154,7 +154,7 @@ function getMultiverseIncomeGain() {
     if (!isMultiverseUnlocked())
         return 1
 
-    return getUniverseInfo().incomeMult * (1 + getMultiverseUpgradeLevel("universal_labor") * 0.1) * getUniverseTwoIncomeGain()
+    return getUniverseInfo().incomeMult * (1 + getMultiverseUpgradeLevel("universal_labor") * 0.1) * getUniverseTwoIncomeGain() * getUniverseFiveIncomeGain()
 }
 
 function getMultiverseExpenseGain() {
@@ -162,7 +162,7 @@ function getMultiverseExpenseGain() {
         return 1
 
     const expenseReduction = Math.min(0.45, getMultiverseUpgradeLevel("soft_constants") * 0.03)
-    return getUniverseInfo().expenseMult * (1 - expenseReduction) * getUniverseTwoExpenseGain() * getUniverseThreeExpenseGain()
+    return getUniverseInfo().expenseMult * (1 - expenseReduction) * getUniverseTwoExpenseGain() * getUniverseThreeExpenseGain() * getUniverseFiveExpenseGain()
 }
 
 function getMultiverseLifespanGain() {
@@ -236,6 +236,9 @@ function getUniverseParameterName(id = getCurrentUniverseId()) {
     if (id == 4)
         return "Temporal anchor"
 
+    if (id == 5)
+        return "Greed index"
+
     if (id == 1)
         return "Prime stability"
 
@@ -254,6 +257,9 @@ function getUniverseParameterGain(id = getCurrentUniverseId()) {
 
     if (id == 4)
         return getUniverseFourTemporalAnchorGain()
+
+    if (id == 5)
+        return getUniverseFiveGreedIndexGain()
 
     return 1
 }
@@ -374,6 +380,44 @@ function getUniverseFourSkillsXpGain() {
 
     const entropyCalendar = gameData.taskData["Entropy Calendar"]
     return entropyCalendar == null ? 1 : 1 + entropyCalendar.level * 0.008
+}
+
+function getUniverseFiveGreedIndexGain() {
+    const greedAccounting = gameData.taskData["Greed Accounting"]
+    const starMarket = gameData.taskData["Star Market"]
+    const debtEngine = getBindedItemEffect("Debt Engine")
+    const netPressure = Math.max(0, Math.log10(Math.max(1, getIncome()) / Math.max(1, getExpense()))) * 0.025
+
+    const accountingGain = greedAccounting == null ? 1 : 1 + greedAccounting.level * greedAccounting.baseData.effect
+    const marketGain = starMarket == null ? 1 : 1 + starMarket.level * starMarket.baseData.effect
+    return (accountingGain + netPressure) * marketGain * debtEngine()
+}
+
+function getUniverseFiveIncomeGain() {
+    if (!isMultiverseUnlocked() || getCurrentUniverseId() != 5)
+        return 1
+
+    const greedAccounting = gameData.taskData["Greed Accounting"]
+    const debtEngine = getBindedItemEffect("Debt Engine")
+    const accountingGain = greedAccounting == null ? 1 : 1 + greedAccounting.level * 0.004
+    return accountingGain * debtEngine()
+}
+
+function getUniverseFiveExpenseGain() {
+    if (!isMultiverseUnlocked() || getCurrentUniverseId() != 5)
+        return 1
+
+    const debtTransmutation = gameData.taskData["Debt Transmutation"]
+    const reduction = debtTransmutation == null ? 0 : Math.min(0.34, Math.abs(debtTransmutation.level * debtTransmutation.baseData.effect))
+    return 1 - reduction
+}
+
+function getUniverseFiveSkillsXpGain() {
+    if (!isMultiverseUnlocked())
+        return 1
+
+    const starMarket = gameData.taskData["Star Market"]
+    return starMarket == null ? 1 : 1 + starMarket.level * 0.008
 }
 
 function getMultiverseVoidResonance() {
