@@ -71,6 +71,8 @@ async function runScenario(browser, name, setup) {
             ? window.gameData.observer.subjects.map(subject => ({
                 rank: subject.rank,
                 personality: subject.personality,
+                characterLevel: subject.character_level || 0,
+                milestones: subject.milestones || {},
                 opGain: typeof getObserverSubjectOpGain == "function" ? getObserverSubjectOpGain(subject) : 0,
                 logLength: subject.bot_log && Array.isArray(subject.bot_log) ? subject.bot_log.length : 0,
             }))
@@ -136,6 +138,34 @@ async function runScenario(browser, name, setup) {
         })
 
         failures.push(...watchFailures.map(failure => `${name}: ${failure}`))
+
+        const progressionFailures = await page.evaluate(() => {
+            const failures = []
+            const subject = gameData.observer && gameData.observer.subjects ? gameData.observer.subjects[0] : null
+            if (subject == null)
+                return ["Observer progression subject is missing"]
+
+            const characterBefore = subject.character_level || 0
+            gameData.observer.points = 1000000
+            if (typeof improveObserverSubjectCharacter != "function" || !improveObserverSubjectCharacter(subject.id))
+                failures.push("Character refinement could not be purchased")
+            if (!((subject.character_level || 0) > characterBefore))
+                failures.push("Character refinement did not increase character_level")
+
+            subject.stage_index = 4
+            subject.progress = 1000
+            subject.bot_evil = 10
+            if (typeof updateObserverSubjectMilestones == "function")
+                updateObserverSubjectMilestones(subject)
+
+            const unlocked = subject.milestones && subject.milestones.first_rebirth && subject.milestones.first_evil && subject.milestones.first_void && subject.milestones.multiverse_signal
+            if (!unlocked)
+                failures.push("Observer subject milestones did not unlock through Multiverse signal")
+
+            return failures
+        })
+
+        failures.push(...progressionFailures.map(failure => `${name}: ${failure}`))
     }
     if (name == "late") {
         const upgradeFailures = await page.evaluate(() => {
