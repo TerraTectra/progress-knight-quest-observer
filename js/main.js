@@ -597,6 +597,8 @@ function autoPerks() {
             buyReduceBoostCooldown()
         if (gameData.hypercubes > hypercubeGainCost() * 100)
             buyHypercubeGain()
+        if (gameData.hypercubes > breakUniverseAltarCost() * 100)
+            buyBreakUniverseAltar()
     }
 }
 

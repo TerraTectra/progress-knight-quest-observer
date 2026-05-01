@@ -620,6 +620,16 @@ function renderMetaverse() {
     document.getElementById("darkMatterMultCost").textContent = format(darkMatterMultCost())
     document.getElementById("darkMaterMultButton").disabled = !canBuyDarkMatterMult()
 
+    const breakUniverseBought = getMultiverseState().universe_break_unlocked
+    document.getElementById("breakUniverseState").textContent = breakUniverseBought ? "Unlocked" : "Sealed"
+    document.getElementById("breakUniverseCost").textContent = format(breakUniverseAltarCost())
+    document.getElementById("breakUniverseButton").disabled = !canBuyBreakUniverseAltar()
+    document.getElementById("breakUniverseButton").textContent = breakUniverseBought ? "Unlocked" : "Sacrifice"
+    if (breakUniverseBought)
+        document.getElementById("breakUniverseButton").classList.add("hidden")
+    else
+        document.getElementById("breakUniverseButton").classList.remove("hidden")
+
     // Perks
     renderPerks()
 }
@@ -646,7 +656,7 @@ function renderMultiverseUniverses() {
         `<div class="rb-stat-box mp"><div><span class="color-hypercubes">Multiverse points:</span> <b>${format(gameData.multiverse_points, 2)}</b></div><div style="color:gray;">+${format(getMultiversePointGain(), 4)}/s real time</div></div>` +
         `<div class="rb-stat-box void"><div><span class="rb-void">Current universe:</span> <b>${currentUniverse.id} - ${currentUniverse.name}</b></div><div style="color:gray;">Void resonance x${format(getMultiverseVoidResonance(), 2)}</div></div>` +
         `<div class="rb-stat-box gold"><div><span class="rb-gold">Highest universe:</span> <b>${state.highest_universe}/10</b></div><div style="color:gray;">Breaks: ${formatWhole(state.universe_breaks)}</div></div>` +
-        `<div class="rb-stat-box red"><div><span class="rb-locked">Next break:</span> <b>${nextUniverse == null ? "Observer seal" : "U-" + nextUniverse.id}</b></div><div style="color:gray;">${nextUniverse == null ? "Observer layer prepared" : "Cost: " + format(nextUniverse.unlockCost, 2) + " MP"}</div></div>`
+        `<div class="rb-stat-box red"><div><span class="rb-locked">Next break:</span> <b>${nextUniverse == null ? "Observer seal" : "U-" + nextUniverse.id}</b></div><div style="color:gray;">${nextUniverse == null ? "Observer layer prepared" : (state.universe_break_unlocked ? "Cost: " + format(nextUniverse.unlockCost, 2) + " MP" : "Sealed until Metaverse altar: Break Universe")}</div></div>`
 
     if (summary.dataset.renderSignature != summaryHtml) {
         summary.innerHTML = summaryHtml
@@ -658,6 +668,7 @@ function renderMultiverseUniverses() {
         state.current_universe,
         state.highest_universe,
         state.universe_breaks,
+        state.universe_break_unlocked ? 1 : 0,
         state.observer_stub_unlocked ? 1 : 0,
         canBreak ? 1 : 0,
     ].join("|")
@@ -678,13 +689,14 @@ function renderMultiverseUniverses() {
 
         if (current && universe.id == state.highest_universe && universe.id < 10) {
             const next = getUniverseInfo(universe.id + 1)
-            button = `<button class="w3-button button" onclick="breakCurrentUniverse()" ${canBreakCurrentUniverse() ? "" : "disabled"}>Break: ${format(next.unlockCost, 2)} MP</button>`
+            const breakText = state.universe_break_unlocked ? `Break: ${format(next.unlockCost, 2)} MP` : "Break locked"
+            button = `<button class="w3-button button" onclick="breakCurrentUniverse()" ${canBreakCurrentUniverse() ? "" : "disabled"}>${breakText}</button>`
         } else if (unlocked && !current) {
             button = `<button class="w3-button button" onclick="enterUniverse(${universe.id})">Enter</button>`
         } else if (current) {
             button = `<button class="w3-button button" disabled>Entered</button>`
         } else {
-            button = `<button class="w3-button button" disabled>Break U-${universe.id - 1}</button>`
+            button = `<button class="w3-button button" disabled>${state.universe_break_unlocked ? "Break U-" + (universe.id - 1) : "Metaverse sealed"}</button>`
         }
 
         html +=

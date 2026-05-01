@@ -27,6 +27,7 @@ function getMultiverseState() {
             current_universe: 1,
             highest_universe: 1,
             universe_breaks: 0,
+            universe_break_unlocked: false,
             upgrades: {},
             observer_stub_unlocked: false,
         }
@@ -46,6 +47,8 @@ function getMultiverseState() {
         gameData.multiverse.highest_universe = 1
     if (gameData.multiverse.universe_breaks == null)
         gameData.multiverse.universe_breaks = 0
+    if (gameData.multiverse.universe_break_unlocked == null)
+        gameData.multiverse.universe_break_unlocked = false
 
     return gameData.multiverse
 }
@@ -114,6 +117,7 @@ function canBreakCurrentUniverse() {
     const nextUniverse = getUniverseInfo(state.current_universe + 1)
 
     return isMultiverseUnlocked()
+        && state.universe_break_unlocked
         && state.current_universe == state.highest_universe
         && state.highest_universe < 10
         && gameData.multiverse_points >= nextUniverse.unlockCost
@@ -215,6 +219,26 @@ function getMultiversePointGain() {
 
     const cartography = 1 + getMultiverseUpgradeLevel("void_cartography") * 0.18
     return 0.001 * getMultiverseVoidResonance() * getUniverseInfo().mpMult * cartography
+}
+
+function breakUniverseAltarCost() {
+    return 1e24
+}
+
+function canBuyBreakUniverseAltar() {
+    return isMultiverseUnlocked()
+        && gameData.rebirthFiveCount > 0
+        && !getMultiverseState().universe_break_unlocked
+        && gameData.hypercubes >= breakUniverseAltarCost()
+}
+
+function buyBreakUniverseAltar() {
+    if (!canBuyBreakUniverseAltar())
+        return false
+
+    gameData.hypercubes -= breakUniverseAltarCost()
+    getMultiverseState().universe_break_unlocked = true
+    return true
 }
 
 function increaseMultiversePoints() {

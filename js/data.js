@@ -26,6 +26,7 @@
         current_universe: 1,
         highest_universe: 1,
         universe_breaks: 0,
+        universe_break_unlocked: false,
         upgrades: {
             stable_memory: 0,
             universal_labor: 0,
@@ -570,6 +571,7 @@ const requirementsBaseData = {
     "Essence gain multiplier": new HypercubeRequirement(["#EssenceAltar"], [{ requirement: 500000000 }]),
     "Challenges are not reset": new HypercubeRequirement(["#ChallengeAltar"], [{ requirement: 1e12 }]),
     "Dark Matter gain multiplier": new HypercubeRequirement(["#DarkMaterAltar"], [{ requirement: 1e17 }]),
+    "Break Universe": new HypercubeRequirement(["#BreakUniverseAltar"], [{ requirement: 1e22 }]),
 
     // Metaverse Perks
     "Metaverse Perks": new PerkPointRequirement(["#metaversePage2"], [{ requirement: 1 }]),
