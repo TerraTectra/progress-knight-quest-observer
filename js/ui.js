@@ -26,6 +26,20 @@ function initializeUI() {
     }
 }
 
+function renderUISafely(name, renderFunction) {
+    try {
+        renderFunction()
+    }
+    catch (error) {
+        if (renderUISafely.failedRenders == null)
+            renderUISafely.failedRenders = {}
+        if (renderUISafely.failedRenders[name] == null) {
+            renderUISafely.failedRenders[name] = true
+            console.error("UI render failed:", name, error)
+        }
+    }
+}
+
 function updateUI() {
     /*
         NOTE: To ensure that performance does not decrease,
@@ -36,59 +50,67 @@ function updateUI() {
     */
 
     // Always render the sidebar.
-    renderSideBar()
+    renderUISafely("sidebar", function() { renderSideBar() })
 
     // Always render all the requirements.
-    renderRequirements()
+    renderUISafely("requirements", function() { renderRequirements() })
 
     const currentTab = gameData.settings.selectedTab
 
     if (currentTab == Tab.JOBS) {
-        updateRequiredRows(gameData.taskData, jobCategories)
-        renderHeaderRows(jobCategories)
-        renderJobs()
+        renderUISafely("jobs", function() {
+            updateRequiredRows(gameData.taskData, jobCategories)
+            renderHeaderRows(jobCategories)
+            renderJobs()
+        })
     }
 
     if (currentTab == Tab.SKILLS || gameData.settings.layout == 0 && currentTab == Tab.JOBS) {
-        updateRequiredRows(gameData.taskData, skillCategories)
-        renderHeaderRows(skillCategories)
-        renderSkills()
+        renderUISafely("skills", function() {
+            updateRequiredRows(gameData.taskData, skillCategories)
+            renderHeaderRows(skillCategories)
+            renderSkills()
+        })
     }
 
     if (currentTab == Tab.SHOP || gameData.settings.layout == 0 && currentTab == Tab.JOBS) {
-        updateRequiredRows(gameData.itemData, itemCategories)
-        renderShop()
+        renderUISafely("shop", function() {
+            updateRequiredRows(gameData.itemData, itemCategories)
+            renderShop()
+        })
     }
 
     if (currentTab == Tab.EVILPERKS) {
-        renderEvilPerks()
+        renderUISafely("evil perks", function() { renderEvilPerks() })
     }
 
     if (currentTab == Tab.CHALLENGES)
-        renderChallenges()
+        renderUISafely("challenges", function() { renderChallenges() })
 
     if (currentTab == Tab.MILESTONES) {
-        updateRequiredRows(milestoneData, milestoneCategories)
-        renderMilestones()
+        renderUISafely("milestones", function() {
+            updateRequiredRows(milestoneData, milestoneCategories)
+            renderMilestones()
+        })
     }
 
     if (currentTab == Tab.DARK_MATTER)
-        renderDarkMatter()
+        renderUISafely("dark matter", function() { renderDarkMatter() })
 
     if (currentTab == Tab.MULTIVERSE)
-        renderMultiverse()
+        renderUISafely("multiverse", function() { renderMultiverse() })
 
     if (currentTab == Tab.OBSERVER)
-        renderObserver()
+        renderUISafely("observer", function() { renderObserver() })
 
     if (currentTab == Tab.METAVERSE)
-        renderMetaverse()
+        renderUISafely("metaverse", function() { renderMetaverse() })
 
     if (currentTab == Tab.SETTINGS)
-        renderSettings()
+        renderUISafely("settings", function() { renderSettings() })
 
     if (currentTab == Tab.REBIRTH)
-        renderRebirth()
+        renderUISafely("rebirth", function() { renderRebirth() })
 
     if (typeof updateObserverVisibility === "function")
         updateObserverVisibility()
@@ -1167,6 +1189,34 @@ function createAllRows(categoryType, tableId) {
     }
 }
 
+function getMultiverseRequirementText(requirements) {
+    let finalText = ""
+
+    for (const requirement of requirements) {
+        if (requirement == null)
+            continue
+
+        if (requirement.universe != null && getHighestUniverseId() < requirement.universe) {
+            finalText += " Universe " + getHighestUniverseId() + "/" + requirement.universe + ","
+        }
+        else if (requirement.currentUniverse != null && getCurrentUniverseId() != requirement.currentUniverse) {
+            finalText += " Current universe " + getCurrentUniverseId() + "/" + requirement.currentUniverse + ","
+        }
+        else if (requirement.task != null) {
+            const task = gameData.taskData[requirement.task]
+            if (task == null)
+                continue
+            if (task.level < requirement.requirement)
+                finalText += " " + requirement.task + " " + formatLevel(task.level) + "/" + formatLevel(requirement.requirement) + ","
+        }
+        else if (requirement.mp != null && gameData.multiverse_points < requirement.mp) {
+            finalText += " " + format(gameData.multiverse_points, 2) + "/" + format(requirement.mp, 2) + " MP,"
+        }
+    }
+
+    return finalText.substring(0, finalText.length - 1)
+}
+
 function updateRequiredRows(data, categoryType) {
     const requiredRows = document.getElementsByClassName("requiredRow")
     for (const requiredRow of requiredRows) {
@@ -1251,17 +1301,8 @@ function updateRequiredRows(data, categoryType) {
                     hypercubeElement.textContent = format(requirements[0].requirement) + " hypercubes"
                 } else if (requirementObject instanceof MultiverseUniverseRequirement) {
                     levelElement.classList.remove("hiddenTask")
-                    for (const requirement of requirements) {
-                        if (requirement.universe != null && getHighestUniverseId() < requirement.universe)
-                            finalText += " Universe " + getHighestUniverseId() + "/" + requirement.universe + ","
-                        else if (requirement.task != null) {
-                            const task = gameData.taskData[requirement.task]
-                            if (task == null) continue
-                            if (task.level < requirement.requirement)
-                                finalText += " " + requirement.task + " " + formatLevel(task.level) + "/" + formatLevel(requirement.requirement) + ","
-                        }
-                    }
-                    finalText = finalText.substring(0, finalText.length - 1)
+                    finalText = getMultiverseRequirementText(requirements)
+                    levelElement.textContent = finalText
                 } else if (requirementObject instanceof AgeRequirement) {
                     essenceElement.classList.remove("hiddenTask")
                     essenceElement.textContent = "Age " + format(requirements[0].requirement)
@@ -1281,6 +1322,11 @@ function updateRequiredRows(data, categoryType) {
             else if (data == gameData.itemData) {
                 if (requirementObject instanceof MultiverseUniverseRequirement) {
                     const coinRequirement = requirements.find(requirement => requirement.coins != null)
+                    finalText = getMultiverseRequirementText(requirements)
+                    if (finalText != "") {
+                        levelElement.classList.remove("hiddenTask")
+                        levelElement.textContent = finalText
+                    }
                     if (coinRequirement != null) {
                         coinElement.classList.remove("hiddenTask")
                         formatCoins(coinRequirement.coins, coinElement)
