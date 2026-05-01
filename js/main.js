@@ -114,6 +114,9 @@ function addMultipliers() {
         } else if (skillCategories["Universe IX Quiet Collapse"].includes(task.name)) {
             task.xpMultipliers.push(getBindedItemEffect("Collapse Gauge"))
             task.xpMultipliers.push(getUniverseNineSkillsXpGain)
+        } else if (skillCategories["Universe X Observer Threshold"].includes(task.name)) {
+            task.xpMultipliers.push(getBindedItemEffect("Observer Lens"))
+            task.xpMultipliers.push(getUniverseTenSkillsXpGain)
         }
     }
 
@@ -446,7 +449,7 @@ function getUnpausedGameSpeed() {
     const timeWarpingSpeed = boostWarping * timeWarping.getEffect() * temporalDimension.getEffect() * timeLoop.getEffect() * warpDrive * speedSpeedSpeed * timeIsAFlatCircle
 
     const gameSpeed = baseGameSpeed * timeWarpingSpeed * getChallengeBonus("time_does_not_fly") * getGottaBeFastGain() * getDarkMatterSkillTimeWarping()
-        * getUniverseFourGameSpeedGain() * gameData.settings.adminGameSpeedMultiplier
+        * getUniverseFourGameSpeedGain() * getUniverseTenGameSpeedGain() * gameData.settings.adminGameSpeedMultiplier
 
     if (gameData.active_challenge == "time_does_not_fly" || gameData.active_challenge == "the_darkest_time")
         return Math.pow(gameSpeed, 0.7)

@@ -147,7 +147,7 @@ function getMultiverseXpGain() {
     if (!isMultiverseUnlocked())
         return 1
 
-    return getUniverseInfo().xpMult * (1 + getMultiverseUpgradeLevel("stable_memory") * 0.08) * getUniverseSevenXpGain() * getUniverseEightXpGain() * getUniverseNineXpGain()
+    return getUniverseInfo().xpMult * (1 + getMultiverseUpgradeLevel("stable_memory") * 0.08) * getUniverseSevenXpGain() * getUniverseEightXpGain() * getUniverseNineXpGain() * getUniverseTenXpGain()
 }
 
 function getMultiverseIncomeGain() {
@@ -169,21 +169,21 @@ function getMultiverseLifespanGain() {
     if (!isMultiverseUnlocked())
         return 1
 
-    return getUniverseInfo().lifespanMult * (1 + getMultiverseUpgradeLevel("long_echo") * 0.05) * getUniverseFourLifespanGain() * getUniverseSixLifespanGain() * getUniverseEightLifespanGain()
+    return getUniverseInfo().lifespanMult * (1 + getMultiverseUpgradeLevel("long_echo") * 0.05) * getUniverseFourLifespanGain() * getUniverseSixLifespanGain() * getUniverseEightLifespanGain() * getUniverseTenLifespanGain()
 }
 
 function getMultiverseEvilGain() {
     if (!isMultiverseUnlocked())
         return 1
 
-    return (1 + getMultiverseUpgradeLevel("abyss_tithe") * 0.12) * getUniverseSixEvilGain() * getUniverseNineEvilGain()
+    return (1 + getMultiverseUpgradeLevel("abyss_tithe") * 0.12) * getUniverseSixEvilGain() * getUniverseNineEvilGain() * getUniverseTenEvilGain()
 }
 
 function getMultiverseEssenceGain() {
     if (!isMultiverseUnlocked())
         return 1
 
-    return (1 + getMultiverseUpgradeLevel("essence_prism") * 0.10) * getUniverseThreeEssenceGain() * getUniverseSixEssenceGain() * getUniverseNineEssenceGain()
+    return (1 + getMultiverseUpgradeLevel("essence_prism") * 0.10) * getUniverseThreeEssenceGain() * getUniverseSixEssenceGain() * getUniverseNineEssenceGain() * getUniverseTenEssenceGain()
 }
 
 function getMultiverseCategoryPower(category, scale) {
@@ -251,6 +251,9 @@ function getUniverseParameterName(id = getCurrentUniverseId()) {
     if (id == 9)
         return "Collapse control"
 
+    if (id == 10)
+        return "Observer signal"
+
     if (id == 1)
         return "Prime stability"
 
@@ -284,6 +287,9 @@ function getUniverseParameterGain(id = getCurrentUniverseId()) {
 
     if (id == 9)
         return getUniverseNineCollapseControlGain()
+
+    if (id == 10)
+        return getUniverseTenObserverSignalGain()
 
     return 1
 }
@@ -660,6 +666,76 @@ function getUniverseNineSkillsXpGain() {
 
     const lastSignal = gameData.taskData["Last Signal"]
     return lastSignal == null ? 1 : 1 + lastSignal.level * 0.008
+}
+
+function getUniverseTenObserverSignalGain() {
+    const thresholdListening = gameData.taskData["Threshold Listening"]
+    const impossibleRoutine = gameData.taskData["Impossible Routine"]
+    const witnessPreparation = gameData.taskData["Witness Preparation"]
+    const staticCrown = getBindedItemEffect("Static Crown")
+    const lifetimeMemory = 1 + Math.log10(gameData.multiverse_points_lifetime + 10) * 0.02
+    const breakMemory = 1 + Math.sqrt(getMultiverseState().universe_breaks) * 0.045
+
+    const listeningGain = thresholdListening == null ? 1 : 1 + thresholdListening.level * thresholdListening.baseData.effect
+    const routineGain = impossibleRoutine == null ? 1 : 1 + impossibleRoutine.level * impossibleRoutine.baseData.effect
+    const witnessGain = witnessPreparation == null ? 1 : 1 + witnessPreparation.level * witnessPreparation.baseData.effect
+    return listeningGain * routineGain * witnessGain * lifetimeMemory * breakMemory * staticCrown()
+}
+
+function getUniverseTenXpGain() {
+    if (!isMultiverseUnlocked() || getCurrentUniverseId() != 10)
+        return 1
+
+    const thresholdListening = gameData.taskData["Threshold Listening"]
+    const impossibleRoutine = gameData.taskData["Impossible Routine"]
+    const observerLens = getBindedItemEffect("Observer Lens")
+    const listeningGain = thresholdListening == null ? 1 : 1 + thresholdListening.level * 0.0028
+    const routineGain = impossibleRoutine == null ? 1 : 1 + impossibleRoutine.level * 0.0028
+    return listeningGain * routineGain * observerLens()
+}
+
+function getUniverseTenGameSpeedGain() {
+    if (!isMultiverseUnlocked() || getCurrentUniverseId() != 10)
+        return 1
+
+    const impossibleRoutine = gameData.taskData["Impossible Routine"]
+    const staticCrown = getBindedItemEffect("Static Crown")
+    const routineGain = impossibleRoutine == null ? 1 : 1 + impossibleRoutine.level * 0.0025
+    return routineGain * staticCrown()
+}
+
+function getUniverseTenLifespanGain() {
+    if (!isMultiverseUnlocked() || getCurrentUniverseId() != 10)
+        return 1
+
+    const witnessPreparation = gameData.taskData["Witness Preparation"]
+    return witnessPreparation == null ? 1 : 1 + witnessPreparation.level * 0.0025
+}
+
+function getUniverseTenEvilGain() {
+    if (!isMultiverseUnlocked() || getCurrentUniverseId() != 10)
+        return 1
+
+    const witnessPreparation = gameData.taskData["Witness Preparation"]
+    const witnessGain = witnessPreparation == null ? 1 : 1 + witnessPreparation.level * 0.0028
+    return witnessGain
+}
+
+function getUniverseTenEssenceGain() {
+    if (!isMultiverseUnlocked() || getCurrentUniverseId() != 10)
+        return 1
+
+    const witnessPreparation = gameData.taskData["Witness Preparation"]
+    const witnessGain = witnessPreparation == null ? 1 : 1 + witnessPreparation.level * 0.0028
+    return witnessGain
+}
+
+function getUniverseTenSkillsXpGain() {
+    if (!isMultiverseUnlocked())
+        return 1
+
+    const witnessPreparation = gameData.taskData["Witness Preparation"]
+    return witnessPreparation == null ? 1 : 1 + witnessPreparation.level * 0.008
 }
 
 function getMultiverseVoidResonance() {

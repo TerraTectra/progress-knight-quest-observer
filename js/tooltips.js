@@ -248,6 +248,11 @@ const tooltips = {
     "Last Signal": "Hold on to the last signal before total silence. It improves Collapse control, Evil gain, and Essence gain inside Universe IX.",
     "Collapse Gauge": "A gauge that measures how much reality is left before the next silence. It improves Universe IX Quiet Collapse training.",
     "Quiet Beacon": "A beacon that shines only when no one can see it. It improves Universe IX MP, Evil, and Essence gain.",
+    "Threshold Listening": "Universe X speaks from outside the run. Listen carefully enough and the Observer signal begins to take shape.",
+    "Impossible Routine": "Repeat actions that should not be repeatable. This stabilizes speed and XP inside the Observer Threshold.",
+    "Witness Preparation": "Prepare to stop playing as one life and start watching many. This improves Evil, Essence, and lifespan inside Universe X.",
+    "Observer Lens": "A lens that reflects the player instead of the world. It improves Universe X Observer Threshold training.",
+    "Static Crown": "A crown made of frozen interference. It improves Universe X MP, Observer signal, and speed recovery.",
 
     "Strong Hope": "Another Faint Hope buff?!",
     "Ruler of the Metaverse": "Now you are thinking with portals",

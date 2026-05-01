@@ -297,6 +297,10 @@ const skillBaseData = {
     "Collapse Containment": { name: "Collapse Containment", maxXp: 1.4e17, heroxp: 950, effect: 0.0025, description: "U-IX MP + All XP" },
     "Silent Economy": { name: "Silent Economy", maxXp: 4.8e17, heroxp: 965, effect: -0.0025, description: "U-IX Expenses + Income" },
     "Last Signal": { name: "Last Signal", maxXp: 1.6e18, heroxp: 980, effect: 0.0025, description: "U-IX MP + Evil + Essence" },
+
+    "Threshold Listening": { name: "Threshold Listening", maxXp: 5e18, heroxp: 1000, effect: 0.0022, description: "U-X MP + Observer Signal" },
+    "Impossible Routine": { name: "Impossible Routine", maxXp: 1.7e19, heroxp: 1015, effect: 0.0022, description: "U-X All XP + Gamespeed" },
+    "Witness Preparation": { name: "Witness Preparation", maxXp: 6e19, heroxp: 1030, effect: 0.0022, description: "U-X Evil + Essence + Lifespan" },
 }
 
 const itemBaseData = {
@@ -373,6 +377,8 @@ const itemBaseData = {
     "Ascension Map": { name: "Ascension Map", expense: 7e49, effect: 1.10, description: "U-VIII MP + XP + Lifespan", heromult: 29, heroeffect: 1e8 },
     "Collapse Gauge": { name: "Collapse Gauge", expense: 5e52, effect: 1.42, description: "Universe IX Collapse XP", heromult: 30, heroeffect: 1e8 },
     "Quiet Beacon": { name: "Quiet Beacon", expense: 4e54, effect: 1.10, description: "U-IX MP + Evil + Essence", heromult: 31, heroeffect: 1e8 },
+    "Observer Lens": { name: "Observer Lens", expense: 3e57, effect: 1.38, description: "Universe X Threshold XP", heromult: 32, heroeffect: 1e8 },
+    "Static Crown": { name: "Static Crown", expense: 2.5e59, effect: 1.10, description: "U-X MP + Signal + Gamespeed", heromult: 33, heroeffect: 1e8 },
 }
 
 const requirementsBaseData = {
@@ -564,6 +570,10 @@ const requirementsBaseData = {
     "Collapse Containment": new MultiverseUniverseRequirement([getQuerySelector("Collapse Containment")], [{ universe: 9 }]),
     "Silent Economy": new MultiverseUniverseRequirement([getQuerySelector("Silent Economy")], [{ universe: 9 }, { task: "Collapse Containment", requirement: 20 }]),
     "Last Signal": new MultiverseUniverseRequirement([getQuerySelector("Last Signal")], [{ universe: 9 }, { task: "Silent Economy", requirement: 35 }]),
+    "Universe X Observer Threshold": new MultiverseUniverseRequirement([removeSpaces(".Universe X Observer Threshold")], [{ universe: 10 }]),
+    "Threshold Listening": new MultiverseUniverseRequirement([getQuerySelector("Threshold Listening")], [{ universe: 10 }]),
+    "Impossible Routine": new MultiverseUniverseRequirement([getQuerySelector("Impossible Routine")], [{ universe: 10 }, { task: "Threshold Listening", requirement: 20 }]),
+    "Witness Preparation": new MultiverseUniverseRequirement([getQuerySelector("Witness Preparation")], [{ universe: 10 }, { task: "Impossible Routine", requirement: 35 }]),
 
     // Properties
     "Homeless": new CoinRequirement([getQuerySelector("Homeless")], [{ requirement: 0 }]),
@@ -637,6 +647,8 @@ const requirementsBaseData = {
     "Ascension Map": new MultiverseUniverseRequirement([getQuerySelector("Ascension Map")], [{ universe: 8 }, { task: "Sideways Promotion", requirement: 25 }, { coins: itemBaseData["Ascension Map"].expense * 100 }]),
     "Collapse Gauge": new MultiverseUniverseRequirement([getQuerySelector("Collapse Gauge")], [{ universe: 9 }, { task: "Collapse Containment", requirement: 10 }, { coins: itemBaseData["Collapse Gauge"].expense * 100 }]),
     "Quiet Beacon": new MultiverseUniverseRequirement([getQuerySelector("Quiet Beacon")], [{ universe: 9 }, { task: "Silent Economy", requirement: 25 }, { coins: itemBaseData["Quiet Beacon"].expense * 100 }]),
+    "Observer Lens": new MultiverseUniverseRequirement([getQuerySelector("Observer Lens")], [{ universe: 10 }, { task: "Threshold Listening", requirement: 10 }, { coins: itemBaseData["Observer Lens"].expense * 100 }]),
+    "Static Crown": new MultiverseUniverseRequirement([getQuerySelector("Static Crown")], [{ universe: 10 }, { task: "Impossible Routine", requirement: 25 }, { coins: itemBaseData["Static Crown"].expense * 100 }]),
     
 
     // Milestones
@@ -714,12 +726,13 @@ const skillCategories = {
     "Universe VI Void Studies": ["Dimming Resonance", "Abyssal Recycling", "Null Continuity"],
     "Universe VII Causality": ["Causal Threading", "Paradox Discipline", "Retroactive Training"],
     "Universe VIII Broken Ladder": ["Ladder Reconstruction", "Sideways Promotion", "Fractured Mastery"],
-    "Universe IX Quiet Collapse": ["Collapse Containment", "Silent Economy", "Last Signal"]
+    "Universe IX Quiet Collapse": ["Collapse Containment", "Silent Economy", "Last Signal"],
+    "Universe X Observer Threshold": ["Threshold Listening", "Impossible Routine", "Witness Preparation"]
 }
 
 const itemCategories = {
     "Properties": ["Homeless", "Tent", "Wooden Hut", "Cottage", "House", "Large House", "Small Palace", "Grand Palace", "Town Ruler", "City Ruler", "Nation Ruler", "Pocket Dimension", "Void Realm", "Void Universe", "Astral Realm", "Galactic Throne", "Spaceship", "Planet", "Ringworld", "Stellar Neighborhood", "Galaxy", "Supercluster", "Galaxy Filament", "Observable Universe", "Multiverse", "Quantum World", "Boötes Void"],
-    "Misc": ["Book", "Dumbbells", "Personal Squire", "Steel Longsword", "Butler", "Sapphire Charm", "Study Desk", "Library", "Observatory", "Mind's Eye", "Void Necklace", "Void Armor", "Void Blade", "Void Orb", "Void Dust", "Celestial Robe", "Universe Fragment", "Multiverse Fragment", "Stairway to heaven", "Highway to hell", "Tesseract", "Desintegration", "Custom Galaxy", "Hypersphere", "Royal Ledger", "Tax Seal", "Taxed Grimoire", "Arcane Abacus", "Broken Hourglass", "Chronal Compass", "Star Ledger", "Debt Engine", "Dimmed Compass", "Null Contract", "Causality Needle", "Paradox Anchor", "Broken Rung", "Ascension Map", "Collapse Gauge", "Quiet Beacon"]
+    "Misc": ["Book", "Dumbbells", "Personal Squire", "Steel Longsword", "Butler", "Sapphire Charm", "Study Desk", "Library", "Observatory", "Mind's Eye", "Void Necklace", "Void Armor", "Void Blade", "Void Orb", "Void Dust", "Celestial Robe", "Universe Fragment", "Multiverse Fragment", "Stairway to heaven", "Highway to hell", "Tesseract", "Desintegration", "Custom Galaxy", "Hypersphere", "Royal Ledger", "Tax Seal", "Taxed Grimoire", "Arcane Abacus", "Broken Hourglass", "Chronal Compass", "Star Ledger", "Debt Engine", "Dimmed Compass", "Null Contract", "Causality Needle", "Paradox Anchor", "Broken Rung", "Ascension Map", "Collapse Gauge", "Quiet Beacon", "Observer Lens", "Static Crown"]
 }
 
 const headerRowColors = {
@@ -742,6 +755,7 @@ const headerRowColors = {
     "Universe VII Causality": "#b14cff",
     "Universe VIII Broken Ladder": "#ff7a1a",
     "Universe IX Quiet Collapse": "#4f5d75",
+    "Universe X Observer Threshold": "#00a6fb",
     "Void Manipulation": "#762B91",
     "Celestial Powers": "#D5C010",
     "Properties_Auto": "#21cc5e",
@@ -775,6 +789,7 @@ const headerRowTextColors = {
     "Universe VII Causality": "white",
     "Universe VIII Broken Ladder": "purple",
     "Universe IX Quiet Collapse": "white",
+    "Universe X Observer Threshold": "white",
     "Void Manipulation": "white",
     "Celestial Powers": "purple",
     "Properties_Auto": "purple",
