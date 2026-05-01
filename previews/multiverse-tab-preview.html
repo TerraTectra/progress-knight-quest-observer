@@ -7,167 +7,217 @@
     <link rel="stylesheet" href="../css/styles.css">
     <style>
         :root {
-            --pk-bg: rgb(32, 32, 32);
-            --pk-panel: rgb(46, 46, 46);
-            --pk-panel-2: rgb(40, 40, 40);
-            --pk-border: rgb(73, 73, 73);
+            --pk-bg: rgb(31, 31, 31);
+            --pk-panel: rgb(43, 43, 43);
+            --pk-panel-dark: rgb(36, 36, 36);
+            --pk-row: rgb(39, 39, 39);
+            --pk-row-alt: rgb(45, 45, 45);
+            --pk-border: rgb(70, 70, 70);
             --pk-muted: rgb(165, 165, 165);
-            --mp: #18d2d9;
-            --void: #9b5cff;
-            --gold: #e5c100;
-            --good: rgb(39, 234, 17);
-            --bad: #e63946;
-            --soft-blue: #1f7895;
-            --soft-rose: #b85f78;
-            --soft-green: #3a8f55;
+            --pk-blue: rgb(46, 148, 231);
+            --pk-blue-dark: rgb(12, 101, 173);
+            --pk-cyan: rgb(34, 169, 193);
+            --pk-cyan-dark: rgb(28, 125, 145);
+            --pk-void: rgb(127, 52, 163);
+            --pk-gold: rgb(219, 186, 38);
+            --pk-green: rgb(77, 164, 48);
+            --pk-red: rgb(226, 50, 63);
+            --pk-pink: rgb(196, 55, 146);
+            --pk-orange: orange;
         }
 
         body.preview-body {
-            background:
-                linear-gradient(180deg, rgba(24, 210, 217, 0.05), transparent 260px),
-                var(--pk-bg);
+            background: var(--pk-bg);
             color: white;
             padding: 24px;
         }
 
-        .preview-shell {
-            display: flex;
-            align-items: flex-start;
-            gap: 0.8em;
+        body.preview-body .panel {
+            background: var(--pk-panel) !important;
+            color: white !important;
+            border: 1px solid rgb(25, 25, 25);
         }
 
-        .preview-sidebar {
-            width: 300px;
-            border-left: 0.3em solid var(--mp);
+        body.preview-body .w3-button {
+            background: var(--pk-panel-dark);
+            color: white;
+            border: 1px solid rgb(25, 25, 25);
         }
 
-        .preview-main {
-            min-width: 960px;
+        body.preview-body .w3-button:hover {
+            background: rgb(55, 55, 55) !important;
+            color: white !important;
+        }
+
+        body.preview-body .w3-button[disabled] {
+            color: rgb(125, 125, 125) !important;
+            background: rgb(35, 35, 35) !important;
+            opacity: 1;
         }
 
         .preview-title-row {
             display: flex;
             align-items: baseline;
             gap: 1em;
+            margin-bottom: 0.8em;
         }
 
-        .preview-subtitle {
+        .preview-title-row h1 {
+            margin: 0;
+        }
+
+        .preview-subtitle,
+        .muted {
             color: var(--pk-muted);
-            font-size: 0.9em;
         }
 
-        .stat-box {
-            margin-top: 1em;
-            padding: 0.7em 0.8em;
-            background: var(--pk-panel-2);
-            border: 1px solid var(--pk-border);
+        .preview-shell {
+            display: flex;
+            align-items: flex-start;
+            gap: 0.9em;
         }
 
-        .stat-box.mp {
-            border-left: 0.35em solid var(--mp);
+        .preview-sidebar {
+            width: 300px;
+            flex: 0 0 300px;
         }
 
-        .stat-box.void {
-            border-left: 0.35em solid var(--void);
-        }
-
-        .stat-box.gold {
-            border-left: 0.35em solid var(--gold);
+        .preview-main {
+            min-width: 1160px;
+            max-width: 1380px;
+            flex: 1 1 auto;
         }
 
         .tab-preview {
             display: flex;
+            flex-wrap: wrap;
             border-bottom: 1px solid var(--pk-border);
+            background: var(--pk-panel-dark);
         }
 
         .tab-preview .baritem {
+            background: var(--pk-panel-dark) !important;
+            color: white !important;
             border-right: 1px solid var(--pk-border);
+            min-width: 88px;
         }
 
         .tab-preview .active-tab {
-            background: linear-gradient(180deg, #2a8aa5, #1f637b) !important;
+            background: rgb(96, 125, 139) !important;
             color: white !important;
         }
 
         .section-title {
-            background: linear-gradient(90deg, #168aa5, #762b91);
             padding: 0.45em 0.7em;
             color: white;
-            margin-bottom: 0.8em;
+            margin-bottom: 0.75em;
+            font-weight: bold;
         }
 
-        .universe-grid {
-            display: grid;
-            grid-template-columns: repeat(3, minmax(0, 1fr));
-            gap: 0.8em;
-            margin-top: 1em;
+        .section-mp { background: var(--pk-cyan); }
+        .section-universe { background: var(--pk-void); }
+        .section-upgrades { background: var(--pk-gold); color: purple; }
+        .section-rules { background: var(--pk-green); }
+        .section-observer { background: var(--pk-pink); }
+
+        .stat-box {
+            margin-top: 0.8em;
+            padding: 0.65em 0.8em;
+            background: var(--pk-panel-dark);
+            border: 1px solid var(--pk-border);
+        }
+
+        .stat-box b {
+            color: white;
+        }
+
+        .stat-box.mp { border-left: 0.35em solid var(--pk-cyan); }
+        .stat-box.void { border-left: 0.35em solid var(--pk-void); }
+        .stat-box.gold { border-left: 0.35em solid var(--pk-gold); }
+        .stat-box.good { border-left: 0.35em solid var(--pk-green); }
+        .stat-box.bad { border-left: 0.35em solid var(--pk-red); }
+
+        .summary-table td {
+            background: var(--pk-row);
+            border-bottom: 1px solid var(--pk-border) !important;
+            padding: 0.55em 0.7em !important;
+        }
+
+        .summary-label {
+            color: var(--pk-muted);
+            font-size: 0.9em;
+        }
+
+        .summary-value {
+            font-size: 1.18em;
+            font-weight: bold;
+            color: white;
         }
 
         .source-grid {
             display: grid;
-            grid-template-columns: repeat(4, minmax(0, 1fr));
-            gap: 0.8em;
-            margin-top: 1em;
+            grid-template-columns: repeat(5, minmax(0, 1fr));
+            gap: 0.6em;
+            margin-top: 0.8em;
         }
 
         .source-box {
-            background: rgb(38, 38, 38);
+            background: var(--pk-panel-dark);
             border: 1px solid var(--pk-border);
-            border-left: 0.35em solid var(--mp);
-            padding: 0.7em 0.8em;
-            min-height: 86px;
+            border-top: 0.3em solid var(--pk-cyan);
+            padding: 0.65em 0.75em;
+            min-height: 108px;
         }
 
-        .source-box.void { border-left-color: var(--void); }
-        .source-box.dark { border-left-color: #78a8ff; }
-        .source-box.hyper { border-left-color: var(--gold); }
-        .source-box.universe { border-left-color: var(--good); }
+        .source-box.void { border-top-color: var(--pk-void); }
+        .source-box.dark { border-top-color: var(--pk-blue); }
+        .source-box.universe { border-top-color: var(--pk-green); }
+        .source-box.breaks { border-top-color: var(--pk-gold); }
+        .source-box.observer { border-top-color: var(--pk-pink); }
 
         .source-title {
             color: white;
             font-weight: bold;
-            margin-bottom: 0.35em;
+            margin-bottom: 0.3em;
         }
 
         .source-value {
-            color: var(--mp);
+            color: rgb(68, 213, 229);
             font-weight: bold;
+            padding-top: 0.25em;
         }
 
-        .altar-preview {
-            margin-top: 1em;
-            background: rgb(38, 38, 38);
-            border: 1px solid var(--pk-border);
-            border-left: 0.35em solid var(--gold);
-            padding: 0.8em;
+        .chain-table,
+        .income-table,
+        .upgrade-table {
+            margin-top: 0.8em;
         }
 
-        .universe-card {
-            background: rgb(38, 38, 38);
-            border: 1px solid var(--pk-border);
-            padding: 0.8em;
-            min-height: 168px;
+        .chain-table th,
+        .income-table th {
+            background: var(--pk-void);
+            color: white;
         }
 
-        .universe-card.current {
-            border-color: var(--mp);
-            box-shadow: inset 0 0 0 1px rgba(24, 210, 217, 0.2);
+        .upgrade-table th {
+            background: var(--pk-gold);
+            color: purple;
         }
 
-        .universe-card.unlocked {
-            border-color: var(--soft-green);
+        .chain-table td,
+        .income-table td,
+        .upgrade-table td {
+            background: var(--pk-row);
+            border-bottom: 1px solid var(--pk-border) !important;
+            vertical-align: top !important;
+            padding-top: 0.48em !important;
+            padding-bottom: 0.48em !important;
         }
 
-        .universe-card.locked {
-            border-color: #6b3a42;
-            opacity: 0.78;
-        }
-
-        .universe-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: start;
-            gap: 0.6em;
+        .chain-table tr:nth-child(odd) td,
+        .income-table tr:nth-child(odd) td,
+        .upgrade-table tr:nth-child(odd) td {
+            background: var(--pk-row-alt);
         }
 
         .universe-name {
@@ -175,222 +225,447 @@
             color: white;
         }
 
-        .universe-rule {
-            color: var(--pk-muted);
-            margin-top: 0.45em;
-            min-height: 3.2em;
+        .status-current { color: var(--pk-orange); font-weight: bold; }
+        .status-open { color: rgb(91, 217, 74); font-weight: bold; }
+        .status-next { color: rgb(68, 213, 229); font-weight: bold; }
+        .status-locked { color: rgb(238, 91, 101); font-weight: bold; }
+        .mp-text { color: rgb(68, 213, 229); }
+        .void-text { color: rgb(194, 124, 231); }
+        .gold-text { color: var(--pk-gold); }
+        .green-text { color: rgb(91, 217, 74); }
+
+        .mini-bar {
+            position: relative;
+            background: var(--pk-blue-dark);
+            height: 1.15em;
+            margin-top: 0.35em;
+            max-width: 210px;
         }
 
-        .chip {
-            display: inline-block;
-            padding: 0.12em 0.45em;
-            border: 1px solid currentColor;
-            font-size: 0.9em;
-            white-space: nowrap;
+        .mini-fill {
+            height: 100%;
+            background: var(--pk-blue);
         }
 
-        .chip-current { color: var(--mp); }
-        .chip-unlocked { color: var(--good); }
-        .chip-locked { color: var(--bad); }
-        .chip-mp { color: var(--mp); }
-        .chip-gold { color: var(--gold); }
-
-        .distortion-list {
-            color: var(--pk-muted);
-            margin-top: 0.7em;
-            line-height: 1.45;
-        }
-
-        .distortion-list b {
+        .mini-text {
+            position: absolute;
+            left: 0.35em;
+            top: 0;
+            font-size: 0.85em;
             color: white;
         }
 
-        .upgrade-table {
-            margin-top: 0.7em;
+        .preview-button {
+            min-width: 100px;
         }
 
-        .upgrade-table tr:nth-child(even) {
-            background: rgba(255, 255, 255, 0.025);
+        .preview-button.break {
+            background: var(--pk-void) !important;
+            color: white !important;
         }
 
-        .upgrade-name.memory { color: #66ccff; }
-        .upgrade-name.labor { color: #9cff9c; }
-        .upgrade-name.echo { color: #d2b1ff; }
-        .upgrade-name.abyss { color: #ff6b6b; }
-        .upgrade-name.prism { color: #f2d06b; }
-        .upgrade-name.cartography { color: var(--mp); }
-        .upgrade-name.constants { color: #ffb178; }
+        .rules-list {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 0.65em;
+        }
 
-        .muted {
+        .rule-box {
+            background: var(--pk-panel-dark);
+            border: 1px solid var(--pk-border);
+            padding: 0.65em 0.75em;
+        }
+
+        .observer-stub {
+            margin-top: 1em;
+            background: var(--pk-panel-dark);
+            border: 1px solid var(--pk-border);
+            border-left: 0.35em solid var(--pk-pink);
+            padding: 0.8em;
+        }
+
+        .compact-note {
             color: var(--pk-muted);
+            font-size: 0.92em;
+            line-height: 1.35;
+        }
+
+        .divider {
+            border-bottom: 0.1em solid rgb(76, 76, 76);
+            padding-top: 1.25em;
+            margin-bottom: 1em;
         }
     </style>
 </head>
 <body class="dark preview-body">
     <div class="preview-title-row">
-        <h1>Progress Knight</h1>
-        <div class="preview-subtitle">Standalone Multiverse tab preview - opens from The Void, separate from Quest Metaverse</div>
+        <h1>Progress Knight Quest</h1>
+        <div class="preview-subtitle">Multiverse tab preview - original Progress Knight style, live game unchanged</div>
     </div>
 
     <div class="preview-shell">
         <div class="panel w3-padding preview-sidebar">
             <div class="text-caption">Age 1000 Day 0</div>
             <div class="muted">Lifespan: infinite</div>
+            <div class="muted">Real Time: 02:43:11</div>
 
             <div class="stat-box mp">
-                <div><span class="color-hypercubes">Multiverse points:</span> <b>42.30</b></div>
-                <div class="muted">+0.0142/s, unaffected by Time Warp</div>
+                <div><span class="mp-text">Multiverse points:</span> <b>4.38k</b></div>
+                <div class="muted">+0.156/s real time</div>
+                <div class="compact-note">Time Warp, boost, and admin speed do not multiply this gain.</div>
             </div>
 
             <div class="stat-box void">
-                <div><span style="color: var(--void);">Universe:</span> <b>I - Prime World</b></div>
-                <div class="muted">Void resonance x14.20</div>
+                <div><span class="void-text">Current universe:</span> <b>II - Strained Kingdom</b></div>
+                <div class="muted">Bureaucratic order: 42%</div>
             </div>
 
             <div class="stat-box gold">
-                <div><span style="color: var(--gold);">Next break:</span> <b>U-II</b></div>
-                <div class="muted">Sealed until Metaverse altar: Break Universe</div>
+                <div><span class="gold-text">Universe chain:</span> <b>II / X</b></div>
+                <div class="muted">Breaks completed: 1</div>
+            </div>
+
+            <div class="stat-box good">
+                <div><span class="green-text">Unlocked layer:</span> <b>The Void</b></div>
+                <div class="muted">The Void revealed the Multiverse, but U-II+ requires universe breaks.</div>
+            </div>
+
+            <div class="stat-box bad">
+                <div><span class="status-next">Next break:</span> <b>U-II -> U-III</b></div>
+                <div class="muted">Need: 120 MP and Break Universe in U-II.</div>
             </div>
         </div>
 
         <div class="preview-main">
             <div class="panel w3-margin-left tab-preview">
-                <div class="w3-button w3-bar-item baritem">Altar</div>
-                <div class="w3-button w3-bar-item baritem active-tab">Universes</div>
-                <div class="w3-button w3-bar-item baritem">Perks</div>
+                <div class="w3-button w3-bar-item baritem">Hero</div>
+                <div class="w3-button w3-bar-item baritem">Skills</div>
+                <div class="w3-button w3-bar-item baritem">Shop</div>
+                <div class="w3-button w3-bar-item baritem">Evil perks</div>
+                <div class="w3-button w3-bar-item baritem">Challenges</div>
+                <div class="w3-button w3-bar-item baritem">Milestones</div>
+                <div class="w3-button w3-bar-item baritem">Amulet</div>
+                <div class="w3-button w3-bar-item baritem">Dark Matter</div>
+                <div class="w3-button w3-bar-item baritem active-tab">Multiverse</div>
+                <div class="w3-button w3-bar-item baritem">Settings</div>
             </div>
 
             <div class="panel w3-margin-left w3-margin-top w3-padding">
-                <div class="section-title text-caption"><b>MP Sources</b></div>
-                <div class="muted">Multiverse Points grow from real-time Void progress. Time Warp, boosts, and admin speed do not multiply this income.</div>
+                <div class="section-title section-mp text-caption">Multiverse</div>
+                <table class="w3-table w3-bordered summary-table">
+                    <tr>
+                        <td>
+                            <div class="summary-label">Stored MP</div>
+                            <div class="summary-value mp-text">4.38k</div>
+                        </td>
+                        <td>
+                            <div class="summary-label">Passive MP/sec</div>
+                            <div class="summary-value mp-text">+0.156</div>
+                        </td>
+                        <td>
+                            <div class="summary-label">Current universe</div>
+                            <div class="summary-value">II - Strained Kingdom</div>
+                        </td>
+                        <td>
+                            <div class="summary-label">Next target</div>
+                            <div class="summary-value gold-text">Break U-II</div>
+                        </td>
+                        <td>
+                            <div class="summary-label">Observer</div>
+                            <div class="summary-value status-locked">Locked</div>
+                        </td>
+                    </tr>
+                </table>
+
+                <div class="compact-note" style="padding-top:0.8em;">
+                    The Multiverse opens when The Void proves that the world is not singular. Universe I starts earning a small passive MP flow immediately.
+                    Higher universes unlock only by breaking the previous universe, and every unlocked universe can be entered again at any time.
+                </div>
+
                 <div class="source-grid">
                     <div class="source-box void">
-                        <div class="source-title">Void jobs</div>
-                        <div class="muted">Corrupted, Void Slave, Abyss God...</div>
+                        <div class="source-title">Void pressure</div>
+                        <div class="compact-note">Void jobs, Void skills, and max levels.</div>
                         <div class="source-value">x3.82</div>
                     </div>
-                    <div class="source-box void">
-                        <div class="source-title">Void skills</div>
-                        <div class="muted">Void Amplification, Mind Release...</div>
-                        <div class="source-value">x2.96</div>
-                    </div>
                     <div class="source-box dark">
-                        <div class="source-title">Dark layer</div>
-                        <div class="muted">Dark Matter and late essence pressure.</div>
+                        <div class="source-title">Dark economy</div>
+                        <div class="compact-note">Dark Matter, Essence, and Dark Orbs.</div>
                         <div class="source-value">x1.18</div>
                     </div>
                     <div class="source-box universe">
-                        <div class="source-title">Universe</div>
-                        <div class="muted">Current universe passive multiplier.</div>
-                        <div class="source-value">x1.00</div>
+                        <div class="source-title">Universe parameter</div>
+                        <div class="compact-note">Current universe mastery stat.</div>
+                        <div class="source-value">x1.42</div>
+                    </div>
+                    <div class="source-box breaks">
+                        <div class="source-title">Break history</div>
+                        <div class="compact-note">Permanent bonus from completed universe breaks.</div>
+                        <div class="source-value">x1.25</div>
+                    </div>
+                    <div class="source-box observer">
+                        <div class="source-title">No time abuse</div>
+                        <div class="compact-note">MP is real-time only. Warping does not multiply it.</div>
+                        <div class="source-value">fixed clock</div>
                     </div>
                 </div>
 
-                <div class="altar-preview">
-                    <div class="text-caption"><span style="color: var(--gold);"><b>Metaverse altar preview: Break Universe</b></span></div>
-                    <div class="muted">Late Hypercube altar. Requires the native Quest Metaverse layer, costs Hypercubes, and unlocks the first real universe break in this tab.</div>
-                    <div class="muted" style="padding-top:0.35em;">Reward: Universe breaks unlocked and permanent <span class="chip chip-mp">+25% MP gain</span>.</div>
-                    <div class="muted" style="padding-top:0.35em;">Suggested condition: Dark Matter gain multiplier purchased once, Essence gain multiplier purchased once, then pay <span class="chip chip-gold">1e24 Hypercubes</span>.</div>
-                </div>
+                <div class="divider"></div>
 
-                <div style="border-bottom: 0.1em solid rgb(24, 210, 217); padding-top: 2em;"></div>
-
-                <div style="padding-top:1em"></div>
-                <div class="section-title text-caption"><b>Universes</b></div>
-                <div class="muted">Unlock each next universe by breaking the previous one. Every universe increases passive Multiverse Point gain, but distorts the base rules harder.</div>
-
-                <div class="universe-grid">
-                    <div class="universe-card current">
-                        <div class="universe-header">
-                            <div>
-                                <div class="universe-name">I - Prime World</div>
-                                <div class="muted">Stable baseline</div>
-                            </div>
-                            <span class="chip chip-current">Current</span>
-                        </div>
-                        <div class="universe-rule">The original rules remain stable. This world teaches the new MP economy.</div>
-                        <div class="distortion-list">
-                            MP <b>x1.0</b><br>
-                            XP <b>x1.00</b> / Income <b>x1.00</b><br>
-                            Expenses <b>x1.00</b>
-                        </div>
+                <div class="section-title section-rules text-caption">Break rules</div>
+                <div class="rules-list">
+                    <div class="rule-box">
+                        <b class="mp-text">No Prime purchase</b>
+                        <div class="compact-note">Universe I is your origin. It is never bought.</div>
                     </div>
-
-                    <div class="universe-card locked">
-                        <div class="universe-header">
-                            <div>
-                                <div class="universe-name">II - Strained Kingdom</div>
-                                <div class="muted">Economic pressure</div>
-                            </div>
-                            <span class="chip chip-locked">Sealed</span>
-                        </div>
-                        <div class="universe-rule">Work pays less and upkeep bites harder. Early economy choices start to matter.</div>
-                        <div class="distortion-list">
-                            MP <b>x2.5</b><br>
-                            XP <b>x0.96</b> / Income <b>x0.92</b><br>
-                            Break U-I after the final Hypercube altar.
-                        </div>
+                    <div class="rule-box">
+                        <b class="gold-text">Break current highest</b>
+                        <div class="compact-note">U-III unlocks only after breaking U-II, then U-IV after breaking U-III.</div>
                     </div>
-
-                    <div class="universe-card locked">
-                        <div class="universe-header">
-                            <div>
-                                <div class="universe-name">III - Taxed Arcana</div>
-                                <div class="muted">Magic tolls</div>
-                            </div>
-                            <span class="chip chip-locked">Locked</span>
-                        </div>
-                        <div class="universe-rule">Magic remains powerful, but every shortcut has a cost.</div>
-                        <div class="distortion-list">
-                            MP <b>x5.0</b><br>
-                            XP <b>x0.94</b> / Income <b>x0.88</b><br>
-                            Break U-II: <span class="chip chip-gold">120 MP</span>
-                        </div>
+                    <div class="rule-box">
+                        <b class="green-text">Switch freely</b>
+                        <div class="compact-note">Any unlocked universe can be entered again for farming or setup.</div>
+                    </div>
+                    <div class="rule-box">
+                        <b class="void-text">Distortion grows</b>
+                        <div class="compact-note">Every universe changes one core rule more aggressively than the last.</div>
                     </div>
                 </div>
 
-                <div style="border-bottom: 0.1em solid rgb(24, 210, 217); padding-top: 2em;"></div>
+                <div class="divider"></div>
 
-                <div style="padding-top:1em">
-                    <div class="section-title text-caption"><b>Multiverse Upgrades</b></div>
-                    <table class="w3-table w3-bordered upgrade-table">
-                        <tr>
-                            <td><b class="upgrade-name memory">Stable Memory</b><br><span class="muted">+8% all XP per level.</span></td>
-                            <td><span class="chip chip-current">Lvl 2</span></td>
-                            <td><span class="chip chip-gold">21.2 MP</span></td>
-                            <td><button class="w3-button button">Buy</button></td>
-                        </tr>
-                        <tr>
-                            <td><b class="upgrade-name labor">Universal Labor</b><br><span class="muted">+10% job income per level.</span></td>
-                            <td><span class="chip chip-current">Lvl 1</span></td>
-                            <td><span class="chip chip-gold">14.7 MP</span></td>
-                            <td><button class="w3-button button">Buy</button></td>
-                        </tr>
-                        <tr>
-                            <td><b class="upgrade-name abyss">Abyss Tithe</b><br><span class="muted">+12% Evil gain per level.</span></td>
-                            <td><span class="chip">Lvl 0</span></td>
-                            <td><span class="chip chip-gold">12.0 MP</span></td>
-                            <td><button class="w3-button button">Buy</button></td>
-                        </tr>
-                        <tr>
-                            <td><b class="upgrade-name prism">Essence Prism</b><br><span class="muted">+10% Essence gain per level.</span></td>
-                            <td><span class="chip">Lvl 0</span></td>
-                            <td><span class="chip chip-gold">16.0 MP</span></td>
-                            <td><button class="w3-button button">Buy</button></td>
-                        </tr>
-                        <tr>
-                            <td><b class="upgrade-name cartography">Void Cartography</b><br><span class="muted">+18% Multiverse Point gain per level.</span></td>
-                            <td><span class="chip chip-current">Lvl 1</span></td>
-                            <td><span class="chip chip-gold">27.5 MP</span></td>
-                            <td><button class="w3-button button">Buy</button></td>
-                        </tr>
-                        <tr>
-                            <td><b class="upgrade-name constants">Soft Constants</b><br><span class="muted">-3% expenses per level, capped at -45%.</span></td>
-                            <td><span class="chip">Lvl 0</span></td>
-                            <td><span class="chip chip-gold">18.0 MP</span></td>
-                            <td><button class="w3-button button">Buy</button></td>
-                        </tr>
-                    </table>
+                <div class="section-title section-universe text-caption">Passive universe income</div>
+                <table class="w3-table w3-bordered income-table">
+                    <tr>
+                        <th style="width: 14em;">Universe</th>
+                        <th style="width: 12em;">Parameter</th>
+                        <th>How it grows</th>
+                        <th style="width: 10em;">Income</th>
+                        <th style="width: 14em;">Status</th>
+                    </tr>
+                    <tr>
+                        <td><b>I - Prime World</b><br><span class="muted">Stable origin</span></td>
+                        <td>Prime stability</td>
+                        <td>Void unlock, total max levels, first Dark Matter progress.</td>
+                        <td><span class="mp-text">+0.018/s</span></td>
+                        <td><span class="status-open">Always active</span></td>
+                    </tr>
+                    <tr>
+                        <td><b>II - Strained Kingdom</b><br><span class="muted">Bureaucracy</span></td>
+                        <td>Bureaucratic order</td>
+                        <td>Royal Administration, Merchant progress, net income stability.</td>
+                        <td><span class="mp-text">+0.138/s</span></td>
+                        <td><span class="status-current">Current universe</span></td>
+                    </tr>
+                    <tr>
+                        <td><b>III - Taxed Arcana</b></td>
+                        <td>Arcane compliance</td>
+                        <td>Magic jobs, Essence gain, audit skills.</td>
+                        <td><span class="mp-text">x5 base</span></td>
+                        <td><span class="status-next">Unlock by breaking U-II</span></td>
+                    </tr>
+                    <tr>
+                        <td><b>IV - Thin Time</b></td>
+                        <td>Temporal anchor</td>
+                        <td>Lifespan, Time Warping, Super Immortality.</td>
+                        <td><span class="mp-text">x9 base</span></td>
+                        <td><span class="status-locked">Locked</span></td>
+                    </tr>
+                    <tr>
+                        <td><b>V - Greedy Stars</b></td>
+                        <td>Greed index</td>
+                        <td>Income, expense control, Dark shop investment.</td>
+                        <td><span class="mp-text">x16 base</span></td>
+                        <td><span class="status-locked">Locked</span></td>
+                    </tr>
+                    <tr>
+                        <td><b>VI - Dimming Void</b></td>
+                        <td>Dimming resonance</td>
+                        <td>Void work, Void skills, Evil gain, Essence gain.</td>
+                        <td><span class="mp-text">x28 base</span></td>
+                        <td><span class="status-locked">Locked</span></td>
+                    </tr>
+                    <tr>
+                        <td><b>VII - Hostile Causality</b></td>
+                        <td>Causal stability</td>
+                        <td>Break history, challenge completions, anti-penalty upgrades.</td>
+                        <td><span class="mp-text">x48 base</span></td>
+                        <td><span class="status-locked">Locked</span></td>
+                    </tr>
+                    <tr>
+                        <td><b>VIII - Broken Ladder</b></td>
+                        <td>Ladder integrity</td>
+                        <td>Cross-branch max levels and mastery spread.</td>
+                        <td><span class="mp-text">x80 base</span></td>
+                        <td><span class="status-locked">Locked</span></td>
+                    </tr>
+                    <tr>
+                        <td><b>IX - Quiet Collapse</b></td>
+                        <td>Collapse control</td>
+                        <td>Meta upgrades, completed breaks, late Dark Matter.</td>
+                        <td><span class="mp-text">x130 base</span></td>
+                        <td><span class="status-locked">Locked</span></td>
+                    </tr>
+                    <tr>
+                        <td><b>X - Observer Threshold</b></td>
+                        <td>Observer signal</td>
+                        <td>Universe X signal skills and final instability control.</td>
+                        <td><span class="mp-text">x220 base</span></td>
+                        <td><span class="status-locked">Unlocks Observer</span></td>
+                    </tr>
+                </table>
+
+                <div class="divider"></div>
+
+                <div class="section-title section-universe text-caption">Universe chain</div>
+                <table class="w3-table w3-bordered chain-table">
+                    <tr>
+                        <th style="width: 15em;">Universe</th>
+                        <th style="width: 8em;">State</th>
+                        <th>Rule distortion</th>
+                        <th style="width: 13em;">Break cost</th>
+                        <th style="width: 11em;">Action</th>
+                    </tr>
+                    <tr>
+                        <td><div class="universe-name">I - Prime World</div><div class="muted">Original rules</div></td>
+                        <td><span class="status-open">Unlocked</span></td>
+                        <td>Baseline Progress Knight Quest. Used as the safe farming world.</td>
+                        <td>Already owned</td>
+                        <td><button class="w3-button button preview-button">Enter</button></td>
+                    </tr>
+                    <tr>
+                        <td><div class="universe-name">II - Strained Kingdom</div><div class="muted">Bureaucratic order</div></td>
+                        <td><span class="status-current">Current</span></td>
+                        <td>Income x0.90, expenses x1.10. Royal Administration softens both penalties.</td>
+                        <td>Broken once</td>
+                        <td><button class="w3-button button preview-button" disabled>Current</button></td>
+                    </tr>
+                    <tr>
+                        <td><div class="universe-name">III - Taxed Arcana</div><div class="muted">Arcane compliance</div></td>
+                        <td><span class="status-next">Next</span></td>
+                        <td>Magic progress is taxed until Arcane Compliance skills catch up.</td>
+                        <td><span class="gold-text">120 MP</span><br><span class="muted">Requires Break Universe in U-II</span></td>
+                        <td><button class="w3-button button break preview-button">Break U-II</button></td>
+                    </tr>
+                    <tr>
+                        <td><div class="universe-name">IV - Thin Time</div></td>
+                        <td><span class="status-locked">Locked</span></td>
+                        <td>Shorter lifespan and weaker idle safety. Lifespan upgrades become mandatory.</td>
+                        <td>340 MP</td>
+                        <td><button class="w3-button button preview-button" disabled>Locked</button></td>
+                    </tr>
+                    <tr>
+                        <td><div class="universe-name">V - Greedy Stars</div></td>
+                        <td><span class="status-locked">Locked</span></td>
+                        <td>Economy is unstable. Overspending punishes progress harder.</td>
+                        <td>900 MP</td>
+                        <td><button class="w3-button button preview-button" disabled>Locked</button></td>
+                    </tr>
+                    <tr>
+                        <td><div class="universe-name">VI - Dimming Void</div></td>
+                        <td><span class="status-locked">Locked</span></td>
+                        <td>Void and Evil matter more than normal jobs. Dark routes become core progression.</td>
+                        <td>2.30k MP</td>
+                        <td><button class="w3-button button preview-button" disabled>Locked</button></td>
+                    </tr>
+                    <tr>
+                        <td><div class="universe-name">VII - Hostile Causality</div></td>
+                        <td><span class="status-locked">Locked</span></td>
+                        <td>Raw speed stops solving everything. Balanced preparation is rewarded.</td>
+                        <td>6.20k MP</td>
+                        <td><button class="w3-button button preview-button" disabled>Locked</button></td>
+                    </tr>
+                    <tr>
+                        <td><div class="universe-name">VIII - Broken Ladder</div></td>
+                        <td><span class="status-locked">Locked</span></td>
+                        <td>Normal unlock order bends. Side routes and mastery spread become important.</td>
+                        <td>16.0k MP</td>
+                        <td><button class="w3-button button preview-button" disabled>Locked</button></td>
+                    </tr>
+                    <tr>
+                        <td><div class="universe-name">IX - Quiet Collapse</div></td>
+                        <td><span class="status-locked">Locked</span></td>
+                        <td>Progress decays without enough meta infrastructure.</td>
+                        <td>42.0k MP</td>
+                        <td><button class="w3-button button preview-button" disabled>Locked</button></td>
+                    </tr>
+                    <tr>
+                        <td><div class="universe-name">X - Observer Threshold</div></td>
+                        <td><span class="status-locked">Locked</span></td>
+                        <td>The final world is unstable enough to reveal the Observer layer.</td>
+                        <td>110k MP</td>
+                        <td><button class="w3-button button preview-button" disabled>Locked</button></td>
+                    </tr>
+                </table>
+
+                <div class="divider"></div>
+
+                <div class="section-title section-upgrades text-caption">Multiverse upgrades</div>
+                <table class="w3-table w3-bordered upgrade-table">
+                    <tr>
+                        <th>Upgrade</th>
+                        <th style="width: 8em;">Level</th>
+                        <th style="width: 11em;">Cost</th>
+                        <th style="width: 11em;">Action</th>
+                    </tr>
+                    <tr>
+                        <td><b class="mp-text">Stable Memory</b><br><span class="muted">All XP. The safest first purchase after Void unlock.</span></td>
+                        <td>2</td>
+                        <td>21.2 MP</td>
+                        <td><button class="w3-button button preview-button">Buy</button></td>
+                    </tr>
+                    <tr>
+                        <td><b class="green-text">Universal Labor</b><br><span class="muted">Job income. Helps with U-II and U-V economy pressure.</span></td>
+                        <td>1</td>
+                        <td>14.7 MP</td>
+                        <td><button class="w3-button button preview-button">Buy</button></td>
+                    </tr>
+                    <tr>
+                        <td><b class="gold-text">Long Echo</b><br><span class="muted">Lifespan. Becomes critical from U-IV onward.</span></td>
+                        <td>1</td>
+                        <td>20.8 MP</td>
+                        <td><button class="w3-button button preview-button">Buy</button></td>
+                    </tr>
+                    <tr>
+                        <td><b style="color: var(--pk-red);">Abyss Tithe</b><br><span class="muted">Evil gain. Keeps Evil relevant after Multiverse opens.</span></td>
+                        <td>0</td>
+                        <td>12.0 MP</td>
+                        <td><button class="w3-button button preview-button">Buy</button></td>
+                    </tr>
+                    <tr>
+                        <td><b style="color: var(--pk-void);">Essence Prism</b><br><span class="muted">Essence gain. Supports magic, almightiness, and U-III.</span></td>
+                        <td>0</td>
+                        <td>18.0 MP</td>
+                        <td><button class="w3-button button preview-button">Buy</button></td>
+                    </tr>
+                    <tr>
+                        <td><b style="color: var(--pk-void);">Dark Singularity</b><br><span class="muted">Dark Matter gain. Late bridge into Hypercube and universe breaks.</span></td>
+                        <td>0</td>
+                        <td>22.0 MP</td>
+                        <td><button class="w3-button button preview-button">Buy</button></td>
+                    </tr>
+                    <tr>
+                        <td><b class="mp-text">Void Cartography</b><br><span class="muted">Passive MP gain. Scales best while farming universe parameters.</span></td>
+                        <td>1</td>
+                        <td>27.5 MP</td>
+                        <td><button class="w3-button button preview-button">Buy</button></td>
+                    </tr>
+                    <tr>
+                        <td><b class="mp-text">Soft Constants</b><br><span class="muted">Reduces universe penalties without removing their identity.</span></td>
+                        <td>0</td>
+                        <td>34.0 MP</td>
+                        <td><button class="w3-button button preview-button">Buy</button></td>
+                    </tr>
+                </table>
+
+                <div class="observer-stub">
+                    <div class="section-title section-observer text-caption">Observer Signal</div>
+                    <div class="muted">
+                        Locked until Universe X. When the signal is prepared, entering Observer hides every old tab and replaces the game with the Observer layer.
+                    </div>
+                    <div class="compact-note" style="padding-top:0.35em;">
+                        This preview only fixes the Multiverse presentation. The Observer remains the third global layer and should be previewed separately before implementation.
+                    </div>
                 </div>
             </div>
         </div>
