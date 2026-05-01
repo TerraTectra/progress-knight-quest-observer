@@ -531,18 +531,45 @@ function renderCurrentChallengeRewardValue(side_bar = false) {
 function renderMilestones() {
     for (const key in milestoneData) {
         const milestone = milestoneData[key]
+        if (milestone == null)
+            continue
+
         const row = getRowByName(milestone.name)
-        row.querySelector(".essence").textContent = format(milestone.expense)
+        if (row == null) {
+            if (renderMilestones.missingRows == null)
+                renderMilestones.missingRows = {}
+            if (renderMilestones.missingRows[key] == null) {
+                renderMilestones.missingRows[key] = true
+                console.warn("Milestone row is missing:", key, milestone.name)
+            }
+            continue
+        }
+
+        const essenceElement = row.querySelector(".essence")
+        if (essenceElement != null)
+            essenceElement.textContent = format(milestone.expense)
 
 
-        let desc = milestone.description
-        if (milestone.getEffect != null)
-            desc = "x" + format(milestone.getEffect(), 1) + " " + desc
+        let desc = milestone.description || ""
+        try {
+            if (milestone.getEffect != null)
+                desc = "x" + format(milestone.getEffect(), 1) + " " + desc
 
-        if (milestone.baseData.effect != null)
-            desc = "x" + format(milestone.baseData.effect, 0) + " " + desc
+            if (milestone.baseData != null && milestone.baseData.effect != null)
+                desc = "x" + format(milestone.baseData.effect, 0) + " " + desc
+        }
+        catch (error) {
+            if (renderMilestones.failedEffects == null)
+                renderMilestones.failedEffects = {}
+            if (renderMilestones.failedEffects[key] == null) {
+                renderMilestones.failedEffects[key] = true
+                console.warn("Milestone effect render failed:", key, error)
+            }
+        }
 
-        row.querySelector(".description").textContent = desc
+        const descriptionElement = row.querySelector(".description")
+        if (descriptionElement != null)
+            descriptionElement.textContent = desc
     }
 }
 
@@ -1591,7 +1618,12 @@ function setTab(selectedTab) {
     gameData.settings.selectedTab = selectedTab
 
     // Update the UI when switching tabs to prevent flikering.
-    updateUI()
+    try {
+        updateUI()
+    }
+    catch (error) {
+        console.error("Tab render failed:", selectedTab, error)
+    }
 
     const element = document.getElementById(selectedTab + "TabButton")
     const allowHiddenTab = selectedTab == Tab.JOBS || selectedTab == Tab.INFO || selectedTab == Tab.SETTINGS
