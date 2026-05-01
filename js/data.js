@@ -289,6 +289,10 @@ const skillBaseData = {
     "Causal Threading": { name: "Causal Threading", maxXp: 1.2e14, heroxp: 850, effect: 0.003, description: "U-VII MP + All XP" },
     "Paradox Discipline": { name: "Paradox Discipline", maxXp: 4e14, heroxp: 865, effect: 0.003, description: "U-VII Income + XP recovery" },
     "Retroactive Training": { name: "Retroactive Training", maxXp: 1.4e15, heroxp: 880, effect: 0.003, description: "U-VII Skill XP + MP" },
+
+    "Ladder Reconstruction": { name: "Ladder Reconstruction", maxXp: 4e15, heroxp: 900, effect: 0.0028, description: "U-VIII MP + All XP" },
+    "Sideways Promotion": { name: "Sideways Promotion", maxXp: 1.3e16, heroxp: 915, effect: 0.003, description: "U-VIII Income + Job XP" },
+    "Fractured Mastery": { name: "Fractured Mastery", maxXp: 4.5e16, heroxp: 930, effect: 0.003, description: "U-VIII Skill XP + Lifespan" },
 }
 
 const itemBaseData = {
@@ -361,6 +365,8 @@ const itemBaseData = {
     "Null Contract": { name: "Null Contract", expense: 3e40, effect: 1.12, description: "U-VI MP + Evil + Essence", heromult: 25, heroeffect: 1e8 },
     "Causality Needle": { name: "Causality Needle", expense: 2e43, effect: 1.5, description: "Universe VII Causality XP", heromult: 26, heroeffect: 1e8 },
     "Paradox Anchor": { name: "Paradox Anchor", expense: 1.5e45, effect: 1.11, description: "U-VII MP + XP + Income", heromult: 27, heroeffect: 1e8 },
+    "Broken Rung": { name: "Broken Rung", expense: 9e47, effect: 1.45, description: "Universe VIII Ladder XP", heromult: 28, heroeffect: 1e8 },
+    "Ascension Map": { name: "Ascension Map", expense: 7e49, effect: 1.10, description: "U-VIII MP + XP + Lifespan", heromult: 29, heroeffect: 1e8 },
 }
 
 const requirementsBaseData = {
@@ -544,6 +550,10 @@ const requirementsBaseData = {
     "Causal Threading": new MultiverseUniverseRequirement([getQuerySelector("Causal Threading")], [{ universe: 7 }]),
     "Paradox Discipline": new MultiverseUniverseRequirement([getQuerySelector("Paradox Discipline")], [{ universe: 7 }, { task: "Causal Threading", requirement: 20 }]),
     "Retroactive Training": new MultiverseUniverseRequirement([getQuerySelector("Retroactive Training")], [{ universe: 7 }, { task: "Paradox Discipline", requirement: 35 }]),
+    "Universe VIII Broken Ladder": new MultiverseUniverseRequirement([removeSpaces(".Universe VIII Broken Ladder")], [{ universe: 8 }]),
+    "Ladder Reconstruction": new MultiverseUniverseRequirement([getQuerySelector("Ladder Reconstruction")], [{ universe: 8 }]),
+    "Sideways Promotion": new MultiverseUniverseRequirement([getQuerySelector("Sideways Promotion")], [{ universe: 8 }, { task: "Ladder Reconstruction", requirement: 20 }]),
+    "Fractured Mastery": new MultiverseUniverseRequirement([getQuerySelector("Fractured Mastery")], [{ universe: 8 }, { task: "Sideways Promotion", requirement: 35 }]),
 
     // Properties
     "Homeless": new CoinRequirement([getQuerySelector("Homeless")], [{ requirement: 0 }]),
@@ -613,6 +623,8 @@ const requirementsBaseData = {
     "Null Contract": new MultiverseUniverseRequirement([getQuerySelector("Null Contract")], [{ universe: 6 }, { task: "Abyssal Recycling", requirement: 25 }, { coins: itemBaseData["Null Contract"].expense * 100 }]),
     "Causality Needle": new MultiverseUniverseRequirement([getQuerySelector("Causality Needle")], [{ universe: 7 }, { task: "Causal Threading", requirement: 10 }, { coins: itemBaseData["Causality Needle"].expense * 100 }]),
     "Paradox Anchor": new MultiverseUniverseRequirement([getQuerySelector("Paradox Anchor")], [{ universe: 7 }, { task: "Paradox Discipline", requirement: 25 }, { coins: itemBaseData["Paradox Anchor"].expense * 100 }]),
+    "Broken Rung": new MultiverseUniverseRequirement([getQuerySelector("Broken Rung")], [{ universe: 8 }, { task: "Ladder Reconstruction", requirement: 10 }, { coins: itemBaseData["Broken Rung"].expense * 100 }]),
+    "Ascension Map": new MultiverseUniverseRequirement([getQuerySelector("Ascension Map")], [{ universe: 8 }, { task: "Sideways Promotion", requirement: 25 }, { coins: itemBaseData["Ascension Map"].expense * 100 }]),
     
 
     // Milestones
@@ -688,12 +700,13 @@ const skillCategories = {
     "Universe IV Chronology": ["Temporal Anchoring", "Borrowed Seconds", "Entropy Calendar"],
     "Universe V Commerce": ["Greed Accounting", "Debt Transmutation", "Star Market"],
     "Universe VI Void Studies": ["Dimming Resonance", "Abyssal Recycling", "Null Continuity"],
-    "Universe VII Causality": ["Causal Threading", "Paradox Discipline", "Retroactive Training"]
+    "Universe VII Causality": ["Causal Threading", "Paradox Discipline", "Retroactive Training"],
+    "Universe VIII Broken Ladder": ["Ladder Reconstruction", "Sideways Promotion", "Fractured Mastery"]
 }
 
 const itemCategories = {
     "Properties": ["Homeless", "Tent", "Wooden Hut", "Cottage", "House", "Large House", "Small Palace", "Grand Palace", "Town Ruler", "City Ruler", "Nation Ruler", "Pocket Dimension", "Void Realm", "Void Universe", "Astral Realm", "Galactic Throne", "Spaceship", "Planet", "Ringworld", "Stellar Neighborhood", "Galaxy", "Supercluster", "Galaxy Filament", "Observable Universe", "Multiverse", "Quantum World", "Boötes Void"],
-    "Misc": ["Book", "Dumbbells", "Personal Squire", "Steel Longsword", "Butler", "Sapphire Charm", "Study Desk", "Library", "Observatory", "Mind's Eye", "Void Necklace", "Void Armor", "Void Blade", "Void Orb", "Void Dust", "Celestial Robe", "Universe Fragment", "Multiverse Fragment", "Stairway to heaven", "Highway to hell", "Tesseract", "Desintegration", "Custom Galaxy", "Hypersphere", "Royal Ledger", "Tax Seal", "Taxed Grimoire", "Arcane Abacus", "Broken Hourglass", "Chronal Compass", "Star Ledger", "Debt Engine", "Dimmed Compass", "Null Contract", "Causality Needle", "Paradox Anchor"]
+    "Misc": ["Book", "Dumbbells", "Personal Squire", "Steel Longsword", "Butler", "Sapphire Charm", "Study Desk", "Library", "Observatory", "Mind's Eye", "Void Necklace", "Void Armor", "Void Blade", "Void Orb", "Void Dust", "Celestial Robe", "Universe Fragment", "Multiverse Fragment", "Stairway to heaven", "Highway to hell", "Tesseract", "Desintegration", "Custom Galaxy", "Hypersphere", "Royal Ledger", "Tax Seal", "Taxed Grimoire", "Arcane Abacus", "Broken Hourglass", "Chronal Compass", "Star Ledger", "Debt Engine", "Dimmed Compass", "Null Contract", "Causality Needle", "Paradox Anchor", "Broken Rung", "Ascension Map"]
 }
 
 const headerRowColors = {
@@ -714,6 +727,7 @@ const headerRowColors = {
     "Universe V Commerce": "#d5a80c",
     "Universe VI Void Studies": "#762B91",
     "Universe VII Causality": "#b14cff",
+    "Universe VIII Broken Ladder": "#ff7a1a",
     "Void Manipulation": "#762B91",
     "Celestial Powers": "#D5C010",
     "Properties_Auto": "#21cc5e",
@@ -745,6 +759,7 @@ const headerRowTextColors = {
     "Universe V Commerce": "purple",
     "Universe VI Void Studies": "white",
     "Universe VII Causality": "white",
+    "Universe VIII Broken Ladder": "purple",
     "Void Manipulation": "white",
     "Celestial Powers": "purple",
     "Properties_Auto": "purple",

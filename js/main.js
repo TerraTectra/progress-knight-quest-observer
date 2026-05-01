@@ -108,6 +108,9 @@ function addMultipliers() {
         } else if (skillCategories["Universe VII Causality"].includes(task.name)) {
             task.xpMultipliers.push(getBindedItemEffect("Causality Needle"))
             task.xpMultipliers.push(getUniverseSevenSkillsXpGain)
+        } else if (skillCategories["Universe VIII Broken Ladder"].includes(task.name)) {
+            task.xpMultipliers.push(getBindedItemEffect("Broken Rung"))
+            task.xpMultipliers.push(getUniverseEightSkillsXpGain)
         }
     }
 

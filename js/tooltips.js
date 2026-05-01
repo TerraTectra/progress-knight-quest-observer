@@ -238,6 +238,11 @@ const tooltips = {
     "Retroactive Training": "Make past training count twice by proving it happened later. This improves Causal stability and late skill training.",
     "Causality Needle": "A needle used to stitch broken cause-and-effect chains. It improves Universe VII Causality training.",
     "Paradox Anchor": "An anchor thrown backward through time. It improves Universe VII MP gain, XP recovery, and income recovery.",
+    "Ladder Reconstruction": "Universe VIII breaks familiar growth ladders. Rebuild enough rungs to turn broken progression into MP and XP recovery.",
+    "Sideways Promotion": "Advance by moving sideways instead of upward. This restores income and job progress inside Broken Ladder.",
+    "Fractured Mastery": "Mastery no longer arrives in order. Collect fractured lessons to improve skill training and lifespan in Universe VIII.",
+    "Broken Rung": "A rung from a ladder that never reached the same place twice. It improves Universe VIII Broken Ladder training.",
+    "Ascension Map": "A map of routes that do not point upward. It improves Universe VIII MP gain, XP recovery, and lifespan recovery.",
 
     "Strong Hope": "Another Faint Hope buff?!",
     "Ruler of the Metaverse": "Now you are thinking with portals",

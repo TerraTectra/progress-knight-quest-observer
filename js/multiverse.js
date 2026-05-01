@@ -147,14 +147,14 @@ function getMultiverseXpGain() {
     if (!isMultiverseUnlocked())
         return 1
 
-    return getUniverseInfo().xpMult * (1 + getMultiverseUpgradeLevel("stable_memory") * 0.08) * getUniverseSevenXpGain()
+    return getUniverseInfo().xpMult * (1 + getMultiverseUpgradeLevel("stable_memory") * 0.08) * getUniverseSevenXpGain() * getUniverseEightXpGain()
 }
 
 function getMultiverseIncomeGain() {
     if (!isMultiverseUnlocked())
         return 1
 
-    return getUniverseInfo().incomeMult * (1 + getMultiverseUpgradeLevel("universal_labor") * 0.1) * getUniverseTwoIncomeGain() * getUniverseFiveIncomeGain() * getUniverseSevenIncomeGain()
+    return getUniverseInfo().incomeMult * (1 + getMultiverseUpgradeLevel("universal_labor") * 0.1) * getUniverseTwoIncomeGain() * getUniverseFiveIncomeGain() * getUniverseSevenIncomeGain() * getUniverseEightIncomeGain()
 }
 
 function getMultiverseExpenseGain() {
@@ -169,7 +169,7 @@ function getMultiverseLifespanGain() {
     if (!isMultiverseUnlocked())
         return 1
 
-    return getUniverseInfo().lifespanMult * (1 + getMultiverseUpgradeLevel("long_echo") * 0.05) * getUniverseFourLifespanGain() * getUniverseSixLifespanGain()
+    return getUniverseInfo().lifespanMult * (1 + getMultiverseUpgradeLevel("long_echo") * 0.05) * getUniverseFourLifespanGain() * getUniverseSixLifespanGain() * getUniverseEightLifespanGain()
 }
 
 function getMultiverseEvilGain() {
@@ -245,6 +245,9 @@ function getUniverseParameterName(id = getCurrentUniverseId()) {
     if (id == 7)
         return "Causal stability"
 
+    if (id == 8)
+        return "Ladder integrity"
+
     if (id == 1)
         return "Prime stability"
 
@@ -272,6 +275,9 @@ function getUniverseParameterGain(id = getCurrentUniverseId()) {
 
     if (id == 7)
         return getUniverseSevenCausalStabilityGain()
+
+    if (id == 8)
+        return getUniverseEightLadderIntegrityGain()
 
     return 1
 }
@@ -530,6 +536,57 @@ function getUniverseSevenSkillsXpGain() {
 
     const retroactiveTraining = gameData.taskData["Retroactive Training"]
     return retroactiveTraining == null ? 1 : 1 + retroactiveTraining.level * 0.008
+}
+
+function getUniverseEightLadderIntegrityGain() {
+    const ladderReconstruction = gameData.taskData["Ladder Reconstruction"]
+    const sidewaysPromotion = gameData.taskData["Sideways Promotion"]
+    const fracturedMastery = gameData.taskData["Fractured Mastery"]
+    const ascensionMap = getBindedItemEffect("Ascension Map")
+
+    const ladderGain = ladderReconstruction == null ? 1 : 1 + ladderReconstruction.level * ladderReconstruction.baseData.effect
+    const sidewaysGain = sidewaysPromotion == null ? 1 : 1 + sidewaysPromotion.level * sidewaysPromotion.baseData.effect
+    const masteryGain = fracturedMastery == null ? 1 : 1 + fracturedMastery.level * fracturedMastery.baseData.effect
+    return ladderGain * sidewaysGain * masteryGain * ascensionMap()
+}
+
+function getUniverseEightXpGain() {
+    if (!isMultiverseUnlocked() || getCurrentUniverseId() != 8)
+        return 1
+
+    const ladderReconstruction = gameData.taskData["Ladder Reconstruction"]
+    const fracturedMastery = gameData.taskData["Fractured Mastery"]
+    const ascensionMap = getBindedItemEffect("Ascension Map")
+    const ladderGain = ladderReconstruction == null ? 1 : 1 + ladderReconstruction.level * 0.0035
+    const masteryGain = fracturedMastery == null ? 1 : 1 + fracturedMastery.level * 0.0025
+    return ladderGain * masteryGain * ascensionMap()
+}
+
+function getUniverseEightIncomeGain() {
+    if (!isMultiverseUnlocked() || getCurrentUniverseId() != 8)
+        return 1
+
+    const sidewaysPromotion = gameData.taskData["Sideways Promotion"]
+    const promotionGain = sidewaysPromotion == null ? 1 : 1 + sidewaysPromotion.level * 0.004
+    return promotionGain
+}
+
+function getUniverseEightLifespanGain() {
+    if (!isMultiverseUnlocked() || getCurrentUniverseId() != 8)
+        return 1
+
+    const fracturedMastery = gameData.taskData["Fractured Mastery"]
+    const ascensionMap = getBindedItemEffect("Ascension Map")
+    const masteryGain = fracturedMastery == null ? 1 : 1 + fracturedMastery.level * 0.0025
+    return masteryGain * ascensionMap()
+}
+
+function getUniverseEightSkillsXpGain() {
+    if (!isMultiverseUnlocked())
+        return 1
+
+    const fracturedMastery = gameData.taskData["Fractured Mastery"]
+    return fracturedMastery == null ? 1 : 1 + fracturedMastery.level * 0.008
 }
 
 function getMultiverseVoidResonance() {
