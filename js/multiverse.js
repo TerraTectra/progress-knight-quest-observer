@@ -12,14 +12,14 @@ const multiverseUniverses = [
 ]
 
 const multiverseUpgradeData = {
-    stable_memory: { name: "Stable Memory", baseCost: 4, costMult: 2.3, description: "+8% all XP per level." },
-    universal_labor: { name: "Universal Labor", baseCost: 6, costMult: 2.45, description: "+10% job income per level." },
-    long_echo: { name: "Long Echo", baseCost: 8, costMult: 2.6, description: "+5% lifespan per level." },
-    abyss_tithe: { name: "Abyss Tithe", baseCost: 12, costMult: 2.7, description: "+12% Evil gain per level." },
-    essence_prism: { name: "Essence Prism", baseCost: 16, costMult: 2.85, description: "+10% Essence gain per level." },
-    dark_singularity: { name: "Dark Singularity", baseCost: 22, costMult: 3.05, description: "+15% Dark Matter gain per level." },
-    void_cartography: { name: "Void Cartography", baseCost: 10, costMult: 2.75, description: "+18% Multiverse Point gain per level." },
-    soft_constants: { name: "Soft Constants", baseCost: 18, costMult: 3, description: "-3% expenses per level, capped at -45%." },
+    stable_memory: { name: "Stable Memory", baseCost: 4, costMult: 2.3, effect: 0.08, description: "+8% all XP per level." },
+    universal_labor: { name: "Universal Labor", baseCost: 6, costMult: 2.45, effect: 0.10, description: "+10% job income per level." },
+    long_echo: { name: "Long Echo", baseCost: 8, costMult: 2.6, effect: 0.06, description: "+6% lifespan per level." },
+    abyss_tithe: { name: "Abyss Tithe", baseCost: 12, costMult: 2.7, effect: 0.14, description: "+14% Evil gain per level and a small MP resonance bonus." },
+    essence_prism: { name: "Essence Prism", baseCost: 16, costMult: 2.85, effect: 0.12, description: "+12% Essence gain per level and a small MP resonance bonus." },
+    dark_singularity: { name: "Dark Singularity", baseCost: 22, costMult: 3.05, effect: 0.18, description: "+18% Dark Matter gain per level and improves MP income from the dark layer." },
+    void_cartography: { name: "Void Cartography", baseCost: 10, costMult: 2.75, effect: 0.16, description: "+16% Multiverse Point gain per level." },
+    soft_constants: { name: "Soft Constants", baseCost: 18, costMult: 3, effect: 0.04, cap: 0.50, description: "-4% expenses per level, capped at -50%." },
 }
 
 function getMultiverseState() {
@@ -49,6 +49,7 @@ function getMultiverseState() {
             gameData.multiverse.upgrades[key] = 0
         if (isNaN(gameData.multiverse.upgrades[key]) || !isFinite(gameData.multiverse.upgrades[key]))
             gameData.multiverse.upgrades[key] = 0
+        gameData.multiverse.upgrades[key] = Math.max(0, Math.floor(gameData.multiverse.upgrades[key]))
     }
 
     if (gameData.multiverse.current_universe == null || isNaN(gameData.multiverse.current_universe))
@@ -129,11 +130,15 @@ function softcapMultiverseSource(value, start = 250, power = 0.62) {
 
 function getMultiverseUpgradeCost(upgrade) {
     const data = multiverseUpgradeData[upgrade]
+    if (data == null)
+        return Infinity
+
     return data.baseCost * Math.pow(data.costMult, getMultiverseUpgradeLevel(upgrade))
 }
 
 function canBuyMultiverseUpgrade(upgrade) {
-    return isMultiverseUnlocked() && gameData.multiverse_points >= getMultiverseUpgradeCost(upgrade)
+    const cost = getMultiverseUpgradeCost(upgrade)
+    return isMultiverseUnlocked() && Number.isFinite(cost) && gameData.multiverse_points >= cost
 }
 
 function buyMultiverseUpgrade(upgrade) {
@@ -143,6 +148,28 @@ function buyMultiverseUpgrade(upgrade) {
     gameData.multiverse_points -= getMultiverseUpgradeCost(upgrade)
     getMultiverseState().upgrades[upgrade] += 1
     return true
+}
+
+function getMultiverseUpgradeMultiplier(upgrade) {
+    const data = multiverseUpgradeData[upgrade]
+    if (data == null)
+        return 1
+
+    return 1 + getMultiverseUpgradeLevel(upgrade) * data.effect
+}
+
+function getMultiverseExpenseReduction() {
+    const data = multiverseUpgradeData.soft_constants
+    return Math.min(data.cap, getMultiverseUpgradeLevel("soft_constants") * data.effect)
+}
+
+function getMultiverseDarkLayerMpGain() {
+    return getSafeMultiverseNumber(
+        1
+        + getMultiverseUpgradeLevel("dark_singularity") * 0.06
+        + getMultiverseUpgradeLevel("abyss_tithe") * 0.025
+        + getMultiverseUpgradeLevel("essence_prism") * 0.025
+    )
 }
 
 function canEnterUniverse(id) {
@@ -192,21 +219,21 @@ function getMultiverseXpGain() {
     if (!isMultiverseUnlocked())
         return 1
 
-    return getSafeMultiverseNumber(getUniverseInfo().xpMult * (1 + getMultiverseUpgradeLevel("stable_memory") * 0.08) * getUniverseSevenXpGain() * getUniverseEightXpGain() * getUniverseNineXpGain() * getUniverseTenXpGain())
+    return getSafeMultiverseNumber(getUniverseInfo().xpMult * getMultiverseUpgradeMultiplier("stable_memory") * getUniverseSevenXpGain() * getUniverseEightXpGain() * getUniverseNineXpGain() * getUniverseTenXpGain())
 }
 
 function getMultiverseIncomeGain() {
     if (!isMultiverseUnlocked())
         return 1
 
-    return getSafeMultiverseNumber(getUniverseInfo().incomeMult * (1 + getMultiverseUpgradeLevel("universal_labor") * 0.1) * getUniverseTwoIncomeGain() * getUniverseFiveIncomeGain() * getUniverseSevenIncomeGain() * getUniverseEightIncomeGain() * getUniverseNineIncomeGain())
+    return getSafeMultiverseNumber(getUniverseInfo().incomeMult * getMultiverseUpgradeMultiplier("universal_labor") * getUniverseTwoIncomeGain() * getUniverseFiveIncomeGain() * getUniverseSevenIncomeGain() * getUniverseEightIncomeGain() * getUniverseNineIncomeGain())
 }
 
 function getMultiverseExpenseGain() {
     if (!isMultiverseUnlocked())
         return 1
 
-    const expenseReduction = Math.min(0.45, getMultiverseUpgradeLevel("soft_constants") * 0.03)
+    const expenseReduction = getMultiverseExpenseReduction()
     return getSafeMultiverseNumber(getUniverseInfo().expenseMult * (1 - expenseReduction) * getUniverseTwoExpenseGain() * getUniverseThreeExpenseGain() * getUniverseFiveExpenseGain() * getUniverseNineExpenseGain())
 }
 
@@ -214,28 +241,28 @@ function getMultiverseLifespanGain() {
     if (!isMultiverseUnlocked())
         return 1
 
-    return getSafeMultiverseNumber(getUniverseInfo().lifespanMult * (1 + getMultiverseUpgradeLevel("long_echo") * 0.05) * getUniverseFourLifespanGain() * getUniverseSixLifespanGain() * getUniverseEightLifespanGain() * getUniverseTenLifespanGain())
+    return getSafeMultiverseNumber(getUniverseInfo().lifespanMult * getMultiverseUpgradeMultiplier("long_echo") * getUniverseFourLifespanGain() * getUniverseSixLifespanGain() * getUniverseEightLifespanGain() * getUniverseTenLifespanGain())
 }
 
 function getMultiverseEvilGain() {
     if (!isMultiverseUnlocked())
         return 1
 
-    return getSafeMultiverseNumber((1 + getMultiverseUpgradeLevel("abyss_tithe") * 0.12) * getUniverseSixEvilGain() * getUniverseNineEvilGain() * getUniverseTenEvilGain())
+    return getSafeMultiverseNumber(getMultiverseUpgradeMultiplier("abyss_tithe") * getUniverseSixEvilGain() * getUniverseNineEvilGain() * getUniverseTenEvilGain())
 }
 
 function getMultiverseEssenceGain() {
     if (!isMultiverseUnlocked())
         return 1
 
-    return getSafeMultiverseNumber((1 + getMultiverseUpgradeLevel("essence_prism") * 0.10) * getUniverseThreeEssenceGain() * getUniverseSixEssenceGain() * getUniverseNineEssenceGain() * getUniverseTenEssenceGain())
+    return getSafeMultiverseNumber(getMultiverseUpgradeMultiplier("essence_prism") * getUniverseThreeEssenceGain() * getUniverseSixEssenceGain() * getUniverseNineEssenceGain() * getUniverseTenEssenceGain())
 }
 
 function getMultiverseDarkMatterGain() {
     if (!isMultiverseUnlocked())
         return 1
 
-    return getSafeMultiverseNumber(1 + getMultiverseUpgradeLevel("dark_singularity") * 0.15)
+    return getSafeMultiverseNumber(getMultiverseUpgradeMultiplier("dark_singularity") * getUniverseNineDarkMatterGain() * getUniverseTenDarkMatterGain())
 }
 
 function getMultiverseCategoryPower(category, scale) {
@@ -267,7 +294,7 @@ function getMultiverseDarkLayerSource() {
     const darkMatter = 1 + Math.log10(Math.max(0, gameData.dark_matter) + 1) * 0.01
     const hypercubes = 1 + Math.log10(Math.max(0, gameData.hypercubes) + 1) * 0.025
     const essence = 1 + Math.max(0, Math.log10(Math.max(0, gameData.essence) + 1) - 20) * 0.015
-    return getSafeMultiverseNumber(darkMatter * hypercubes * essence)
+    return getSafeMultiverseNumber(darkMatter * hypercubes * essence * getMultiverseDarkLayerMpGain())
 }
 
 function getMultiverseUniverseSource() {
@@ -756,6 +783,18 @@ function getUniverseNineEssenceGain() {
     return signalGain * quietBeacon()
 }
 
+function getUniverseNineDarkMatterGain() {
+    if (!isMultiverseUnlocked() || getCurrentUniverseId() != 9)
+        return 1
+
+    const collapseContainment = gameData.taskData["Collapse Containment"]
+    const lastSignal = gameData.taskData["Last Signal"]
+    const quietBeacon = getMultiverseItemEffect("Quiet Beacon")
+    const containmentGain = collapseContainment == null ? 1 : 1 + collapseContainment.level * 0.002
+    const signalGain = lastSignal == null ? 1 : 1 + lastSignal.level * 0.0025
+    return containmentGain * signalGain * quietBeacon()
+}
+
 function getUniverseNineSkillsXpGain() {
     if (!isMultiverseUnlocked())
         return 1
@@ -866,6 +905,18 @@ function getUniverseTenEssenceGain() {
     return witnessGain
 }
 
+function getUniverseTenDarkMatterGain() {
+    if (!isMultiverseUnlocked() || getCurrentUniverseId() != 10)
+        return 1
+
+    const thresholdListening = gameData.taskData["Threshold Listening"]
+    const witnessPreparation = gameData.taskData["Witness Preparation"]
+    const observerLens = getMultiverseItemEffect("Observer Lens")
+    const listeningGain = thresholdListening == null ? 1 : 1 + thresholdListening.level * 0.0018
+    const witnessGain = witnessPreparation == null ? 1 : 1 + witnessPreparation.level * 0.0022
+    return listeningGain * witnessGain * observerLens()
+}
+
 function getUniverseTenSkillsXpGain() {
     if (!isMultiverseUnlocked())
         return 1
@@ -885,9 +936,12 @@ function getMultiversePointGain() {
     if (!isMultiverseUnlocked())
         return 0
 
-    const cartography = 1 + getMultiverseUpgradeLevel("void_cartography") * 0.18
-    const voidResonance = Math.pow(getMultiverseVoidResonance(), 0.55)
-    return getSafeMultiverseNumber(0.003 * voidResonance * getTotalUniversePassiveWeight() * cartography * getMultiverseBreakRewardGain(), 0, 1e300)
+    const cartography = getMultiverseUpgradeMultiplier("void_cartography")
+    const voidResonance = Math.pow(getMultiverseVoidResonance(), 0.52)
+    const universeWeight = getTotalUniversePassiveWeight()
+    const observerThreshold = getHighestUniverseId() >= 10 ? 1.12 : 1
+
+    return getSafeMultiverseNumber(0.0026 * voidResonance * universeWeight * cartography * getMultiverseBreakRewardGain() * observerThreshold, 0, 1e300)
 }
 
 function breakUniverseAltarCost() {
@@ -922,6 +976,8 @@ function increaseMultiversePoints() {
     if (!canSimulate() || !isMultiverseUnlocked())
         return
 
+    // MP is a real-time passive layer. Do not route this through applySpeed:
+    // Time Warping, admin speed, and universe game-speed effects must not multiply it.
     const gain = getSafeMultiverseNumber(getMultiversePointGain() / updateSpeed, 0, 1e300)
     gameData.multiverse_points += gain
     gameData.multiverse_points_lifetime += gain
