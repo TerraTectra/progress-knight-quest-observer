@@ -1362,30 +1362,56 @@ function renderObservedObserverSubject() {
     const routeQuality = getObserverSubjectRouteQuality(subject)
     const property = getObserverBotProperty(subject)
     const items = subject.bot_items == null || subject.bot_items.length == 0 ? "None" : subject.bot_items.slice(-4).join(", ")
+    const aiProgress = Math.min(100, subject.ai_xp / getObserverAiXpToNext(subject) * 100)
 
     document.getElementById("observerWatchName").textContent = subject.name
     document.getElementById("observerWatchRank").textContent = rank.name
+    document.getElementById("observerWatchPersonality").textContent = personality.name
     document.getElementById("observerWatchAge").textContent = format(Math.floor(subject.bot_age_days / 365), 0) + " Day " + formatWhole(Math.floor(subject.bot_age_days % 365))
     document.getElementById("observerWatchUniverse").textContent = "U-" + stage.universe
+    document.getElementById("observerWatchPhase").textContent = stage.name
     document.getElementById("observerWatchCoins").textContent = format(subject.bot_coins, 2)
     document.getElementById("observerWatchMeta").textContent = format(subject.bot_evil, 2) + " / " + format(subject.bot_mp, 2)
     document.getElementById("observerWatchOp").textContent = format(getObserverSubjectOpGain(subject), 3)
+    document.getElementById("observerWatchClean").textContent = formatTime(subject.clean_time, true)
+    document.getElementById("observerWatchMistakes").textContent = formatWhole(subject.mistakes)
+    document.getElementById("observerWatchRouteQuality").textContent = "x" + format(routeQuality, 2)
+    document.getElementById("observerWatchAiLevel").textContent = formatWhole(subject.ai_level) + " (" + format(aiProgress, 1) + "%)"
+    document.getElementById("observerWatchAiMeter").style.width = aiProgress + "%"
+    document.getElementById("observerWatchProgressMeter").style.width = progress + "%"
 
-    document.getElementById("observerWatchTable").innerHTML =
-        `<tr style="background:#4caf50;"><th>Route</th><th>Level</th><th>State</th><th>Progress</th></tr>` +
+    document.getElementById("observerWatchJobsTable").innerHTML =
+        `<tr><th>Job</th><th>Level</th><th>State</th><th>Progress</th></tr>` +
         `<tr class="rb-observer-bot-row-muted"><td>${previousStage.job}</td><td>${Math.max(1, jobLevel - 16)}</td><td>Completed</td><td>Max</td></tr>` +
         `<tr class="rb-observer-bot-row-active"><td>${subject.bot_focus_job}</td><td>${jobLevel}</td><td>${subject.bot_focus_job == stage.job ? "Current job" : "Wrong focus"}</td><td>${format(progress, 1)}%</td></tr>` +
-        `<tr><td>${nextStage.job}</td><td>${Math.max(1, jobLevel - 7)}</td><td>Next route</td><td>Locked</td></tr>` +
-        `<tr style="background:#18d2d9;"><th>Skill route</th><th>Level</th><th>State</th><th>Progress</th></tr>` +
+        `<tr><td>${nextStage.job}</td><td>${Math.max(1, jobLevel - 7)}</td><td>Next route</td><td>Locked</td></tr>`
+
+    document.getElementById("observerWatchSkillsTable").innerHTML =
+        `<tr><th>Skill</th><th>Level</th><th>State</th><th>Progress</th></tr>` +
         `<tr class="rb-observer-bot-row-muted"><td>${previousStage.skill}</td><td>${Math.max(1, skillLevel - 14)}</td><td>Completed</td><td>Max</td></tr>` +
         `<tr class="rb-observer-bot-row-active"><td>${subject.bot_focus_skill}</td><td>${skillLevel}</td><td>${subject.bot_focus_skill == stage.skill ? "Current skill" : "Wrong focus"}</td><td>${format(progress, 1)}%</td></tr>` +
-        `<tr><td>${nextStage.skill}</td><td>${Math.max(1, skillLevel - 6)}</td><td>Next unlock</td><td>Waiting</td></tr>` +
-        `<tr style="background:#c06578;"><th>Shop</th><th>Owned</th><th>Effect</th><th>State</th></tr>` +
-        `<tr><td>Property</td><td>${property.name}</td><td>Route x${format(1 + property.quality, 2)}</td><td>Active</td></tr>` +
-        `<tr><td>Items</td><td colspan="2">${items}</td><td>x${format(1 + getObserverBotItemQuality(subject), 2)}</td></tr>`
+        `<tr><td>${nextStage.skill}</td><td>${Math.max(1, skillLevel - 6)}</td><td>Next unlock</td><td>Waiting</td></tr>`
+
+    document.getElementById("observerWatchShopRows").innerHTML =
+        getObserverWatchShopRow(property.name, "Route x" + format(1 + property.quality, 2), "Owned") +
+        getObserverWatchShopRow(items, "Items x" + format(1 + getObserverBotItemQuality(subject), 2), subject.bot_items.length > 0 ? "Owned" : "Waiting") +
+        getObserverWatchShopRow(getObserverWatchNextProperty(subject), "Next housing", "Saving") +
+        getObserverWatchShopRow(getObserverWatchNextItem(subject), "Next item", "Saving")
+
+    document.getElementById("observerWatchEvilTable").innerHTML =
+        `<tr><td>Evil route</td><td>${subject.stage_index >= 2 ? "Open" : "Locked"}</td></tr>` +
+        `<tr><td>Void approach</td><td>${subject.stage_index >= 3 ? "In progress" : "Locked"}</td></tr>` +
+        `<tr><td>Bot Evil</td><td>${format(subject.bot_evil, 2)}</td></tr>` +
+        `<tr><td>Next target</td><td>${stage.universe == 1 ? nextStage.name : "Universe " + stage.universe}</td></tr>`
+
+    document.getElementById("observerWatchMultiverseTable").innerHTML =
+        `<tr><td>Current universe</td><td>U-${stage.universe}</td></tr>` +
+        `<tr><td>Multiverse signal</td><td>${subject.stage_index >= 4 ? "Known" : "Locked"}</td></tr>` +
+        `<tr><td>Bot MP</td><td>${format(subject.bot_mp, 2)}</td></tr>` +
+        `<tr><td>Universe X clears</td><td>${formatWhole(subject.completed_universe_x)}</td></tr>`
 
     document.getElementById("observerWatchDecisionState").innerHTML =
-        `<b>AI decision state</b><br>` +
+        `<b>Last decision:</b> ${subject.last_action}<br>` +
         `<span style="color:gray;">Goal:</span> ${getObserverSubjectGoal(subject)}<br>` +
         `<span style="color:gray;">Rank behavior:</span> ${getObserverSubjectRankStyle(subject)}<br>` +
         `<span style="color:gray;">Character:</span> ${personality.name} - ${getObserverSubjectPersonalityStyle(subject)}<br>` +
@@ -1404,6 +1430,34 @@ function renderObservedObserverSubject() {
         logHtml = `<div>Started a fresh Progress Knight run.</div>`
 
     document.getElementById("observerWatchLog").innerHTML = logHtml
+}
+
+function getObserverWatchShopRow(name, effect, state) {
+    const stateClass = state == "Owned" ? "rb-observer-watch-shop-state-owned" : "rb-observer-watch-shop-state-waiting"
+    return `<div class="rb-observer-watch-shop-row">` +
+        `<div><b>${name}</b><br><span style="color:gray;">${effect}</span></div>` +
+        `<div class="${stateClass}">${state}</div>` +
+    `</div>`
+}
+
+function getObserverWatchNextProperty(subject) {
+    const nextProperty = observerBotProperties[Math.min(observerBotProperties.length - 1, (subject.bot_property_index || 0) + 1)]
+    if (nextProperty == null || nextProperty.name == getObserverBotProperty(subject).name)
+        return "Max housing"
+
+    return nextProperty.name
+}
+
+function getObserverWatchNextItem(subject) {
+    if (subject.bot_items == null)
+        subject.bot_items = []
+
+    for (const item of observerBotItems) {
+        if (item.stage <= subject.stage_index && !subject.bot_items.includes(item.name))
+            return item.name
+    }
+
+    return "No visible item"
 }
 
 function renderObserverUpgrades() {

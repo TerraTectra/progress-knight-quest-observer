@@ -99,6 +99,44 @@ async function runScenario(browser, name, setup) {
         failures.push(`${name}: first observer subject must generate Observer Points`)
     if (name == "observer" && (!globals.observerSubjects[0] || globals.observerSubjects[0].logLength <= 0))
         failures.push(`${name}: first observer subject must keep a decision log`)
+    if (name == "observer") {
+        const watchFailures = await page.evaluate(() => {
+            const failures = []
+            const subject = gameData.observer && gameData.observer.subjects ? gameData.observer.subjects[0] : null
+            if (subject == null || typeof observeObserverSubject != "function")
+                return ["Observer watch cannot select the first subject"]
+
+            observeObserverSubject(subject.id)
+            updateUI()
+
+            const watch = document.getElementById("observerWatchView")
+            if (watch == null || watch.classList.contains("hidden"))
+                failures.push("Observer watch view did not open")
+
+            const requiredIds = [
+                "observerWatchName",
+                "observerWatchPersonality",
+                "observerWatchPhase",
+                "observerWatchJobsTable",
+                "observerWatchSkillsTable",
+                "observerWatchShopRows",
+                "observerWatchEvilTable",
+                "observerWatchMultiverseTable",
+                "observerWatchDecisionState",
+                "observerWatchLog",
+            ]
+
+            for (const id of requiredIds) {
+                const element = document.getElementById(id)
+                if (element == null || element.textContent.trim().length == 0)
+                    failures.push(`Observer watch field ${id} is empty`)
+            }
+
+            return failures
+        })
+
+        failures.push(...watchFailures.map(failure => `${name}: ${failure}`))
+    }
     if (name == "late") {
         const upgradeFailures = await page.evaluate(() => {
             if (typeof multiverseUpgradeData == "undefined")

@@ -1,0 +1,482 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>Observer Watch v2 preview</title>
+    <link rel="stylesheet" href="../css/w3.css">
+    <link rel="stylesheet" href="../css/styles.css">
+    <link rel="stylesheet" href="../css/dark.css">
+    <style>
+        :root {
+            --pk-bg: rgb(31, 31, 31);
+            --pk-panel: rgb(43, 43, 43);
+            --pk-panel-dark: rgb(36, 36, 36);
+            --pk-row: rgb(40, 40, 40);
+            --pk-row-light: rgb(48, 48, 48);
+            --pk-border: rgb(73, 73, 73);
+            --pk-muted: rgb(165, 165, 165);
+            --pk-blue: rgb(46, 148, 231);
+            --pk-cyan: rgb(34, 169, 193);
+            --pk-green: rgb(76, 175, 80);
+            --pk-red: rgb(226, 50, 63);
+            --pk-gold: rgb(226, 192, 32);
+            --pk-purple: rgb(118, 43, 145);
+            --pk-pink: rgb(196, 55, 146);
+            --pk-orange: rgb(255, 152, 0);
+        }
+
+        body.preview-body {
+            background: var(--pk-bg);
+            color: white;
+            padding: 22px;
+        }
+
+        .preview-shell {
+            display: flex;
+            align-items: flex-start;
+            gap: 0.85em;
+        }
+
+        .preview-sidebar {
+            width: 252px;
+            flex: 0 0 252px;
+            background: var(--pk-panel);
+            border: 1px solid rgb(24, 24, 24);
+            padding: 0.85em;
+        }
+
+        .preview-main {
+            min-width: 1180px;
+            max-width: 1450px;
+            flex: 1 1 auto;
+        }
+
+        .preview-title {
+            display: flex;
+            align-items: baseline;
+            gap: 0.8em;
+            margin-bottom: 0.8em;
+        }
+
+        .preview-title h1 {
+            margin: 0;
+            font-size: 30px;
+            font-weight: 400;
+        }
+
+        .muted {
+            color: var(--pk-muted);
+        }
+
+        .stat-block {
+            margin-top: 0.75em;
+            padding-top: 0.55em;
+            border-top: 1px solid var(--pk-border);
+        }
+
+        .stat-value {
+            color: white;
+            font-size: 1.25em;
+        }
+
+        .stat-blue { color: #00bfff; }
+        .stat-red { color: red; }
+        .stat-purple { color: #9b5cff; }
+        .stat-gold { color: var(--pk-gold); }
+        .stat-green { color: #20d45a; }
+
+        .top-tabs {
+            display: flex;
+            flex-wrap: wrap;
+            background: var(--pk-panel);
+            border: 1px solid rgb(24, 24, 24);
+        }
+
+        .top-tabs .baritem {
+            color: white;
+            min-width: 90px;
+            border-right: 1px solid var(--pk-border);
+            background: var(--pk-panel-dark);
+            text-align: center;
+        }
+
+        .top-tabs .active {
+            background: rgb(96, 125, 139);
+        }
+
+        .watch-header {
+            margin-top: 0.65em;
+            background: var(--pk-panel);
+            border: 1px solid rgb(24, 24, 24);
+            padding: 0.75em 0.9em;
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) 170px;
+            gap: 0.75em;
+        }
+
+        .watch-header h2 {
+            margin: 0;
+            font-size: 1.35em;
+        }
+
+        .watch-button {
+            background: rgb(35, 35, 35);
+            border: 1px solid white;
+            color: white;
+            padding: 0.4em 0.7em;
+            text-align: center;
+        }
+
+        .watch-grid {
+            display: grid;
+            grid-template-columns: 260px minmax(0, 1fr);
+            gap: 0.8em;
+            margin-top: 0.8em;
+        }
+
+        .panel {
+            background: var(--pk-panel);
+            border: 1px solid rgb(24, 24, 24);
+        }
+
+        .panel-pad {
+            padding: 0.85em;
+        }
+
+        .section-title {
+            padding: 0.38em 0.65em;
+            font-weight: bold;
+            color: white;
+        }
+
+        .section-subject { background: var(--pk-purple); }
+        .section-route { background: var(--pk-cyan); }
+        .section-work { background: var(--pk-green); }
+        .section-skill { background: var(--pk-pink); }
+        .section-shop { background: rgb(34, 169, 193); }
+        .section-evil { background: var(--pk-red); }
+        .section-multi { background: var(--pk-purple); }
+        .section-log { background: rgb(96, 125, 139); }
+
+        .subject-card {
+            border-left: 0.35em solid #777;
+        }
+
+        .subject-name {
+            font-size: 1.28em;
+            font-weight: bold;
+        }
+
+        .rank-pill {
+            display: inline-block;
+            border: 1px solid currentColor;
+            padding: 0.12em 0.45em;
+            margin-top: 0.35em;
+            color: #aaa;
+        }
+
+        .trait-row {
+            display: flex;
+            justify-content: space-between;
+            gap: 0.6em;
+            border-top: 1px solid rgb(58, 58, 58);
+            padding-top: 0.38em;
+            margin-top: 0.38em;
+        }
+
+        .trait-row span {
+            color: var(--pk-muted);
+        }
+
+        .meter {
+            height: 13px;
+            border: 1px solid var(--pk-border);
+            background: rgb(22, 22, 22);
+            margin-top: 0.45em;
+        }
+
+        .meter div {
+            height: 100%;
+            background: var(--pk-blue);
+        }
+
+        .meter .green { background: var(--pk-green); }
+        .meter .gold { background: var(--pk-gold); }
+        .meter .red { background: var(--pk-red); }
+        .meter .purple { background: var(--pk-purple); }
+
+        .bot-tabs {
+            display: flex;
+            background: var(--pk-panel-dark);
+            border: 1px solid rgb(24, 24, 24);
+            border-bottom: 0;
+        }
+
+        .bot-tabs div {
+            padding: 0.45em 0.85em;
+            min-width: 96px;
+            border-right: 1px solid var(--pk-border);
+            text-align: center;
+        }
+
+        .bot-tabs .active {
+            background: var(--pk-cyan);
+            color: white;
+        }
+
+        .content-grid {
+            display: grid;
+            grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr);
+            gap: 0.8em;
+        }
+
+        table.watch-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .watch-table th {
+            text-align: left;
+            color: white;
+            border-bottom: 1px solid var(--pk-border);
+            padding: 0.35em 0.45em;
+        }
+
+        .watch-table td {
+            padding: 0.35em 0.45em;
+            border-bottom: 1px solid rgb(58, 58, 58);
+        }
+
+        .watch-table tr.active-row td:first-child {
+            background: var(--pk-blue);
+            color: white;
+        }
+
+        .watch-table tr.locked td {
+            color: rgb(125, 125, 125);
+        }
+
+        .decision-box {
+            background: var(--pk-row);
+            border: 1px solid var(--pk-border);
+            padding: 0.7em;
+            margin-bottom: 0.7em;
+        }
+
+        .decision-grid {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 0.55em;
+        }
+
+        .mini-stat {
+            background: var(--pk-row);
+            border: 1px solid var(--pk-border);
+            padding: 0.5em 0.6em;
+        }
+
+        .mini-stat span {
+            display: block;
+            color: var(--pk-muted);
+            font-size: 0.9em;
+        }
+
+        .log {
+            background: rgb(32, 32, 32);
+            border: 1px solid var(--pk-border);
+            padding: 0.65em;
+            max-height: 230px;
+            overflow: hidden;
+        }
+
+        .log div {
+            padding: 0.25em 0;
+            border-bottom: 1px solid rgb(52, 52, 52);
+        }
+
+        .shop-row {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) 110px;
+            gap: 0.6em;
+            border-bottom: 1px solid rgb(58, 58, 58);
+            padding: 0.42em 0;
+        }
+
+        .shop-row .owned {
+            color: var(--pk-green);
+        }
+
+        .shop-row .waiting {
+            color: var(--pk-muted);
+        }
+
+        .warning-note {
+            margin-top: 0.75em;
+            color: var(--pk-muted);
+            font-size: 0.92em;
+        }
+    </style>
+</head>
+<body class="preview-body dark">
+    <div class="preview-title">
+        <h1>Progress Knight Quest</h1>
+        <span class="muted">Observer Watch v2 preview · original-style mockup</span>
+    </div>
+
+    <div class="preview-shell">
+        <aside class="preview-sidebar">
+            <div class="stat-value">Observer</div>
+            <div class="muted">Only Observer tab remains after entry.</div>
+
+            <div class="stat-block">
+                <div class="stat-blue">Observer Points: 42.8k</div>
+                <div class="muted">+18.4/s from subjects</div>
+            </div>
+
+            <div class="stat-block">
+                <div class="stat-purple">Subjects: 5</div>
+                <div class="muted">Best universe: U-VI</div>
+            </div>
+
+            <div class="stat-block">
+                <div class="stat-gold">Invisible Hand</div>
+                <div class="muted">Global buffs only. No direct commands.</div>
+            </div>
+
+            <div class="stat-block">
+                <div class="stat-green">Selected</div>
+                <div>Subject 1 · Trash · Timid</div>
+            </div>
+        </aside>
+
+        <main class="preview-main">
+            <div class="top-tabs">
+                <div class="w3-bar-item baritem active">Observer</div>
+            </div>
+
+            <div class="watch-header">
+                <div>
+                    <h2>Watching Subject 1</h2>
+                    <div class="muted">A bot starts from zero and plays Progress Knight Quest by itself. The Observer can only watch and strengthen global buffs.</div>
+                </div>
+                <div class="watch-button">Stop watching</div>
+            </div>
+
+            <div class="watch-grid">
+                <section class="panel subject-card">
+                    <div class="section-title section-subject">Subject</div>
+                    <div class="panel-pad">
+                        <div class="subject-name">Subject 1</div>
+                        <div class="rank-pill">Trash rank</div>
+                        <div class="muted" style="margin-top:0.45em;">Timid personality</div>
+                        <div class="warning-note">Avoids risks and keeps longer clean streaks, but buys slowly and struggles in distorted universes.</div>
+
+                        <div class="trait-row"><span>AI level</span><b>7</b></div>
+                        <div class="meter"><div class="gold" style="width: 42%;"></div></div>
+
+                        <div class="trait-row"><span>Current universe</span><b>U-I</b></div>
+                        <div class="trait-row"><span>Current phase</span><b>Void approach</b></div>
+                        <div class="trait-row"><span>OP/sec</span><b class="stat-blue">0.18</b></div>
+                        <div class="trait-row"><span>Clean streak</span><b class="stat-green">04:59</b></div>
+                        <div class="trait-row"><span>Mistakes</span><b class="stat-red">11</b></div>
+                        <div class="trait-row"><span>Route quality</span><b>71%</b></div>
+                    </div>
+                </section>
+
+                <section>
+                    <div class="bot-tabs">
+                        <div class="active">Hero</div>
+                        <div>Skills</div>
+                        <div>Shop</div>
+                        <div>Evil</div>
+                        <div>Multiverse</div>
+                        <div>AI Log</div>
+                    </div>
+
+                    <div class="panel panel-pad">
+                        <div class="content-grid">
+                            <div>
+                                <div class="section-title section-route">Current route</div>
+                                <div class="decision-box">
+                                    <b>Last decision:</b> Chose the safer Void slave / Void manipulation route for Void approach.
+                                    <div class="meter"><div class="purple" style="width: 64%;"></div></div>
+                                    <div class="muted" style="margin-top:0.35em;">Goal: reach Multiverse signal · ETA 06:18</div>
+                                </div>
+
+                                <div class="decision-grid">
+                                    <div class="mini-stat"><span>Age</span><b>47y 128d</b></div>
+                                    <div class="mini-stat"><span>Coins</span><b>1.38e7</b></div>
+                                    <div class="mini-stat"><span>Rebirths</span><b>5</b></div>
+                                    <div class="mini-stat"><span>Evil</span><b class="stat-red">128</b></div>
+                                    <div class="mini-stat"><span>Dark Matter</span><b class="stat-purple">0.0</b></div>
+                                    <div class="mini-stat"><span>MP</span><b class="stat-blue">0.0</b></div>
+                                </div>
+
+                                <div class="section-title section-work" style="margin-top:0.85em;">Jobs</div>
+                                <table class="watch-table">
+                                    <thead><tr><th>Job</th><th>Level</th><th>XP</th><th>Status</th></tr></thead>
+                                    <tbody>
+                                        <tr><td>Beggar</td><td>22</td><td>Maxed for route</td><td class="muted">Done</td></tr>
+                                        <tr><td>Squire</td><td>18</td><td>44%</td><td class="muted">Fallback</td></tr>
+                                        <tr class="active-row"><td>Void slave</td><td>9</td><td>63%</td><td>Current</td></tr>
+                                        <tr class="locked"><td>Void explorer</td><td>-</td><td>-</td><td>Next unlock</td></tr>
+                                    </tbody>
+                                </table>
+
+                                <div class="section-title section-skill" style="margin-top:0.85em;">Skills</div>
+                                <table class="watch-table">
+                                    <thead><tr><th>Skill</th><th>Level</th><th>XP</th><th>Status</th></tr></thead>
+                                    <tbody>
+                                        <tr><td>Concentration</td><td>34</td><td>Maxed for route</td><td class="muted">Done</td></tr>
+                                        <tr><td>Dark influence</td><td>21</td><td>77%</td><td class="muted">Support</td></tr>
+                                        <tr class="active-row"><td>Void manipulation</td><td>8</td><td>58%</td><td>Current</td></tr>
+                                        <tr class="locked"><td>Reality Surveying</td><td>-</td><td>-</td><td>Next unlock</td></tr>
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            <div>
+                                <div class="section-title section-shop">Shop / life</div>
+                                <div class="shop-row"><div><b>Tent</b><br><span class="muted">Cheap stability for early loops.</span></div><div class="owned">Owned</div></div>
+                                <div class="shop-row"><div><b>Cottage</b><br><span class="muted">Better route quality.</span></div><div class="owned">Owned</div></div>
+                                <div class="shop-row"><div><b>Sapphire Charm</b><br><span class="muted">Helps Evil route.</span></div><div class="owned">Owned</div></div>
+                                <div class="shop-row"><div><b>Void Compass</b><br><span class="muted">Needed for Void approach.</span></div><div class="waiting">Saving</div></div>
+
+                                <div class="section-title section-evil" style="margin-top:0.85em;">Evil / Void</div>
+                                <table class="watch-table">
+                                    <tbody>
+                                        <tr><td>Evil route</td><td class="stat-green">Open</td></tr>
+                                        <tr><td>Void approach</td><td class="stat-gold">In progress</td></tr>
+                                        <tr><td>Void layer</td><td class="muted">Not reached</td></tr>
+                                        <tr><td>Next target</td><td>Void explorer</td></tr>
+                                    </tbody>
+                                </table>
+
+                                <div class="section-title section-multi" style="margin-top:0.85em;">Multiverse route</div>
+                                <table class="watch-table">
+                                    <tbody>
+                                        <tr><td>Universe I</td><td class="stat-green">Current</td></tr>
+                                        <tr><td>Multiverse signal</td><td class="muted">Locked</td></tr>
+                                        <tr><td>Universe II</td><td class="muted">Locked</td></tr>
+                                        <tr><td>Universe X clear</td><td class="muted">0</td></tr>
+                                    </tbody>
+                                </table>
+
+                                <div class="section-title section-log" style="margin-top:0.85em;">Decision log</div>
+                                <div class="log">
+                                    <div>47y 128d - Chose the safer Void slave / Void manipulation route for Void approach.</div>
+                                    <div>47y 112d - Kept a clean route for 05:00.</div>
+                                    <div>46y 340d - Bought Sapphire Charm.</div>
+                                    <div>45y 190d - Hesitated too long and lost the clean streak.</div>
+                                    <div>44y 021d - Carefully reached Void approach and checked the route twice.</div>
+                                    <div>32y 188d - Studied the unlock path into Evil route.</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </main>
+    </div>
+</body>
+</html>

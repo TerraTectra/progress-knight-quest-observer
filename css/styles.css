@@ -872,7 +872,7 @@ button:focus {
 
 .rb-observer-watch-grid {
     display: grid;
-    grid-template-columns: 230px minmax(0, 1fr);
+    grid-template-columns: 260px minmax(0, 1fr);
     gap: 0.8em;
 }
 
@@ -914,6 +914,32 @@ button:focus {
     background-color: #18d2d9;
 }
 
+.rb-observer-watch-content-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr);
+    gap: 0.8em;
+}
+
+.rb-watch-section-title {
+    padding: 0.38em 0.65em;
+    margin-top: 0.8em;
+    margin-bottom: 0.55em;
+    color: white;
+    font-weight: bold;
+}
+
+.rb-watch-section-title:first-child {
+    margin-top: 0;
+}
+
+.rb-watch-route-title { background-color: #18d2d9; }
+.rb-watch-job-title { background-color: #4caf50; }
+.rb-watch-skill-title { background-color: #c83792; }
+.rb-watch-shop-title { background-color: #22a9c1; }
+.rb-watch-evil-title { background-color: #e2323f; }
+.rb-watch-multiverse-title { background-color: #762b91; }
+.rb-watch-log-title { background-color: #607d8b; }
+
 .rb-observer-bot-table th {
     color: white;
 }
@@ -929,6 +955,31 @@ button:focus {
 
 .rb-observer-bot-row-muted {
     color: rgb(135, 135, 135);
+}
+
+.rb-observer-watch-shop {
+    border: 1px solid rgb(73, 73, 73);
+    background-color: rgb(38, 38, 38);
+}
+
+.rb-observer-watch-shop-row {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 7em;
+    gap: 0.6em;
+    border-bottom: 1px solid rgb(58, 58, 58);
+    padding: 0.45em 0.6em;
+}
+
+.rb-observer-watch-shop-row:last-child {
+    border-bottom: 0;
+}
+
+.rb-observer-watch-shop-state-owned {
+    color: #3fb950;
+}
+
+.rb-observer-watch-shop-state-waiting {
+    color: rgb(165, 165, 165);
 }
 
 .rb-observer-decision-state {
@@ -973,7 +1024,8 @@ body.rb-observer-active #maincolumn {
     .rb-observer-summary,
     .rb-observer-command-grid,
     .rb-observer-subject-grid,
-    .rb-observer-watch-grid {
+    .rb-observer-watch-grid,
+    .rb-observer-watch-content-grid {
         display: block;
     }
 
