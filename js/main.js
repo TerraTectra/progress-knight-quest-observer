@@ -954,6 +954,7 @@ function rebirthReset(set_tab_to_jobs = true) {
         // if (gameData.settings.selectedTab == Tab.METAVERSE && gameData.perks.)
 
         if (gameData.settings.selectedTab == Tab.METAVERSE && gameData.hypercubes > 0
+            || gameData.settings.selectedTab == Tab.MULTIVERSE && isMultiverseUnlocked()
             || gameData.settings.selectedTab == Tab.CHALLENGES && gameData.evil > 10000
             || gameData.settings.selectedTab == Tab.MILESTONES && gameData.essence > 0
             || gameData.settings.selectedTab == Tab.DARK_MATTER && gameData.dark_matter > 0
@@ -1154,6 +1155,8 @@ function assignMethods() {
             requirement = Object.assign(new DarkOrbsRequirement(requirement.querySelectors, requirement.requirements), requirement)
         } else if (requirement.type == "metaverse") {
             requirement = Object.assign(new MetaverseRequirement(requirement.querySelectors, requirement.requirements), requirement)
+        } else if (requirement.type == "multiverse") {
+            requirement = Object.assign(new MultiverseRequirement(requirement.querySelectors, requirement.requirements), requirement)
         } else if (requirement.type == "hypercube") {
             requirement = Object.assign(new HypercubeRequirement(requirement.querySelectors, requirement.requirements), requirement)
         } else if (requirement.type == "perkpoint") {
@@ -1174,6 +1177,22 @@ function assignMethods() {
         newArray.push(gameData.itemData[misc.name])
     }
     gameData.currentMisc = newArray
+
+    normalizeMetaLayerUnlocks()
+}
+
+function normalizeMetaLayerUnlocks() {
+    if (gameData.requirements["Metaverse"] != null && gameData.rebirthFiveCount < 1)
+        gameData.requirements["Metaverse"].completed = false
+
+    if (gameData.requirements["Multiverse"] != null && !isMultiverseUnlocked())
+        gameData.requirements["Multiverse"].completed = false
+
+    if (gameData.settings.selectedTab == "metaverse" && gameData.rebirthFiveCount < 1)
+        gameData.settings.selectedTab = "jobs"
+
+    if (gameData.settings.selectedTab == "multiverse" && !isMultiverseUnlocked())
+        gameData.settings.selectedTab = "jobs"
 }
 
 function replaceSaveDict(dict, saveDict) {

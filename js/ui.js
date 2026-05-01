@@ -75,6 +75,9 @@ function updateUI() {
     if (currentTab == Tab.DARK_MATTER)
         renderDarkMatter()
 
+    if (currentTab == Tab.MULTIVERSE)
+        renderMultiverse()
+
     if (currentTab == Tab.METAVERSE)
         renderMetaverse()
 
@@ -561,12 +564,6 @@ function renderBoostButton(elemName) {
 }
 
 function renderMetaverse() {
-    document.getElementById("multiversePointsMetaDisplay").textContent = format(gameData.multiverse_points, 2)
-    document.getElementById("multiversePointsMetaGainDisplay").textContent = format(getMultiversePointGain(), 4)
-    document.getElementById("multiverseVoidResonanceDisplay").textContent = format(getMultiverseVoidResonance(), 2)
-    renderMultiverseUniverses()
-    renderMultiverseUpgrades()
-
     document.getElementById("currentHypercubesCap").hidden = getHypercubeCap() == Infinity
     document.getElementById("currentHypercubesCapValue").textContent = format(getHypercubeCap())
 
@@ -625,6 +622,14 @@ function renderMetaverse() {
 
     // Perks
     renderPerks()
+}
+
+function renderMultiverse() {
+    document.getElementById("multiversePointsMetaDisplay").textContent = format(gameData.multiverse_points, 2)
+    document.getElementById("multiversePointsMetaGainDisplay").textContent = format(getMultiversePointGain(), 4)
+    document.getElementById("multiverseVoidResonanceDisplay").textContent = format(getMultiverseVoidResonance(), 2)
+    renderMultiverseUniverses()
+    renderMultiverseUpgrades()
 }
 
 function renderMultiverseUniverses() {
@@ -1282,7 +1287,6 @@ function setLayout(id) {
 
     if (id == 0) {
         document.getElementById("tabcolumnMetaverse").classList.add("hidden")
-        document.getElementById("metaverseTab1").appendChild(document.getElementById("multiverseUniversePage"))
         document.getElementById("metaverseTab1").appendChild(document.getElementById("metaversePage2"))
         setTabMetaverse("metaverseTab1")
 
@@ -1290,7 +1294,6 @@ function setLayout(id) {
     }
     else {
         document.getElementById("tabcolumnMetaverse").classList.remove("hidden")
-        document.getElementById("metaverseTabUniverses").appendChild(document.getElementById("multiverseUniversePage"))
         document.getElementById("metaverseTab2").appendChild(document.getElementById("metaversePage2"))
 
         document.getElementById("maincolumnMetaverse").classList.add("settings-main-column")     
@@ -1387,6 +1390,7 @@ const Tab = Object.freeze({
     MILESTONES: "milestones",
     REBIRTH: "rebirth",
     DARK_MATTER: "darkMatter",
+    MULTIVERSE: "multiverse",
     METAVERSE: "metaverse",
     SETTINGS: "settings",
     INFO: "info"

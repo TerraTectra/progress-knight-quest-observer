@@ -398,10 +398,21 @@ class MetaverseRequirement extends Requirement {
     }
 
     getCondition(isHero, requirement) {
-        if (typeof isMultiverseUnlocked === "function" && isMultiverseUnlocked())
-            return true
-
         return gameData.rebirthFiveCount >= requirement.requirement
+    }
+}
+
+class MultiverseRequirement extends Requirement {
+    constructor(querySelectors, requirements) {
+        super(querySelectors, requirements)
+        this.type = "multiverse"
+    }
+
+    getCondition(isHero, requirement) {
+        if (typeof isMultiverseUnlocked === "function")
+            return isMultiverseUnlocked()
+
+        return gameData.multiverse_unlocked || gameData.multiverse_points > 0
     }
 }
 

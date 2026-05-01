@@ -42,6 +42,7 @@
 						<div class="w3-button w3-bar-item tabButton baritem" id="milestonesTabButton" onClick="setTab('milestones')">Milestones</div>
 						<div class="w3-button w3-bar-item tabButton baritem" id="rebirthTabButton" onClick="setTab('rebirth')">Amulet</div>
 						<div class="w3-button w3-bar-item tabButton baritem" id="darkMatterTabButton" onClick="setTab('darkMatter')">Dark Matter</div>
+						<div class="w3-button w3-bar-item tabButton baritem" id="multiverseTabButton" onClick="setTab('multiverse')">Multiverse</div>
 						<div class="w3-button w3-bar-item tabButton baritem" id="metaverseTabButton" onClick="setTab('metaverse')">Metaverse</div>
 						<div class="w3-button w3-bar-item tabButton baritem" id="settingsTabButton" onClick="setTab('settings')">Settings</div>
 					</div>
@@ -265,7 +266,7 @@
 									</div>
 									<div id="multiversePointsInfo">
 										<div class="text-caption"><span class="color-hypercubes">Multiverse points: </span><span id="multiversePointsDisplay"></span></div>
-										<div style="color: gray" class="sidebar-element"><span id="multiversePointsGainDisplay"></span>/s, unaffected by Time Warp</div>
+										<div style="color: gray" class="sidebar-element">Void layer. <span id="multiversePointsGainDisplay"></span>/s, unaffected by Time Warp</div>
 									</div>
 									<div id="rebirthButton1" class="hidden">
 										<button class="w3-button button" style="margin-bottom: 0.1em; margin-top: 0.8em; width: 100%" onClick="rebirthOne()">Touch the eye</button>
@@ -731,7 +732,6 @@
 						<div class="tab column" style="display:none" id="metaverse">
 							<div id="tabcolumnMetaverse" class="panel w3-margin-left" style="display: flex">
 								<div class="w3-button w3-bar-item tabButtonMetaverse baritem w3-blue-gray" id="metaverseTab1TabButton" onClick="setTabMetaverse('metaverseTab1')">Altar</div>
-								<div class="w3-button w3-bar-item tabButtonMetaverse baritem" id="metaverseTabUniversesTabButton" onClick="setTabMetaverse('metaverseTabUniverses')">Universes</div>
 								<div class="w3-button w3-bar-item tabButtonMetaverse baritem" id="metaverseTab2TabButton" onClick="setTabMetaverse('metaverseTab2')">Perks</div>
 							</div>
 							<div id="maincolumnMetaverse" class="panel w3-margin-left w3-margin-top">
@@ -743,14 +743,6 @@
 										<div style="padding-top:1em">
 											<div class="text-caption">Lifespan is now infinite.</div>
 											<div class="text-caption">The more hypercubes you have, the more sacrifice opportunities will open up.</div>
-										</div>
-										<div id="multiversePointsPanel" style="padding-top:2em">
-											<div class="text-caption metaverse-title">Multiverse signal</div>
-											<div style="color:gray; padding-bottom: 0.3em;">The Void has revealed that this run is only one universe among many.</div>
-											<div style="color:gray; padding-bottom: 0.3em;">Multiverse points: <b id="multiversePointsMetaDisplay" class="color-hypercubes"></b></div>
-											<div style="color:gray; padding-bottom: 0.3em;">Passive gain: <b id="multiversePointsMetaGainDisplay"></b> / s</div>
-											<div style="color:gray; padding-bottom: 0.3em;">Void resonance: x<b id="multiverseVoidResonanceDisplay"></b></div>
-											<div style="color:gray; padding-bottom: 0.5em;">This gain uses real time only. Time Warping, boosts, and admin speed do not multiply it.</div>
 										</div>
 										<div style="border-bottom: 0.1em solid rgb(24, 210, 217); padding-top: 2em;"></div>
 										<div style="padding-top:1em">
@@ -809,25 +801,6 @@
 										</div>
 									</div>
 								</div>
-								<div id="metaverseTabUniverses" class="tabMetaverse">
-									<div id="multiverseUniversePage" class="page panel page-column w3-padding">
-										<div class="rb-section-title text-caption"><b>Universes</b></div>
-										<div style="color:gray; padding-top: 0.4em;">Unlock each next universe by breaking the previous one. Every universe increases passive Multiverse Point gain, but distorts the base rules harder.</div>
-										<div id="multiverseUniverseSummary" class="rb-multiverse-summary"></div>
-										<div id="multiverseUniverseGrid" class="rb-universe-grid"></div>
-										<div style="border-bottom: 0.1em solid rgb(24, 210, 217); padding-top: 2em;"></div>
-										<div style="padding-top:1em">
-											<div class="rb-section-title text-caption"><b>Multiverse Upgrades</b></div>
-											<table class="w3-table w3-bordered rb-upgrade-table">
-												<tbody id="multiverseUpgradeRows"></tbody>
-											</table>
-										</div>
-										<div id="observerStubPanel" class="rb-observer-stub hidden">
-											<div class="text-caption"><b>Observer layer</b></div>
-											<div style="color:gray;">A sealed third meta layer. It will open after Universe X is completed.</div>
-										</div>
-									</div>
-								</div>
 								<div id="metaverseTab2" class="tabMetaverse">
 									<div id="metaversePage2" class="page panel page-column w3-padding">
 										<div class="text-caption" style="padding-top:0em; padding-left:1em;">
@@ -852,6 +825,37 @@
 										<div id="Congratulations" class="congrats hidden">
 											<div>Congratulations!</div>
 											<div>You have beaten the game!</div>
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+						<div class="tab column" style="display:none" id="multiverse">
+							<div id="maincolumnMultiverse" class="panel w3-margin-left w3-margin-top">
+								<div id="multiversePage" class="page panel page-column w3-padding">
+									<div id="multiversePointsPanel" style="padding-bottom:1.2em">
+										<div class="text-caption metaverse-title">Multiverse signal</div>
+										<div style="color:gray; padding-bottom: 0.3em;">The Void has revealed that this run is only one universe among many.</div>
+										<div style="color:gray; padding-bottom: 0.3em;">Multiverse points: <b id="multiversePointsMetaDisplay" class="color-hypercubes"></b></div>
+										<div style="color:gray; padding-bottom: 0.3em;">Passive gain: <b id="multiversePointsMetaGainDisplay"></b> / s</div>
+										<div style="color:gray; padding-bottom: 0.3em;">Void resonance: x<b id="multiverseVoidResonanceDisplay"></b></div>
+										<div style="color:gray; padding-bottom: 0.5em;">This gain uses real time only. Time Warping, boosts, and admin speed do not multiply it.</div>
+									</div>
+									<div id="multiverseUniversePage" class="page panel page-column w3-padding">
+										<div class="rb-section-title text-caption"><b>Universes</b></div>
+										<div style="color:gray; padding-top: 0.4em;">Unlock each next universe by breaking the previous one. Every universe increases passive Multiverse Point gain, but distorts the base rules harder.</div>
+										<div id="multiverseUniverseSummary" class="rb-multiverse-summary"></div>
+										<div id="multiverseUniverseGrid" class="rb-universe-grid"></div>
+										<div style="border-bottom: 0.1em solid rgb(24, 210, 217); padding-top: 2em;"></div>
+										<div style="padding-top:1em">
+											<div class="rb-section-title text-caption"><b>Multiverse Upgrades</b></div>
+											<table class="w3-table w3-bordered rb-upgrade-table">
+												<tbody id="multiverseUpgradeRows"></tbody>
+											</table>
+										</div>
+										<div id="observerStubPanel" class="rb-observer-stub hidden">
+											<div class="text-caption"><b>Observer layer</b></div>
+											<div style="color:gray;">A sealed third meta layer. It will open after Universe X is completed.</div>
 										</div>
 									</div>
 								</div>

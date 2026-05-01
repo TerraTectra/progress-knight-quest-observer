@@ -49,7 +49,7 @@ function getMultiverseState() {
 }
 
 function isMultiverseUnlocked() {
-    return gameData.multiverse_unlocked || gameData.multiverse_points > 0 || gameData.rebirthFiveCount > 0
+    return gameData.multiverse_unlocked || gameData.multiverse_points > 0
 }
 
 function updateMultiverseUnlock() {
@@ -133,8 +133,7 @@ function breakCurrentUniverse() {
         state.observer_stub_unlocked = true
 
     rebirthReset(false)
-    setTab("metaverse")
-    setTabMetaverse("metaverseTabUniverses")
+    setTab("multiverse")
     return true
 }
 
