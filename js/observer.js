@@ -16,11 +16,15 @@ const observerCommandData = {
 
 const observerUpgradeData = {
     clear_instructions: { name: "Clear Instructions", baseCost: 12, costMult: 2.25, description: "+10% subject speed per level." },
+    early_guidance: { name: "Early Guidance", baseCost: 16, costMult: 2.2, description: "+12% speed in Prime and Evil setup per level." },
     shared_memory: { name: "Shared Memory", baseCost: 18, costMult: 2.35, description: "+12% Observer Point gain per level." },
     route_drills: { name: "Route Drills", baseCost: 22, costMult: 2.35, description: "+14% AI XP gain per level." },
     error_filter: { name: "Error Filter", baseCost: 25, costMult: 2.45, description: "-8% mistake chance per level, capped at -70%." },
+    void_protocols: { name: "Void Protocols", baseCost: 34, costMult: 2.55, description: "+10% Evil/Void route speed and +8% OP there per level." },
     talent_shaping: { name: "Talent Shaping", baseCost: 45, costMult: 2.65, description: "Improves rank odds for new subjects." },
-    universe_briefing: { name: "Universe Briefing", baseCost: 70, costMult: 2.8, description: "Subjects handle later universes faster." },
+    reality_scripts: { name: "Reality Scripts", baseCost: 58, costMult: 2.65, description: "+9% U-II to U-V route speed per level." },
+    universe_briefing: { name: "Universe Briefing", baseCost: 78, costMult: 2.8, description: "Subjects handle later universes faster." },
+    threshold_maps: { name: "Threshold Maps", baseCost: 125, costMult: 3.05, description: "+7% U-VI to U-X speed and OP per level." },
 }
 
 const observerSubjectStages = [
@@ -299,6 +303,142 @@ function getObserverCommand() {
     return observerCommandData[state.command] || observerCommandData.balanced
 }
 
+function getObserverStageBand(stage) {
+    if (stage.id == "life" || stage.id == "rebirth")
+        return "early"
+    if (stage.id == "evil")
+        return "evil"
+    if (stage.id == "void")
+        return "void"
+    if (stage.universe >= 10)
+        return "threshold"
+    if (stage.universe >= 6)
+        return "late"
+    if (stage.universe >= 2)
+        return "reality"
+    return "multiverse"
+}
+
+function getObserverSubjectGoal(subject) {
+    const stage = getObserverSubjectStage(subject)
+    const previous = getObserverPreviousThreshold(subject.stage_index)
+    const remaining = Math.max(0, stage.threshold - subject.progress)
+    const speed = getObserverSpeedMultiplier(subject)
+    const eta = speed > 0 ? remaining / speed : 0
+    const progress = getObserverStageProgress(subject)
+    const label = progress >= 96 ? "Finishing " : "Reach "
+    return label + stage.name + " (" + formatTime(eta, true) + ")"
+}
+
+function getObserverRankPhaseTable(subject, table, fallback) {
+    const rankTable = table[subject.rank]
+    if (rankTable == null)
+        return fallback
+
+    const band = getObserverStageBand(getObserverSubjectStage(subject))
+    if (rankTable[band] == null)
+        return fallback
+
+    return rankTable[band]
+}
+
+function getObserverRankStageSpeed(subject) {
+    return getObserverRankPhaseTable(subject, {
+        trash: { early: 0.95, evil: 0.72, void: 0.62, multiverse: 0.58, reality: 0.55, late: 0.5, threshold: 0.45 },
+        common: { early: 0.96, evil: 0.88, void: 0.82, multiverse: 0.8, reality: 0.78, late: 0.72, threshold: 0.68 },
+        skilled: { early: 1, evil: 1.02, void: 1.03, multiverse: 1.04, reality: 1.05, late: 1.04, threshold: 1.02 },
+        rare: { early: 1.02, evil: 1.08, void: 1.12, multiverse: 1.15, reality: 1.18, late: 1.22, threshold: 1.2 },
+        epic: { early: 1.05, evil: 1.14, void: 1.2, multiverse: 1.26, reality: 1.32, late: 1.45, threshold: 1.55 },
+        legendary: { early: 1.08, evil: 1.22, void: 1.35, multiverse: 1.45, reality: 1.58, late: 1.85, threshold: 2.05 },
+    }, 1)
+}
+
+function getObserverRankStageOp(subject) {
+    return getObserverRankPhaseTable(subject, {
+        trash: { early: 1, evil: 0.82, void: 0.72, multiverse: 0.68, reality: 0.62, late: 0.56, threshold: 0.5 },
+        common: { early: 0.98, evil: 0.94, void: 0.9, multiverse: 0.88, reality: 0.86, late: 0.82, threshold: 0.78 },
+        skilled: { early: 1, evil: 1, void: 1.02, multiverse: 1.04, reality: 1.06, late: 1.08, threshold: 1.08 },
+        rare: { early: 1.02, evil: 1.08, void: 1.12, multiverse: 1.16, reality: 1.2, late: 1.26, threshold: 1.28 },
+        epic: { early: 1.05, evil: 1.14, void: 1.2, multiverse: 1.28, reality: 1.38, late: 1.52, threshold: 1.62 },
+        legendary: { early: 1.08, evil: 1.22, void: 1.34, multiverse: 1.48, reality: 1.68, late: 1.95, threshold: 2.18 },
+    }, 1)
+}
+
+function getObserverRankStageMistake(subject) {
+    return getObserverRankPhaseTable(subject, {
+        trash: { early: 1.1, evil: 1.25, void: 1.38, multiverse: 1.48, reality: 1.62, late: 1.82, threshold: 2 },
+        common: { early: 1, evil: 1.04, void: 1.08, multiverse: 1.12, reality: 1.16, late: 1.22, threshold: 1.28 },
+        skilled: { early: 1, evil: 0.98, void: 0.96, multiverse: 0.94, reality: 0.92, late: 0.9, threshold: 0.9 },
+        rare: { early: 0.95, evil: 0.88, void: 0.84, multiverse: 0.8, reality: 0.76, late: 0.72, threshold: 0.72 },
+        epic: { early: 0.85, evil: 0.78, void: 0.72, multiverse: 0.66, reality: 0.6, late: 0.56, threshold: 0.55 },
+        legendary: { early: 0.75, evil: 0.66, void: 0.58, multiverse: 0.5, reality: 0.45, late: 0.4, threshold: 0.38 },
+    }, 1)
+}
+
+function getObserverPhaseSpeedMultiplier(stage) {
+    const band = getObserverStageBand(stage)
+    let multiplier = 1
+
+    if (band == "early")
+        multiplier *= 1 + getObserverUpgradeLevel("early_guidance") * 0.12
+    if (band == "evil" || band == "void")
+        multiplier *= 1 + getObserverUpgradeLevel("void_protocols") * 0.1
+    if (band == "reality")
+        multiplier *= 1 + getObserverUpgradeLevel("reality_scripts") * 0.09
+    if (band == "late" || band == "threshold")
+        multiplier *= 1 + getObserverUpgradeLevel("threshold_maps") * 0.07
+
+    return multiplier
+}
+
+function getObserverPhaseOpMultiplier(stage) {
+    const band = getObserverStageBand(stage)
+    let multiplier = 1
+
+    if (band == "evil" || band == "void")
+        multiplier *= 1 + getObserverUpgradeLevel("void_protocols") * 0.08
+    if (band == "late" || band == "threshold")
+        multiplier *= 1 + getObserverUpgradeLevel("threshold_maps") * 0.07
+
+    return multiplier
+}
+
+function getObserverPhaseXpMultiplier(stage) {
+    const band = getObserverStageBand(stage)
+    let multiplier = 1
+
+    if (band == "early")
+        multiplier *= 1 + getObserverUpgradeLevel("early_guidance") * 0.06
+    if (band == "evil" || band == "void")
+        multiplier *= 1 + getObserverUpgradeLevel("void_protocols") * 0.06
+    if (band == "reality")
+        multiplier *= 1 + getObserverUpgradeLevel("reality_scripts") * 0.05
+    if (band == "late" || band == "threshold")
+        multiplier *= 1 + getObserverUpgradeLevel("threshold_maps") * 0.05
+
+    return multiplier
+}
+
+function getObserverPhaseMistakeMultiplier(stage) {
+    const band = getObserverStageBand(stage)
+    let reduction = 0
+
+    if (band == "early")
+        reduction += getObserverUpgradeLevel("early_guidance") * 0.02
+    if (band == "evil" || band == "void")
+        reduction += getObserverUpgradeLevel("void_protocols") * 0.025
+    if (band == "reality")
+        reduction += getObserverUpgradeLevel("reality_scripts") * 0.02
+    if (band == "late" || band == "threshold")
+        reduction += getObserverUpgradeLevel("threshold_maps") * 0.025
+
+    return Math.max(0.45, 1 - reduction)
+}
+
+function getObserverRosterSupportBonus() {
+    return 1 + Math.min(0.18, Math.log2(getObserverState().subjects.length + 1) * 0.035)
+}
+
 function getObserverAiLevelSpeed(subject) {
     return 1 + Math.log2(Math.max(1, subject.ai_level)) * 0.055
 }
@@ -324,7 +464,7 @@ function getObserverSpeedMultiplier(subject) {
     const briefing = 1 + Math.max(0, stage.universe - 1) * getObserverUpgradeLevel("universe_briefing") * 0.03
     const cleanBonus = getObserverCleanSpeedBonus(subject)
     const repeatClearDrag = 1 + Math.sqrt(subject.completed_universe_x) * 0.12
-    return getSafeObserverNumber(rank.speed * command.speed * instructions * briefing * cleanBonus * getObserverAiLevelSpeed(subject) / (stage.difficulty * repeatClearDrag), 0)
+    return getSafeObserverNumber(rank.speed * getObserverRankStageSpeed(subject) * command.speed * instructions * briefing * getObserverPhaseSpeedMultiplier(stage) * cleanBonus * getObserverAiLevelSpeed(subject) / (stage.difficulty * repeatClearDrag), 0)
 }
 
 function getObserverCleanSpeedBonus(subject) {
@@ -344,7 +484,7 @@ function getObserverSubjectOpGain(subject) {
     const stageValue = 0.03 + universeValue * stage.opWeight
     const cleanBonus = 1 + Math.min(0.85, Math.log10(subject.clean_time + 10) * 0.11)
     const clearBonus = 1 + Math.log2(subject.completed_universe_x + 1) * 0.35
-    return getSafeObserverNumber(stageValue * rank.op * command.op * memory * cleanBonus * clearBonus * getObserverAiLevelOp(subject), 0)
+    return getSafeObserverNumber(stageValue * rank.op * getObserverRankStageOp(subject) * command.op * memory * getObserverPhaseOpMultiplier(stage) * cleanBonus * clearBonus * getObserverAiLevelOp(subject) * getObserverRosterSupportBonus(), 0)
 }
 
 function getObserverPointsGain() {
@@ -370,7 +510,7 @@ function getObserverAiXpGain(subject) {
     const stage = getObserverSubjectStage(subject)
     const briefing = 1 + getObserverUpgradeLevel("universe_briefing") * 0.04 * Math.max(0, stage.universe - 1)
     const drills = 1 + getObserverUpgradeLevel("route_drills") * 0.14
-    return getSafeObserverNumber((0.12 + stage.universe * 0.03 + subject.stage_index * 0.01) * rank.xp * command.xp * getObserverCleanXpBonus(subject) * briefing * drills, 0)
+    return getSafeObserverNumber((0.12 + stage.universe * 0.03 + subject.stage_index * 0.01) * rank.xp * command.xp * getObserverCleanXpBonus(subject) * briefing * drills * getObserverPhaseXpMultiplier(stage), 0)
 }
 
 function updateObserver() {
@@ -409,7 +549,7 @@ function updateObserverSubjects() {
 
         const rank = observerRankData[subject.rank]
         const stage = getObserverSubjectStage(subject)
-        const mistakeChance = 0.000045 * rank.mistake * command.mistake * stage.difficulty * getObserverAiLevelMistake(subject) * getObserverMistakeMultiplier()
+        const mistakeChance = 0.000045 * rank.mistake * getObserverRankStageMistake(subject) * command.mistake * stage.difficulty * getObserverAiLevelMistake(subject) * getObserverMistakeMultiplier() * getObserverPhaseMistakeMultiplier(stage)
         if (Math.random() < mistakeChance) {
             applyObserverSubjectMistake(subject)
         }
@@ -525,7 +665,15 @@ function renderObserver() {
     document.getElementById("observerPointsGainDisplay").textContent = format(getObserverPointsGain(), 3)
     document.getElementById("observerSubjectCountDisplay").textContent = formatWhole(state.subjects.length)
     document.getElementById("observerBestRunDisplay").textContent = "U-" + getObserverBestUniverse()
-    document.getElementById("observerGlobalBoostDisplay").textContent = "x" + format((1 + getObserverUpgradeLevel("clear_instructions") * 0.1) * (1 + getObserverUpgradeLevel("shared_memory") * 0.12) * (1 + getObserverUpgradeLevel("route_drills") * 0.14), 2)
+    document.getElementById("observerGlobalBoostDisplay").textContent = "x" + format(
+        (1 + getObserverUpgradeLevel("clear_instructions") * 0.1)
+        * (1 + getObserverUpgradeLevel("shared_memory") * 0.12)
+        * (1 + getObserverUpgradeLevel("route_drills") * 0.14)
+        * (1 + getObserverUpgradeLevel("early_guidance") * 0.06)
+        * (1 + getObserverUpgradeLevel("void_protocols") * 0.08)
+        * (1 + getObserverUpgradeLevel("reality_scripts") * 0.06)
+        * (1 + getObserverUpgradeLevel("threshold_maps") * 0.07),
+    2)
 
     const subjectCost = getObserverSubjectCost()
     const subjectButton = document.getElementById("buyObserverSubjectButton")
@@ -582,6 +730,7 @@ function renderObserverSubjects() {
                 `<div style="color:gray; margin-top:0.45em;">${stage.name}</div>` +
                 `<div class="rb-observer-mini-row"><span>Job</span><b>${stage.job}</b></div>` +
                 `<div class="rb-observer-mini-row"><span>Skill</span><b>${stage.skill}</b></div>` +
+                `<div class="rb-observer-mini-row"><span>Goal</span><b>${getObserverSubjectGoal(subject)}</b></div>` +
                 `<div class="rb-observer-meter"><div style="width:${progress}%"></div></div>` +
                 `<div class="rb-observer-mini-row"><span>AI lvl</span><b>${formatWhole(subject.ai_level)} (${format(aiProgress, 1)}%)</b></div>` +
                 `<div class="rb-observer-mini-row"><span>Clean streak</span><b>${formatTime(subject.clean_time, true)}</b></div>` +
