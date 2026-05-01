@@ -246,6 +246,20 @@ async function runObserverScenario(browser) {
     const failures = []
 
     await page.evaluate(observerSetup)
+    await page.evaluate(() => {
+        const subject = gameData.observer.subjects[0]
+        subject.rank = "rare"
+        subject.personality = "methodical"
+        subject.ai_level = 9
+        subject.character_level = 4
+        subject.stage_index = 8
+        subject.progress = observerSubjectStages[8].threshold + 25
+        subject.completed_universe_x = 2
+        subject.loop_memory = 3
+        subject.bot_items = ["Universe Fragment", "Chronal Compass"]
+        subject.milestones.universe_v = true
+        subject.insights.methodical_routine = true
+    })
     const before = await page.evaluate(() => ({
         points: gameData.observer.points,
         progress: gameData.observer.subjects[0].progress,
@@ -284,6 +298,21 @@ async function runObserverScenario(browser) {
             failures.push("Observer save did not preserve subjects")
         if (!(gameData.observer.points > 0))
             failures.push("Observer save did not preserve points")
+        const subject = gameData.observer.subjects[0]
+        if (subject.rank != "rare" || subject.personality != "methodical")
+            failures.push("Observer save did not preserve subject identity")
+        if (!(subject.ai_level >= 9 && subject.character_level >= 4))
+            failures.push("Observer save did not preserve subject levels")
+        if (!(subject.stage_index >= 8 && subject.progress > observerSubjectStages[8].threshold))
+            failures.push("Observer save did not preserve subject run progress")
+        if (!(subject.completed_universe_x >= 2 && subject.loop_memory >= 3))
+            failures.push("Observer save did not preserve subject loop memory")
+        if (!(subject.bot_items && subject.bot_items.includes("Universe Fragment")))
+            failures.push("Observer save did not preserve subject inventory")
+        if (!(subject.milestones && subject.milestones.universe_v))
+            failures.push("Observer save did not preserve subject milestones")
+        if (!(subject.insights && subject.insights.methodical_routine))
+            failures.push("Observer save did not preserve subject insights")
         return failures
     })
     failures.push(...reloadFailures)
