@@ -28,6 +28,7 @@
         universe_breaks: 0,
         universe_break_unlocked: false,
         universe_mastery: {},
+        universe_break_records: {},
         upgrades: {
             stable_memory: 0,
             universal_labor: 0,

@@ -35,6 +35,7 @@ function getMultiverseState() {
             universe_breaks: 0,
             universe_break_unlocked: false,
             universe_mastery: {},
+            universe_break_records: {},
             upgrades: {},
             observer_stub_unlocked: false,
             observer_signal_prepared: false,
@@ -46,6 +47,8 @@ function getMultiverseState() {
         gameData.multiverse.upgrades = {}
     if (gameData.multiverse.universe_mastery == null || typeof gameData.multiverse.universe_mastery != "object")
         gameData.multiverse.universe_mastery = {}
+    if (gameData.multiverse.universe_break_records == null || typeof gameData.multiverse.universe_break_records != "object")
+        gameData.multiverse.universe_break_records = {}
 
     for (const key in multiverseUpgradeData) {
         if (gameData.multiverse.upgrades[key] == null)
@@ -77,6 +80,10 @@ function getMultiverseState() {
         if (gameData.multiverse.universe_mastery[key] == null || isNaN(gameData.multiverse.universe_mastery[key]) || !isFinite(gameData.multiverse.universe_mastery[key]))
             gameData.multiverse.universe_mastery[key] = 1
         gameData.multiverse.universe_mastery[key] = getSafeMultiverseNumber(gameData.multiverse.universe_mastery[key], 1, 1e300)
+
+        if (gameData.multiverse.universe_break_records[key] == null || isNaN(gameData.multiverse.universe_break_records[key]) || !isFinite(gameData.multiverse.universe_break_records[key]))
+            gameData.multiverse.universe_break_records[key] = 0
+        gameData.multiverse.universe_break_records[key] = Math.max(0, Math.floor(gameData.multiverse.universe_break_records[key]))
     }
 
     return gameData.multiverse
@@ -296,6 +303,7 @@ function breakCurrentUniverse() {
     const nextUniverse = getUniverseInfo(state.current_universe + 1)
 
     rememberUniverseParameter(state.current_universe)
+    recordUniverseBreak(state.current_universe)
     gameData.multiverse_points -= nextUniverse.unlockCost
     state.highest_universe += 1
     state.current_universe = state.highest_universe
@@ -543,6 +551,28 @@ function getBestUniverseParameterGain(id) {
     return remembered
 }
 
+function getUniverseBreakRecord(id) {
+    const state = getMultiverseState()
+    const key = String(Math.max(1, Math.min(10, Math.floor(id))))
+    return Math.max(0, Math.floor(state.universe_break_records[key] || 0))
+}
+
+function recordUniverseBreak(id) {
+    const state = getMultiverseState()
+    const safeId = Math.max(1, Math.min(10, Math.floor(id)))
+    const key = String(safeId)
+    state.universe_break_records[key] = getUniverseBreakRecord(safeId) + 1
+    return state.universe_break_records[key]
+}
+
+function getUniverseBreakRecordMpGain(id) {
+    const breaks = getUniverseBreakRecord(id)
+    if (breaks <= 0)
+        return 1
+
+    return getSafeMultiverseNumber(1 + Math.min(0.85, breaks * 0.07 + Math.log2(breaks + 1) * 0.055))
+}
+
 function getUniverseOnePrimeStabilityGain() {
     const voidJobs = getMultiverseVoidJobSource()
     const voidSkills = getMultiverseVoidSkillSource()
@@ -569,7 +599,7 @@ function getUniversePassiveWeight(id) {
     const depthBonus = 1 + Math.pow(id - 1, 1.12) * 0.025
     const ageFalloff = 1 / Math.pow(id, 0.42)
 
-    return getSafeMultiverseNumber(universe.mpMult * parameter * breakMemory * activeBonus * depthBonus * ageFalloff, 0, 1e300)
+    return getSafeMultiverseNumber(universe.mpMult * parameter * getUniverseBreakRecordMpGain(id) * breakMemory * activeBonus * depthBonus * ageFalloff, 0, 1e300)
 }
 
 function getTotalUniversePassiveWeight() {

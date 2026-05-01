@@ -805,6 +805,34 @@ async function runScenario(browser, name, setup) {
             if (!(u5RememberedWeight > u5FreshWeight))
                 failures.push("Universe V passive MP weight was lost after leaving the universe")
 
+            gameData.multiverse.universe_break_records = {}
+            if (typeof getMultiverseState == "function")
+                getMultiverseState()
+            gameData.multiverse.current_universe = 5
+            gameData.multiverse.highest_universe = 10
+            const u5NoBreakMemory = getUniversePassiveWeight(5)
+            gameData.multiverse.universe_break_records["5"] = 3
+            const u5BreakMemory = getUniversePassiveWeight(5)
+            if (!(u5BreakMemory > u5NoBreakMemory))
+                failures.push("Universe break records do not improve passive MP weight")
+
+            clearRouteProgress()
+            gameData.multiverse.current_universe = 2
+            gameData.multiverse.highest_universe = 2
+            gameData.multiverse.universe_breaks = 1
+            gameData.multiverse.universe_break_records = {}
+            gameData.multiverse_points = 1e14
+            if (typeof getMultiverseState == "function")
+                getMultiverseState()
+            trainRoute(universeRoutes[2], 360)
+            const u2RecordBefore = getUniverseBreakRecord(2)
+            const u2BreakSucceeded = breakCurrentUniverse()
+            const u2RecordAfter = getUniverseBreakRecord(2)
+            if (!u2BreakSucceeded)
+                failures.push("Universe II break did not execute in regression setup")
+            if (!(u2RecordAfter > u2RecordBefore))
+                failures.push("Universe break did not record per-universe completion")
+
             clearRouteProgress()
             gameData.multiverse.current_universe = 2
             gameData.multiverse.highest_universe = 2
