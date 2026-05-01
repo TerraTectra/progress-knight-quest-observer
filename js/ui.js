@@ -128,6 +128,8 @@ function renderSideBar() {
     document.getElementById("timeWarpingDisplay").textContent = "x" + format(getUnpausedGameSpeed() / baseGameSpeed, 2)
 
     document.getElementById("hypercubesDisplay").textContent = formatTreshold(gameData.hypercubes)
+    document.getElementById("multiversePointsDisplay").textContent = format(gameData.multiverse_points, 2)
+    document.getElementById("multiversePointsGainDisplay").textContent = format(getMultiversePointGain(), 4)
 
 
     document.getElementById("hypercubeCapText").hidden = gameData.rebirthFiveCount == 0 || getTotalPerkPoints() > 0
@@ -559,14 +561,22 @@ function renderBoostButton(elemName) {
 }
 
 function renderMetaverse() {
+    document.getElementById("multiversePointsMetaDisplay").textContent = format(gameData.multiverse_points, 2)
+    document.getElementById("multiversePointsMetaGainDisplay").textContent = format(getMultiversePointGain(), 4)
+    document.getElementById("multiverseVoidResonanceDisplay").textContent = format(getMultiverseVoidResonance(), 2)
+
     document.getElementById("currentHypercubesCap").hidden = getHypercubeCap() == Infinity
     document.getElementById("currentHypercubesCapValue").textContent = format(getHypercubeCap())
 
     for (var i = 0; i < 3; i++) {
         const elem = document.getElementById("timeTillNextHypercubePower" + (i + 1))
         const nextH = getNextPowerOfNumber(gameData.hypercubes * Math.pow(10, i))
-        elem.textContent =
-            format(nextH) + " Hypercubes in " + formatTime(getTimeTillNextHypercubePower(i))
+        if (getHypercubeGeneration() == 0) {
+            elem.textContent = i == 0 ? "Hypercube generation begins after the first Metaverse run." : ""
+            elem.hidden = i > 0
+            continue
+        }
+        elem.textContent = format(nextH) + " Hypercubes in " + formatTime(getTimeTillNextHypercubePower(i))
         if (i>0)
             elem.hidden = nextH > getHypercubeCap() || gameData.perks_points == 0 || gameData.hypercubes < 1e20 * Math.pow(10, i)
         else

@@ -263,6 +263,10 @@
 										<div class="text-caption"><span class="color-hypercubes">Hypercubes: </span><span id="hypercubesDisplay"></span></div>
 										<div style="color: gray" class="sidebar-element">for Metaverse sacrifices</div>
 									</div>
+									<div id="multiversePointsInfo">
+										<div class="text-caption"><span class="color-hypercubes">Multiverse points: </span><span id="multiversePointsDisplay"></span></div>
+										<div style="color: gray" class="sidebar-element"><span id="multiversePointsGainDisplay"></span>/s, unaffected by Time Warp</div>
+									</div>
 									<div id="rebirthButton1" class="hidden">
 										<button class="w3-button button" style="margin-bottom: 0.1em; margin-top: 0.8em; width: 100%" onClick="rebirthOne()">Touch the eye</button>
 									</div>
@@ -739,6 +743,14 @@
 											<div class="text-caption">Lifespan is now infinite.</div>
 											<div class="text-caption">The more hypercubes you have, the more sacrifice opportunities will open up.</div>
 										</div>
+										<div id="multiversePointsPanel" style="padding-top:2em">
+											<div class="text-caption metaverse-title">Multiverse signal</div>
+											<div style="color:gray; padding-bottom: 0.3em;">The Void has revealed that this run is only one universe among many.</div>
+											<div style="color:gray; padding-bottom: 0.3em;">Multiverse points: <b id="multiversePointsMetaDisplay" class="color-hypercubes"></b></div>
+											<div style="color:gray; padding-bottom: 0.3em;">Passive gain: <b id="multiversePointsMetaGainDisplay"></b> / s</div>
+											<div style="color:gray; padding-bottom: 0.3em;">Void resonance: x<b id="multiverseVoidResonanceDisplay"></b></div>
+											<div style="color:gray; padding-bottom: 0.5em;">This gain uses real time only. Time Warping, boosts, and admin speed do not multiply it.</div>
+										</div>
 										<div style="border-bottom: 0.1em solid rgb(24, 210, 217); padding-top: 2em;"></div>
 										<div style="padding-top:1em">
 											<div class="text-caption"><span class="color-hypercubes">Hypercubes:</span> <span id="hypercubesMetaDisplay"></span></div>
@@ -1021,6 +1033,7 @@
 	<script type="text/javascript" src="js/challenges.js"></script>
 	<script type="text/javascript" src="js/dark_matter.js"></script>
 	<script type="text/javascript" src="js/metaverse.js"></script>
+	<script type="text/javascript" src="js/multiverse.js"></script>
 	<script type="text/javascript" src="js/tooltips.js"></script>
 	<script type="text/javascript" src="js/milestones.js"></script>
 	<script type="text/javascript" src="js/data.js"></script>

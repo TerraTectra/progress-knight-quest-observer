@@ -19,6 +19,9 @@
     dark_matter: 0,
     dark_orbs: 0,
     hypercubes: 0,
+    multiverse_points: 0,
+    multiverse_points_lifetime: 0,
+    multiverse_unlocked: false,
     perks_points: 0,
     perks: {
         auto_dark_orb: 0,
@@ -543,7 +546,7 @@ const requirementsBaseData = {
     "Challenge_the_darkest_time": new EssenceRequirement(["#theDarkestTimeChallenge"], [{ requirement: 1e47 }]),
 
     // Metaverse Altars
-    "Metaverse": new MetaverseRequirement(["#metaverseTabButton"], [{ requirement: 1 }]),
+    "Metaverse": new MetaverseRequirement(["#metaverseTabButton", "#multiversePointsInfo", "#multiversePointsPanel"], [{ requirement: 1 }]),
     "Increase Hypercube Gain": new HypercubeRequirement(["#IncreaseHypercubeGainAltar"], [{ requirement: 1 }]),
     "Reduce Boost Cooldown": new HypercubeRequirement(["#ReduceBoostCooldownAltar"], [{ requirement: 500 }]),
     "Increase Boost Duration": new HypercubeRequirement(["#IncreaseBoostDurationAltar"], [{ requirement: 2500 }]),

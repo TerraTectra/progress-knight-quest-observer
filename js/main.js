@@ -1361,6 +1361,7 @@ function update(needUpdateUI = true) {
     makeHeroes()
     increaseRealtime()
     increaseDays()
+    increaseMultiversePoints()
     autoPerks()
     autoPromote()
     autoBuy()

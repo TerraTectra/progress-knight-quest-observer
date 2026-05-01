@@ -398,6 +398,9 @@ class MetaverseRequirement extends Requirement {
     }
 
     getCondition(isHero, requirement) {
+        if (typeof isMultiverseUnlocked === "function" && isMultiverseUnlocked())
+            return true
+
         return gameData.rebirthFiveCount >= requirement.requirement
     }
 }
