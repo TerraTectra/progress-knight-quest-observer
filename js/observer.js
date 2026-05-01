@@ -7,11 +7,13 @@ const observerRankData = {
     legendary: { name: "Legendary", speed: 2.08, op: 2.65, xp: 2.05, mistake: 0.2, colorClass: "legendary", description: "Nearly optimal routing toward Universe X." },
 }
 
-const observerCommandData = {
-    balanced: { name: "Balanced", speed: 1, op: 1, mistake: 1, xp: 1, description: "No major bias. Subjects route normally." },
-    safe: { name: "Safe economy", speed: 0.86, op: 1.1, mistake: 0.65, xp: 1.04, description: "Slower runs, fewer bankruptcies and wasted loops." },
-    rush: { name: "Rush breaks", speed: 1.32, op: 0.9, mistake: 1.42, xp: 0.96, description: "Pushes hard toward next universe, but creates more errors." },
-    study: { name: "Study focus", speed: 1.02, op: 1.04, mistake: 0.9, xp: 1.18, description: "Better AI XP growth and smoother routing." },
+const observerPersonalityData = {
+    timid: { name: "Timid", speed: 0.9, op: 1.05, mistake: 0.78, xp: 1.02, purchase: 0.82, choice: 0.08, description: "Avoids risky routes and buys slowly, but keeps clean streaks." },
+    impulsive: { name: "Impulsive", speed: 1.23, op: 0.94, mistake: 1.38, xp: 0.96, purchase: 1.2, choice: -0.05, description: "Rushes progress, overbuys, and often recovers from messy routes." },
+    studious: { name: "Studious", speed: 0.98, op: 1.02, mistake: 0.9, xp: 1.22, purchase: 0.92, choice: 0.12, description: "Learns routes quickly and keeps skill-heavy phases stable." },
+    greedy: { name: "Greedy", speed: 1.06, op: 1.18, mistake: 1.12, xp: 0.98, purchase: 1.32, choice: -0.02, description: "Chases income and items, sometimes at the cost of stability." },
+    methodical: { name: "Methodical", speed: 1, op: 1.08, mistake: 0.72, xp: 1.08, purchase: 0.96, choice: 0.16, description: "Builds clean routes and rarely wastes late-universe attempts." },
+    visionary: { name: "Visionary", speed: 1.1, op: 1.16, mistake: 0.86, xp: 1.14, purchase: 1.03, choice: 0.2, description: "Recognizes universe distortions earlier than most subjects." },
 }
 
 const observerUpgradeData = {
@@ -95,7 +97,7 @@ function getObserverState() {
         state.lifetime_points = 0
     if (state.subjects == null)
         state.subjects = []
-    if (state.command == null || observerCommandData[state.command] == null)
+    if (state.command == null)
         state.command = "balanced"
     if (state.next_subject_id == null)
         state.next_subject_id = state.subjects.length + 1
@@ -128,6 +130,8 @@ function normalizeObserverSubject(subject, state = null) {
         subject.id = state != null ? state.next_subject_id++ : gameData.observer.next_subject_id++
     if (subject.rank == null || observerRankData[subject.rank] == null)
         subject.rank = "trash"
+    if (subject.personality == null || observerPersonalityData[subject.personality] == null)
+        subject.personality = rollObserverPersonality()
     if (subject.name == null)
         subject.name = "Subject " + subject.id
     if (subject.stage_index == null || isNaN(subject.stage_index))
@@ -190,6 +194,10 @@ function normalizeObserverSubject(subject, state = null) {
     subject.bot_property_index = Math.max(0, Math.min(observerBotProperties.length - 1, Math.floor(subject.bot_property_index)))
     subject.bot_job_level = Math.max(1, Math.floor(subject.bot_job_level))
     subject.bot_skill_level = Math.max(1, Math.floor(subject.bot_skill_level))
+}
+
+function getObserverRankOrder() {
+    return ["trash", "common", "skilled", "rare", "epic", "legendary"]
 }
 
 function hasObserverFinalGate() {
@@ -289,6 +297,39 @@ function buyObserverUpgrade(upgrade) {
     return true
 }
 
+function getObserverRankUpgradeCost(subject) {
+    const order = getObserverRankOrder()
+    const index = order.indexOf(subject.rank)
+    if (index < 0 || index >= order.length - 1)
+        return Infinity
+
+    return 85 * Math.pow(3.25, index) * (1 + subject.completed_universe_x * 0.45)
+}
+
+function improveObserverSubjectRank(id) {
+    const state = getObserverState()
+    const order = getObserverRankOrder()
+    for (const subject of state.subjects) {
+        if (subject.id != id)
+            continue
+
+        const index = order.indexOf(subject.rank)
+        const cost = getObserverRankUpgradeCost(subject)
+        if (index < 0 || index >= order.length - 1 || state.points < cost)
+            return false
+
+        state.points -= cost
+        subject.rank = order[index + 1]
+        subject.clean_time = 0
+        subject.last_action = "The Observer refined this subject into " + observerRankData[subject.rank].name + " rank."
+        pushObserverSubjectLog(subject, subject.last_action)
+        renderObserver()
+        return true
+    }
+
+    return false
+}
+
 function getObserverSubjectCost() {
     const state = getObserverState()
     if (state.subjects.length == 0)
@@ -349,6 +390,7 @@ function createObserverSubject(freeSubject) {
         id,
         name: getObserverSubjectName(id),
         rank,
+        personality: rollObserverPersonality(),
         stage_index: 0,
         progress: 0,
         mistakes: 0,
@@ -409,17 +451,13 @@ function rollObserverRank() {
     return "trash"
 }
 
-function setObserverCommand(command) {
-    if (observerCommandData[command] == null)
-        return false
-
-    getObserverState().command = command
-    return true
+function rollObserverPersonality() {
+    const keys = Object.keys(observerPersonalityData)
+    return keys[Math.floor(Math.random() * keys.length)]
 }
 
-function getObserverCommand() {
-    const state = getObserverState()
-    return observerCommandData[state.command] || observerCommandData.balanced
+function getObserverSubjectPersonality(subject) {
+    return observerPersonalityData[subject.personality] || observerPersonalityData.methodical
 }
 
 function getObserverStageBand(stage) {
@@ -465,6 +503,10 @@ function getObserverSubjectRankStyle(subject) {
         return "Near-optimal route toward U-X and Observer Signal."
 
     return rank.description
+}
+
+function getObserverSubjectPersonalityStyle(subject) {
+    return getObserverSubjectPersonality(subject).description
 }
 
 function getObserverBotIncome(subject) {
@@ -555,8 +597,9 @@ function updateObserverSubjectDecision(subject, dt) {
 
     const stage = getObserverSubjectStage(subject)
     const rank = getObserverBotRank(subject)
+    const personality = getObserverSubjectPersonality(subject)
     const aiBonus = Math.min(0.28, Math.log2(subject.ai_level + 1) * 0.035)
-    const rightChoiceChance = Math.min(0.98, rank.choice + aiBonus)
+    const rightChoiceChance = Math.min(0.98, rank.choice + personality.choice + aiBonus)
     const oldJob = subject.bot_focus_job
     const oldSkill = subject.bot_focus_skill
 
@@ -568,7 +611,7 @@ function updateObserverSubjectDecision(subject, dt) {
         subject.bot_focus_skill = stage.skill
     }
 
-    subject.bot_next_decision = Math.max(1.8, 8.5 - rank.choice * 4.2 - Math.min(2.5, subject.ai_level * 0.035))
+    subject.bot_next_decision = Math.max(1.8, 8.5 - rank.choice * 4.2 - personality.speed * 0.6 - Math.min(2.5, subject.ai_level * 0.035))
 
     if (oldJob != subject.bot_focus_job || oldSkill != subject.bot_focus_skill) {
         subject.last_action = "Switched route to " + subject.bot_focus_job + " / " + subject.bot_focus_skill + "."
@@ -579,9 +622,10 @@ function updateObserverSubjectDecision(subject, dt) {
 function updateObserverSubjectTraining(subject, dt) {
     const stage = getObserverSubjectStage(subject)
     const rank = getObserverBotRank(subject)
+    const personality = getObserverSubjectPersonality(subject)
     const speed = getObserverSpeedMultiplier(subject)
     const routeQuality = getObserverSubjectRouteQuality(subject)
-    const xpBase = (0.9 + speed * 0.55) * rank.choice * (0.7 + routeQuality * 0.38)
+    const xpBase = (0.9 + speed * 0.55) * rank.choice * personality.xp * (0.7 + routeQuality * 0.38)
     const targetJob = subject.bot_focus_job == stage.job ? 1.18 : 0.58
     const targetSkill = subject.bot_focus_skill == stage.skill ? 1.2 : 0.58
 
@@ -613,8 +657,9 @@ function updateObserverSubjectTraining(subject, dt) {
 
 function getObserverBotPurchaseReserve(subject) {
     const rank = getObserverBotRank(subject)
+    const personality = getObserverSubjectPersonality(subject)
     const stage = getObserverSubjectStage(subject)
-    return Math.max(120, getObserverBotIncome(subject) * (1.2 + stage.difficulty * 0.22) / Math.max(0.4, rank.thrift))
+    return Math.max(120, getObserverBotIncome(subject) * (1.2 + stage.difficulty * 0.22) / Math.max(0.4, rank.thrift * personality.purchase))
 }
 
 function updateObserverSubjectPurchases(subject, dt) {
@@ -623,6 +668,7 @@ function updateObserverSubjectPurchases(subject, dt) {
         return
 
     const rank = getObserverBotRank(subject)
+    const personality = getObserverSubjectPersonality(subject)
     const reserve = getObserverBotPurchaseReserve(subject)
     const nextProperty = observerBotProperties[Math.min(observerBotProperties.length - 1, (subject.bot_property_index || 0) + 1)]
 
@@ -631,7 +677,7 @@ function updateObserverSubjectPurchases(subject, dt) {
         subject.bot_property_index += 1
         subject.last_action = "Bought " + nextProperty.name + " for a safer route."
         pushObserverSubjectLog(subject, subject.last_action)
-        subject.bot_next_purchase = Math.max(1.5, 8 - rank.purchase * 4)
+        subject.bot_next_purchase = Math.max(1.5, 8 - rank.purchase * personality.purchase * 4)
         return
     }
 
@@ -644,7 +690,7 @@ function updateObserverSubjectPurchases(subject, dt) {
             subject.bot_items.push(item.name)
             subject.last_action = "Bought " + item.name + "."
             pushObserverSubjectLog(subject, subject.last_action)
-            subject.bot_next_purchase = Math.max(1.5, 8.5 - rank.purchase * 4)
+            subject.bot_next_purchase = Math.max(1.5, 8.5 - rank.purchase * personality.purchase * 4)
             return
         }
     }
@@ -655,7 +701,7 @@ function updateObserverSubjectPurchases(subject, dt) {
         pushObserverSubjectLog(subject, subject.last_action)
     }
 
-    subject.bot_next_purchase = Math.max(2.5, 10 - rank.purchase * 3.2)
+    subject.bot_next_purchase = Math.max(2.5, 10 - rank.purchase * personality.purchase * 3.2)
 }
 
 function pushObserverSubjectLog(subject, message) {
@@ -798,13 +844,13 @@ function getObserverMistakeMultiplier() {
 
 function getObserverSpeedMultiplier(subject) {
     const rank = observerRankData[subject.rank]
-    const command = getObserverCommand()
+    const personality = getObserverSubjectPersonality(subject)
     const stage = getObserverSubjectStage(subject)
     const instructions = 1 + getObserverUpgradeLevel("clear_instructions") * 0.1
     const briefing = 1 + Math.max(0, stage.universe - 1) * getObserverUpgradeLevel("universe_briefing") * 0.03
     const cleanBonus = getObserverCleanSpeedBonus(subject)
     const repeatClearDrag = 1 + Math.sqrt(subject.completed_universe_x) * 0.12
-    return getSafeObserverNumber(rank.speed * getObserverRankStageSpeed(subject) * command.speed * instructions * briefing * getObserverPhaseSpeedMultiplier(stage) * cleanBonus * getObserverAiLevelSpeed(subject) / (stage.difficulty * repeatClearDrag), 0)
+    return getSafeObserverNumber(rank.speed * getObserverRankStageSpeed(subject) * personality.speed * instructions * briefing * getObserverPhaseSpeedMultiplier(stage) * cleanBonus * getObserverAiLevelSpeed(subject) / (stage.difficulty * repeatClearDrag), 0)
 }
 
 function getObserverCleanSpeedBonus(subject) {
@@ -817,7 +863,7 @@ function getObserverCleanXpBonus(subject) {
 
 function getObserverSubjectOpGain(subject) {
     const rank = observerRankData[subject.rank]
-    const command = getObserverCommand()
+    const personality = getObserverSubjectPersonality(subject)
     const memory = 1 + getObserverUpgradeLevel("shared_memory") * 0.12
     const stage = getObserverSubjectStage(subject)
     const universeValue = 0.027 * stage.universe + 0.013 * subject.stage_index
@@ -826,7 +872,7 @@ function getObserverSubjectOpGain(subject) {
     const clearBonus = 1 + Math.log2(subject.completed_universe_x + 1) * 0.35
     const routeQuality = getObserverSubjectRouteQuality(subject)
     const levelDepth = 1 + Math.min(0.55, Math.log2((subject.bot_job_level || 1) + (subject.bot_skill_level || 1)) * 0.045)
-    return getSafeObserverNumber(stageValue * rank.op * getObserverRankStageOp(subject) * command.op * memory * getObserverPhaseOpMultiplier(stage) * cleanBonus * clearBonus * getObserverAiLevelOp(subject) * getObserverRosterSupportBonus() * routeQuality * levelDepth, 0)
+    return getSafeObserverNumber(stageValue * rank.op * getObserverRankStageOp(subject) * personality.op * memory * getObserverPhaseOpMultiplier(stage) * cleanBonus * clearBonus * getObserverAiLevelOp(subject) * getObserverRosterSupportBonus() * routeQuality * levelDepth, 0)
 }
 
 function getObserverPointsGain() {
@@ -848,11 +894,11 @@ function getObserverAiXpToNext(subject) {
 
 function getObserverAiXpGain(subject) {
     const rank = observerRankData[subject.rank]
-    const command = getObserverCommand()
+    const personality = getObserverSubjectPersonality(subject)
     const stage = getObserverSubjectStage(subject)
     const briefing = 1 + getObserverUpgradeLevel("universe_briefing") * 0.04 * Math.max(0, stage.universe - 1)
     const drills = 1 + getObserverUpgradeLevel("route_drills") * 0.14
-    return getSafeObserverNumber((0.12 + stage.universe * 0.03 + subject.stage_index * 0.01) * rank.xp * command.xp * getObserverCleanXpBonus(subject) * briefing * drills * getObserverPhaseXpMultiplier(stage), 0)
+    return getSafeObserverNumber((0.12 + stage.universe * 0.03 + subject.stage_index * 0.01) * rank.xp * personality.xp * getObserverCleanXpBonus(subject) * briefing * drills * getObserverPhaseXpMultiplier(stage), 0)
 }
 
 function updateObserver() {
@@ -871,7 +917,6 @@ function updateObserver() {
 
 function updateObserverSubjects() {
     const state = getObserverState()
-    const command = getObserverCommand()
 
     for (const subject of state.subjects) {
         normalizeObserverSubject(subject, state)
@@ -901,8 +946,9 @@ function updateObserverSubjects() {
         }
 
         const rank = observerRankData[subject.rank]
+        const personality = getObserverSubjectPersonality(subject)
         const stage = getObserverSubjectStage(subject)
-        const mistakeChance = 0.000045 * rank.mistake * getObserverRankStageMistake(subject) * command.mistake * stage.difficulty * getObserverAiLevelMistake(subject) * getObserverMistakeMultiplier() * getObserverPhaseMistakeMultiplier(stage)
+        const mistakeChance = 0.000045 * rank.mistake * getObserverRankStageMistake(subject) * personality.mistake * stage.difficulty * getObserverAiLevelMistake(subject) * getObserverMistakeMultiplier() * getObserverPhaseMistakeMultiplier(stage)
         if (Math.random() < mistakeChance) {
             applyObserverSubjectMistake(subject)
         }
@@ -1063,7 +1109,6 @@ function renderObserver() {
     subjectButton.textContent = subjectCost == 0 ? "Add first subject" : "Add subject - " + format(subjectCost, 2) + " OP"
     subjectButton.disabled = state.points < subjectCost
 
-    renderObserverCommands()
     renderObserverSubjects()
     renderObserverUpgrades()
     renderObservedObserverSubject()
@@ -1102,16 +1147,19 @@ function renderObserverSubjects() {
     let html = ""
     for (const subject of state.subjects) {
         const rank = observerRankData[subject.rank]
+        const personality = getObserverSubjectPersonality(subject)
         const stage = getObserverSubjectStage(subject)
         const progress = getObserverStageProgress(subject)
         const aiProgress = Math.min(100, subject.ai_xp / getObserverAiXpToNext(subject) * 100)
         const routeQuality = getObserverSubjectRouteQuality(subject)
+        const rankCost = getObserverRankUpgradeCost(subject)
         html +=
             `<div class="rb-observer-subject ${rank.colorClass}">` +
                 `<div class="rb-observer-subject-head">` +
                     `<div><b>${subject.name}</b><br><span class="rb-rank ${rank.colorClass}">${rank.name}</span></div>` +
                     `<div class="rb-observer-universe">U-${stage.universe}</div>` +
                 `</div>` +
+                `<div style="color:gray; margin-top:0.35em;">${personality.name}: ${personality.description}</div>` +
                 `<div style="color:gray; margin-top:0.45em;">${stage.name}</div>` +
                 `<div class="rb-observer-mini-row"><span>Job</span><b>${subject.bot_focus_job} lvl ${formatWhole(getObserverBotJobLevel(subject))}</b></div>` +
                 `<div class="rb-observer-mini-row"><span>Skill</span><b>${subject.bot_focus_skill} lvl ${formatWhole(getObserverBotSkillLevel(subject))}</b></div>` +
@@ -1124,7 +1172,10 @@ function renderObserverSubjects() {
                 `<div class="rb-observer-mini-row"><span>Mistakes</span><b>${formatWhole(subject.mistakes)}</b></div>` +
                 `<div class="rb-observer-mini-row"><span>U-X clears</span><b>${formatWhole(subject.completed_universe_x)}</b></div>` +
                 `<div class="rb-observer-note">${subject.last_action}</div>` +
-                `<div class="rb-observer-actions"><button class="w3-button button" onclick="observeObserverSubject(${subject.id})">Observe</button></div>` +
+                `<div class="rb-observer-actions">` +
+                    `<button class="w3-button button" onclick="observeObserverSubject(${subject.id})">Observe</button>` +
+                    `<button class="w3-button button" onclick="improveObserverSubjectRank(${subject.id})" ${isFinite(rankCost) && state.points >= rankCost ? "" : "disabled"}>${isFinite(rankCost) ? "Refine rank - " + format(rankCost, 2) + " OP" : "Max rank"}</button>` +
+                `</div>` +
             `</div>`
     }
 
@@ -1145,6 +1196,7 @@ function renderObservedObserverSubject() {
         return
 
     const rank = observerRankData[subject.rank]
+    const personality = getObserverSubjectPersonality(subject)
     const stage = getObserverSubjectStage(subject)
     const previousStage = observerSubjectStages[Math.max(0, subject.stage_index - 1)]
     const nextStage = observerSubjectStages[Math.min(observerSubjectStages.length - 1, subject.stage_index + 1)]
@@ -1180,6 +1232,7 @@ function renderObservedObserverSubject() {
         `<b>AI decision state</b><br>` +
         `<span style="color:gray;">Goal:</span> ${getObserverSubjectGoal(subject)}<br>` +
         `<span style="color:gray;">Rank behavior:</span> ${getObserverSubjectRankStyle(subject)}<br>` +
+        `<span style="color:gray;">Character:</span> ${personality.name} - ${getObserverSubjectPersonalityStyle(subject)}<br>` +
         `<span style="color:gray;">Route quality:</span> x${format(routeQuality, 2)}; ` +
         `<span style="color:gray;">property:</span> ${property.name}<br>` +
         `<span style="color:gray;">Clean streak:</span> ${formatTime(subject.clean_time, true)}; ` +
