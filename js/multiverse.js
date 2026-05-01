@@ -189,6 +189,9 @@ function getMultiverseEssenceGain() {
 function getMultiverseCategoryPower(category, scale) {
     let power = 0
 
+    if (category == null)
+        return 1
+
     for (const taskName of category) {
         const task = gameData.taskData[taskName]
         if (task == null)
@@ -200,17 +203,34 @@ function getMultiverseCategoryPower(category, scale) {
     return 1 + power * scale
 }
 
+function getMultiverseVoidJobSource() {
+    return getMultiverseCategoryPower(jobCategories["The Void"], 0.02)
+}
+
+function getMultiverseVoidSkillSource() {
+    return getMultiverseCategoryPower(skillCategories["Void Manipulation"], 0.018)
+}
+
+function getMultiverseDarkLayerSource() {
+    const darkMatter = 1 + Math.log10(gameData.dark_matter + 1) * 0.01
+    const hypercubes = 1 + Math.log10(gameData.hypercubes + 1) * 0.025
+    const essence = 1 + Math.max(0, Math.log10(gameData.essence + 1) - 20) * 0.015
+    return darkMatter * hypercubes * essence
+}
+
+function getMultiverseUniverseSource() {
+    return getUniverseInfo().mpMult
+}
+
+function getMultiverseBreakRewardGain() {
+    return getMultiverseState().universe_break_unlocked ? 1.25 : 1
+}
+
 function getMultiverseVoidResonance() {
     if (!isMultiverseUnlocked())
         return 0
 
-    const voidJobs = getMultiverseCategoryPower(jobCategories["The Void"], 0.02)
-    const voidSkills = getMultiverseCategoryPower(skillCategories["Void Manipulation"], 0.018)
-    const darkMatter = 1 + Math.log10(gameData.dark_matter + 1) * 0.01
-    const hypercubes = 1 + Math.log10(gameData.hypercubes + 1) * 0.025
-    const essence = 1 + Math.max(0, Math.log10(gameData.essence + 1) - 20) * 0.015
-
-    return voidJobs * voidSkills * darkMatter * hypercubes * essence
+    return getMultiverseVoidJobSource() * getMultiverseVoidSkillSource() * getMultiverseDarkLayerSource()
 }
 
 function getMultiversePointGain() {
@@ -218,16 +238,22 @@ function getMultiversePointGain() {
         return 0
 
     const cartography = 1 + getMultiverseUpgradeLevel("void_cartography") * 0.18
-    return 0.001 * getMultiverseVoidResonance() * getUniverseInfo().mpMult * cartography
+    return 0.001 * getMultiverseVoidResonance() * getMultiverseUniverseSource() * cartography * getMultiverseBreakRewardGain()
 }
 
 function breakUniverseAltarCost() {
     return 1e24
 }
 
+function hasBreakUniverseAltarRequirements() {
+    return gameData.metaverse.dark_mater_gain_modifer >= 1
+        && gameData.metaverse.essence_gain_modifier >= 1
+}
+
 function canBuyBreakUniverseAltar() {
     return isMultiverseUnlocked()
         && gameData.rebirthFiveCount > 0
+        && hasBreakUniverseAltarRequirements()
         && !getMultiverseState().universe_break_unlocked
         && gameData.hypercubes >= breakUniverseAltarCost()
 }

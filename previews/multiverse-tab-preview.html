@@ -103,6 +103,45 @@
             margin-top: 1em;
         }
 
+        .source-grid {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 0.8em;
+            margin-top: 1em;
+        }
+
+        .source-box {
+            background: rgb(38, 38, 38);
+            border: 1px solid var(--pk-border);
+            border-left: 0.35em solid var(--mp);
+            padding: 0.7em 0.8em;
+            min-height: 86px;
+        }
+
+        .source-box.void { border-left-color: var(--void); }
+        .source-box.dark { border-left-color: #78a8ff; }
+        .source-box.hyper { border-left-color: var(--gold); }
+        .source-box.universe { border-left-color: var(--good); }
+
+        .source-title {
+            color: white;
+            font-weight: bold;
+            margin-bottom: 0.35em;
+        }
+
+        .source-value {
+            color: var(--mp);
+            font-weight: bold;
+        }
+
+        .altar-preview {
+            margin-top: 1em;
+            background: rgb(38, 38, 38);
+            border: 1px solid var(--pk-border);
+            border-left: 0.35em solid var(--gold);
+            padding: 0.8em;
+        }
+
         .universe-card {
             background: rgb(38, 38, 38);
             border: 1px solid var(--pk-border);
@@ -222,6 +261,41 @@
             </div>
 
             <div class="panel w3-margin-left w3-margin-top w3-padding">
+                <div class="section-title text-caption"><b>MP Sources</b></div>
+                <div class="muted">Multiverse Points grow from real-time Void progress. Time Warp, boosts, and admin speed do not multiply this income.</div>
+                <div class="source-grid">
+                    <div class="source-box void">
+                        <div class="source-title">Void jobs</div>
+                        <div class="muted">Corrupted, Void Slave, Abyss God...</div>
+                        <div class="source-value">x3.82</div>
+                    </div>
+                    <div class="source-box void">
+                        <div class="source-title">Void skills</div>
+                        <div class="muted">Void Amplification, Mind Release...</div>
+                        <div class="source-value">x2.96</div>
+                    </div>
+                    <div class="source-box dark">
+                        <div class="source-title">Dark layer</div>
+                        <div class="muted">Dark Matter and late essence pressure.</div>
+                        <div class="source-value">x1.18</div>
+                    </div>
+                    <div class="source-box universe">
+                        <div class="source-title">Universe</div>
+                        <div class="muted">Current universe passive multiplier.</div>
+                        <div class="source-value">x1.00</div>
+                    </div>
+                </div>
+
+                <div class="altar-preview">
+                    <div class="text-caption"><span style="color: var(--gold);"><b>Metaverse altar preview: Break Universe</b></span></div>
+                    <div class="muted">Late Hypercube altar. Requires the native Quest Metaverse layer, costs Hypercubes, and unlocks the first real universe break in this tab.</div>
+                    <div class="muted" style="padding-top:0.35em;">Reward: Universe breaks unlocked and permanent <span class="chip chip-mp">+25% MP gain</span>.</div>
+                    <div class="muted" style="padding-top:0.35em;">Suggested condition: Dark Matter gain multiplier purchased once, Essence gain multiplier purchased once, then pay <span class="chip chip-gold">1e24 Hypercubes</span>.</div>
+                </div>
+
+                <div style="border-bottom: 0.1em solid rgb(24, 210, 217); padding-top: 2em;"></div>
+
+                <div style="padding-top:1em"></div>
                 <div class="section-title text-caption"><b>Universes</b></div>
                 <div class="muted">Unlock each next universe by breaking the previous one. Every universe increases passive Multiverse Point gain, but distorts the base rules harder.</div>
 

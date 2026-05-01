@@ -577,6 +577,44 @@ button:focus {
 .rb-stat-box.gold { border-left: 0.35em solid #e5c100; }
 .rb-stat-box.red { border-left: 0.35em solid #e63946; }
 
+.rb-source-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 0.8em;
+    margin-top: 1em;
+}
+
+.rb-source-box {
+    background-color: rgb(37, 37, 37);
+    border: 1px solid rgb(73, 73, 73);
+    padding: 0.75em 0.85em;
+    min-height: 7.4em;
+}
+
+.rb-source-box.void { border-top: 0.25em solid #9b5cff; }
+.rb-source-box.skills { border-top: 0.25em solid #18d2d9; }
+.rb-source-box.dark { border-top: 0.25em solid #e63946; }
+.rb-source-box.universe { border-top: 0.25em solid #e5c100; }
+
+.rb-source-title {
+    color: white;
+    font-weight: bold;
+}
+
+.rb-source-value {
+    color: #18d2d9;
+    font-size: 1.35em;
+    font-weight: bold;
+    padding: 0.25em 0;
+}
+
+.rb-altar-preview {
+    margin-top: 1em;
+    padding: 0.8em;
+    border-left: 0.35em solid #e5c100;
+    background-color: rgb(40, 40, 40);
+}
+
 .rb-universe-grid {
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));

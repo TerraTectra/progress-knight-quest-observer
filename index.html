@@ -803,6 +803,8 @@
 											<div class="text-caption metaverse-title">Break Universe</div>
 											<div style="color:gray; padding-bottom: 0.3em;">Unlocks the first real Multiverse break. After this, Universe II can be bought in the Multiverse tab.</div>
 											<div style="color:gray; padding-bottom: 0.3em;">State: <b id="breakUniverseState"></b></div>
+											<div style="color:gray; padding-bottom: 0.3em;">Requires: Dark Matter gain multiplier <b id="breakUniverseDarkMatterReq"></b>/1, Essence gain multiplier <b id="breakUniverseEssenceReq"></b>/1</div>
+											<div style="color:gray; padding-bottom: 0.3em;">Reward: <b id="breakUniverseReward"></b></div>
 											<div style="color:gray; padding-bottom: 0.5em;">Cost: <b id="breakUniverseCost"></b> <span class="color-hypercubes">Hypercubes</span></div>
 											<button class="w3-button button" id="breakUniverseButton" onclick="buyBreakUniverseAltar()">Sacrifice</button>
 										</div>
@@ -847,6 +849,37 @@
 										<div style="color:gray; padding-bottom: 0.3em;">Passive gain: <b id="multiversePointsMetaGainDisplay"></b> / s</div>
 										<div style="color:gray; padding-bottom: 0.3em;">Void resonance: x<b id="multiverseVoidResonanceDisplay"></b></div>
 										<div style="color:gray; padding-bottom: 0.5em;">This gain uses real time only. Time Warping, boosts, and admin speed do not multiply it.</div>
+									</div>
+									<div id="multiverseSourcesPanel" style="padding-bottom:1.2em">
+										<div class="rb-section-title text-caption"><b>MP Sources</b></div>
+										<div style="color:gray; padding-top: 0.4em;">Multiverse Points grow from real-time Void progress. Time Warp, boosts, and admin speed do not multiply this income.</div>
+										<div class="rb-source-grid">
+											<div class="rb-source-box void">
+												<div class="rb-source-title">Void jobs</div>
+												<div class="rb-source-value">x<span id="multiverseSourceVoidJobs"></span></div>
+												<div style="color:gray;">The Void work levels and max levels.</div>
+											</div>
+											<div class="rb-source-box skills">
+												<div class="rb-source-title">Void skills</div>
+												<div class="rb-source-value">x<span id="multiverseSourceVoidSkills"></span></div>
+												<div style="color:gray;">Void Manipulation skill progress.</div>
+											</div>
+											<div class="rb-source-box dark">
+												<div class="rb-source-title">Dark layer</div>
+												<div class="rb-source-value">x<span id="multiverseSourceDarkLayer"></span></div>
+												<div style="color:gray;">Dark Matter, Hypercubes, and late Essence pressure.</div>
+											</div>
+											<div class="rb-source-box universe">
+												<div class="rb-source-title">Universe</div>
+												<div class="rb-source-value">x<span id="multiverseSourceUniverse"></span></div>
+												<div style="color:gray;">Higher universes pay more MP while distorting the run.</div>
+											</div>
+										</div>
+										<div class="rb-altar-preview">
+											<div class="text-caption"><b>Metaverse altar: Break Universe</b></div>
+											<div style="color:gray;">A late Hypercube sacrifice in the native Metaverse layer. It unlocks universe breaks and permanently improves passive MP gain.</div>
+											<div style="padding-top:0.5em;">Reward: <b id="multiverseBreakRewardState"></b></div>
+										</div>
 									</div>
 									<div id="multiverseUniversePage" class="page panel page-column w3-padding">
 										<div class="rb-section-title text-caption"><b>Universes</b></div>

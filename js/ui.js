@@ -622,6 +622,9 @@ function renderMetaverse() {
 
     const breakUniverseBought = getMultiverseState().universe_break_unlocked
     document.getElementById("breakUniverseState").textContent = breakUniverseBought ? "Unlocked" : "Sealed"
+    document.getElementById("breakUniverseDarkMatterReq").textContent = Math.min(1, gameData.metaverse.dark_mater_gain_modifer)
+    document.getElementById("breakUniverseEssenceReq").textContent = Math.min(1, gameData.metaverse.essence_gain_modifier)
+    document.getElementById("breakUniverseReward").textContent = breakUniverseBought ? "Universe breaks unlocked, x1.25 passive MP gain" : "Unlocks universe breaks and x1.25 passive MP gain"
     document.getElementById("breakUniverseCost").textContent = format(breakUniverseAltarCost())
     document.getElementById("breakUniverseButton").disabled = !canBuyBreakUniverseAltar()
     document.getElementById("breakUniverseButton").textContent = breakUniverseBought ? "Unlocked" : "Sacrifice"
@@ -638,8 +641,24 @@ function renderMultiverse() {
     document.getElementById("multiversePointsMetaDisplay").textContent = format(gameData.multiverse_points, 2)
     document.getElementById("multiversePointsMetaGainDisplay").textContent = format(getMultiversePointGain(), 4)
     document.getElementById("multiverseVoidResonanceDisplay").textContent = format(getMultiverseVoidResonance(), 2)
+    renderMultiverseSources()
     renderMultiverseUniverses()
     renderMultiverseUpgrades()
+}
+
+function renderMultiverseSources() {
+    const voidJobs = document.getElementById("multiverseSourceVoidJobs")
+    if (voidJobs == null)
+        return
+
+    document.getElementById("multiverseSourceVoidJobs").textContent = format(getMultiverseVoidJobSource(), 2)
+    document.getElementById("multiverseSourceVoidSkills").textContent = format(getMultiverseVoidSkillSource(), 2)
+    document.getElementById("multiverseSourceDarkLayer").textContent = format(getMultiverseDarkLayerSource(), 2)
+    document.getElementById("multiverseSourceUniverse").textContent = format(getMultiverseUniverseSource(), 2)
+
+    const rewardState = document.getElementById("multiverseBreakRewardState")
+    if (rewardState != null)
+        rewardState.textContent = getMultiverseState().universe_break_unlocked ? "Active: x1.25 MP gain" : "Sealed in the Metaverse altar"
 }
 
 function renderMultiverseUniverses() {
