@@ -347,7 +347,7 @@ function getEvilGain() {
 
     const evilGain = evilControl.getEffect() * bloodMeditation.getEffect() * absoluteWish.getEffect()
         * oblivionEmbodiment.getEffect() * yingYang.getEffect() * inferno * getChallengeBonus("legends_never_die")
-        * getDarkMatterSkillEvil() * theDevilInsideYou * stairWayToHell() * evilBooster
+        * getDarkMatterSkillEvil() * theDevilInsideYou * stairWayToHell() * evilBooster * getMultiverseEvilGain()
 
     return Math.min(evilGain, 1e308)
 }
@@ -365,8 +365,8 @@ function getEssenceGain() {
 
     const essenceGain = essenceControl.getEffect() * essenceCollector.getEffect() * transcendentMaster.getEffect()
         * faintHope.getEffect() * rise.getEffect() * getChallengeBonus("dance_with_the_devil")
-        * getAGiftFromGodEssenceGain() * darkMagician.getEffect() * getDarkMatterSkillEssence() 
-        * theNewGold * lifeIsValueable *  essenceMultGain()
+        * getAGiftFromGodEssenceGain() * darkMagician.getEffect() * getDarkMatterSkillEssence()
+        * theNewGold * lifeIsValueable *  essenceMultGain() * getMultiverseEssenceGain()
 
     return Math.min(essenceGain, 1e308)
 }

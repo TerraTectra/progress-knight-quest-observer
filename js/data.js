@@ -30,6 +30,8 @@
             stable_memory: 0,
             universal_labor: 0,
             long_echo: 0,
+            abyss_tithe: 0,
+            essence_prism: 0,
             void_cartography: 0,
             soft_constants: 0,
         },

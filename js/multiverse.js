@@ -15,6 +15,8 @@ const multiverseUpgradeData = {
     stable_memory: { name: "Stable Memory", baseCost: 4, costMult: 2.3, description: "+8% all XP per level." },
     universal_labor: { name: "Universal Labor", baseCost: 6, costMult: 2.45, description: "+10% job income per level." },
     long_echo: { name: "Long Echo", baseCost: 8, costMult: 2.6, description: "+5% lifespan per level." },
+    abyss_tithe: { name: "Abyss Tithe", baseCost: 12, costMult: 2.7, description: "+12% Evil gain per level." },
+    essence_prism: { name: "Essence Prism", baseCost: 16, costMult: 2.85, description: "+10% Essence gain per level." },
     void_cartography: { name: "Void Cartography", baseCost: 10, costMult: 2.75, description: "+18% Multiverse Point gain per level." },
     soft_constants: { name: "Soft Constants", baseCost: 18, costMult: 3, description: "-3% expenses per level, capped at -45%." },
 }
@@ -164,6 +166,20 @@ function getMultiverseLifespanGain() {
         return 1
 
     return getUniverseInfo().lifespanMult * (1 + getMultiverseUpgradeLevel("long_echo") * 0.05)
+}
+
+function getMultiverseEvilGain() {
+    if (!isMultiverseUnlocked())
+        return 1
+
+    return 1 + getMultiverseUpgradeLevel("abyss_tithe") * 0.12
+}
+
+function getMultiverseEssenceGain() {
+    if (!isMultiverseUnlocked())
+        return 1
+
+    return 1 + getMultiverseUpgradeLevel("essence_prism") * 0.10
 }
 
 function getMultiverseCategoryPower(category, scale) {
