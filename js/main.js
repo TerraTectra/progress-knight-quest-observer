@@ -638,7 +638,8 @@ function autoPromote() {
     let maxIncome = 0;
     for (const key in gameData.taskData) {
         const task = gameData.taskData[key]
-        if (task instanceof Job && gameData.requirements[key].isCompleted()) {
+        const requirement = gameData.requirements[key]
+        if (task instanceof Job && requirement != null && requirement.isCompleted()) {
             const income = task.getIncome();
             if (income > maxIncome) {
                 maxIncome = income
@@ -651,33 +652,39 @@ function autoPromote() {
 function autoBuy() {
     if (!autoBuyEnabled) return
 
-    let usedExpense = 0
     const income = getIncome()
+    const reserve = income * 0.1
+    let miscExpense = 0
 
+    for (const key in gameData.currentMisc) {
+        miscExpense += gameData.currentMisc[key].getExpense()
+    }
+
+    let propertyExpense = 0
     for (const key in gameData.itemData) {
-        if (gameData.requirements[key].isCompleted()) {
+        const requirement = gameData.requirements[key]
+        if (requirement != null && requirement.isCompleted()) {
             const item = gameData.itemData[key]
             const expense = item.getExpense()
 
             if (itemCategories['Properties'].indexOf(key) != -1) {
-                if (expense < income && expense >= usedExpense) {
+                if (expense + miscExpense <= income - reserve && expense >= propertyExpense) {
                     gameData.currentProperty = item
-                    usedExpense = expense
+                    propertyExpense = expense
                 }
             }
         }
     }
 
-    for (const key in gameData.currentMisc) {
-        usedExpense += gameData.currentMisc[key].getExpense()
-    }
+    let usedExpense = propertyExpense + miscExpense
 
     for (const key in gameData.itemData) {
-        if (gameData.requirements[key].isCompleted()) {
+        const requirement = gameData.requirements[key]
+        if (requirement != null && requirement.isCompleted()) {
             const item = gameData.itemData[key]
             const expense = item.getExpense()
             if (itemCategories['Misc'].indexOf(key) != -1) {
-                if (expense < income - usedExpense) {
+                if (expense + usedExpense <= income - reserve) {
                     if (gameData.currentMisc.indexOf(item) == -1) {
                         gameData.currentMisc.push(item)
                         usedExpense += expense
