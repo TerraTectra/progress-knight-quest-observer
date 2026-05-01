@@ -1564,8 +1564,14 @@ function setTab(selectedTab) {
     updateUI()
 
     const element = document.getElementById(selectedTab + "TabButton")
+    const allowHiddenTab = selectedTab == Tab.JOBS || selectedTab == Tab.INFO || selectedTab == Tab.SETTINGS
 
     const tabs = Array.prototype.slice.call(document.getElementsByClassName("tab"))
+    if (element != null && element.classList.contains("hidden") && !allowHiddenTab) {
+        setTab(Tab.JOBS)
+        return
+    }
+
     tabs.forEach(function(tab) {
         tab.style.display = "none"
     })
