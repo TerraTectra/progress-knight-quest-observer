@@ -22,6 +22,19 @@
     multiverse_points: 0,
     multiverse_points_lifetime: 0,
     multiverse_unlocked: false,
+    multiverse: {
+        current_universe: 1,
+        highest_universe: 1,
+        universe_breaks: 0,
+        upgrades: {
+            stable_memory: 0,
+            universal_labor: 0,
+            long_echo: 0,
+            void_cartography: 0,
+            soft_constants: 0,
+        },
+        observer_stub_unlocked: false,
+    },
     perks_points: 0,
     perks: {
         auto_dark_orb: 0,

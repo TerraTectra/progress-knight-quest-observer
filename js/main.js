@@ -29,11 +29,13 @@ function addMultipliers() {
         task.xpMultipliers.push(getBindedTaskEffect("Blinded By Darkness"))
         task.xpMultipliers.push(getDarkMatterSkillXP)
         task.xpMultipliers.push(getTimeIsAFlatCircleXP)
+        task.xpMultipliers.push(getMultiverseXpGain)
 
         if (task instanceof Job) {
             task.incomeMultipliers.push(task.getLevelMultiplier.bind(task))
             task.incomeMultipliers.push(getBindedTaskEffect("Demon's Wealth"))
             task.incomeMultipliers.push(getLifeCoachIncomeGain)
+            task.incomeMultipliers.push(getMultiverseIncomeGain)
             task.xpMultipliers.push(getBindedTaskEffect("Productivity"))
             task.xpMultipliers.push(getBindedTaskEffect("Dark Knowledge"))
             task.xpMultipliers.push(getBindedItemEffect("Personal Squire"))
@@ -95,6 +97,7 @@ function addMultipliers() {
         item.expenseMultipliers.push(getBindedTaskEffect("Brainwashing"))
         item.expenseMultipliers.push(getBindedTaskEffect("Abyss Manipulation"))
         item.expenseMultipliers.push(getBindedTaskEffect("Galactic Command"))
+        item.expenseMultipliers.push(getMultiverseExpenseGain)
     }
 }
 
@@ -1016,7 +1019,7 @@ function getLifespan() {
     const speedSpeedSpeed = gameData.requirements["Speed speed speed"].isCompleted() ? 1000 : 1
     const lifeIsValueable = gameData.requirements["Life is valueable"].isCompleted() ? 1e5 : 1
     const lifespan = baseLifespan * immortality.getEffect() * superImmortality.getEffect() * abyss.getEffect()
-        * cosmicLongevity.getEffect() * higherDimensions.getEffect() * lifeIsValueable * speedSpeedSpeed
+        * cosmicLongevity.getEffect() * higherDimensions.getEffect() * lifeIsValueable * speedSpeedSpeed * getMultiverseLifespanGain()
 
     if (gameData.active_challenge == "legends_never_die" || gameData.active_challenge == "the_darkest_time") return Math.pow(lifespan, 0.72) + 365 * 25
 
@@ -1242,6 +1245,8 @@ function loadGameData() {
             replaceSaveDict(gameData.challenges, gameDataSave.challenges)
             replaceSaveDict(gameData.dark_matter_shop, gameDataSave.dark_matter_shop)
             replaceSaveDict(gameData.metaverse, gameDataSave.metaverse)
+            replaceSaveDict(gameData.multiverse, gameDataSave.multiverse)
+            replaceSaveDict(gameData.multiverse.upgrades, gameDataSave.multiverse.upgrades)
             replaceSaveDict(gameData.perks, gameDataSave.perks)
             gameData = gameDataSave
 
