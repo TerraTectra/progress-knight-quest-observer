@@ -4,87 +4,302 @@
     <meta charset="utf-8">
     <title>Multiverse tab preview</title>
     <link rel="stylesheet" href="../css/w3.css">
-    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="../css/styles.css">
+    <style>
+        :root {
+            --pk-bg: rgb(32, 32, 32);
+            --pk-panel: rgb(46, 46, 46);
+            --pk-panel-2: rgb(40, 40, 40);
+            --pk-border: rgb(73, 73, 73);
+            --pk-muted: rgb(165, 165, 165);
+            --mp: #18d2d9;
+            --void: #9b5cff;
+            --gold: #e5c100;
+            --good: rgb(39, 234, 17);
+            --bad: #e63946;
+            --soft-blue: #1f7895;
+            --soft-rose: #b85f78;
+            --soft-green: #3a8f55;
+        }
+
+        body.preview-body {
+            background:
+                linear-gradient(180deg, rgba(24, 210, 217, 0.05), transparent 260px),
+                var(--pk-bg);
+            color: white;
+            padding: 24px;
+        }
+
+        .preview-shell {
+            display: flex;
+            align-items: flex-start;
+            gap: 0.8em;
+        }
+
+        .preview-sidebar {
+            width: 300px;
+            border-left: 0.3em solid var(--mp);
+        }
+
+        .preview-main {
+            min-width: 960px;
+        }
+
+        .preview-title-row {
+            display: flex;
+            align-items: baseline;
+            gap: 1em;
+        }
+
+        .preview-subtitle {
+            color: var(--pk-muted);
+            font-size: 0.9em;
+        }
+
+        .stat-box {
+            margin-top: 1em;
+            padding: 0.7em 0.8em;
+            background: var(--pk-panel-2);
+            border: 1px solid var(--pk-border);
+        }
+
+        .stat-box.mp {
+            border-left: 0.35em solid var(--mp);
+        }
+
+        .stat-box.void {
+            border-left: 0.35em solid var(--void);
+        }
+
+        .stat-box.gold {
+            border-left: 0.35em solid var(--gold);
+        }
+
+        .tab-preview {
+            display: flex;
+            border-bottom: 1px solid var(--pk-border);
+        }
+
+        .tab-preview .baritem {
+            border-right: 1px solid var(--pk-border);
+        }
+
+        .tab-preview .active-tab {
+            background: linear-gradient(180deg, #2a8aa5, #1f637b) !important;
+            color: white !important;
+        }
+
+        .section-title {
+            background: linear-gradient(90deg, #168aa5, #762b91);
+            padding: 0.45em 0.7em;
+            color: white;
+            margin-bottom: 0.8em;
+        }
+
+        .universe-grid {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 0.8em;
+            margin-top: 1em;
+        }
+
+        .universe-card {
+            background: rgb(38, 38, 38);
+            border: 1px solid var(--pk-border);
+            padding: 0.8em;
+            min-height: 168px;
+        }
+
+        .universe-card.current {
+            border-color: var(--mp);
+            box-shadow: inset 0 0 0 1px rgba(24, 210, 217, 0.2);
+        }
+
+        .universe-card.unlocked {
+            border-color: var(--soft-green);
+        }
+
+        .universe-card.locked {
+            border-color: #6b3a42;
+            opacity: 0.78;
+        }
+
+        .universe-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            gap: 0.6em;
+        }
+
+        .universe-name {
+            font-weight: bold;
+            color: white;
+        }
+
+        .universe-rule {
+            color: var(--pk-muted);
+            margin-top: 0.45em;
+            min-height: 3.2em;
+        }
+
+        .chip {
+            display: inline-block;
+            padding: 0.12em 0.45em;
+            border: 1px solid currentColor;
+            font-size: 0.9em;
+            white-space: nowrap;
+        }
+
+        .chip-current { color: var(--mp); }
+        .chip-unlocked { color: var(--good); }
+        .chip-locked { color: var(--bad); }
+        .chip-mp { color: var(--mp); }
+        .chip-gold { color: var(--gold); }
+
+        .distortion-list {
+            color: var(--pk-muted);
+            margin-top: 0.7em;
+            line-height: 1.45;
+        }
+
+        .distortion-list b {
+            color: white;
+        }
+
+        .upgrade-table {
+            margin-top: 0.7em;
+        }
+
+        .upgrade-table tr:nth-child(even) {
+            background: rgba(255, 255, 255, 0.025);
+        }
+
+        .upgrade-name.memory { color: #66ccff; }
+        .upgrade-name.labor { color: #9cff9c; }
+        .upgrade-name.echo { color: #d2b1ff; }
+        .upgrade-name.cartography { color: var(--mp); }
+        .upgrade-name.constants { color: #ffb178; }
+
+        .muted {
+            color: var(--pk-muted);
+        }
+    </style>
 </head>
-<body class="dark" style="padding: 24px;">
-    <h1>Progress Knight</h1>
-    <div style="display: flex; align-items: flex-start;">
-        <div class="panel w3-margin-right w3-padding" style="width: 290px;">
+<body class="dark preview-body">
+    <div class="preview-title-row">
+        <h1>Progress Knight</h1>
+        <div class="preview-subtitle">Multiverse tab preview - original dark style, richer palette</div>
+    </div>
+
+    <div class="preview-shell">
+        <div class="panel w3-padding preview-sidebar">
             <div class="text-caption">Age 1000 Day 0</div>
-            <div style="color: gray;">Lifespan: infinite</div>
-            <div style="margin-top: 1em;">
-                <div><span class="color-hypercubes">Multiverse points:</span> 42.30</div>
-                <div style="color: gray;">0.0142/s, unaffected by Time Warp</div>
+            <div class="muted">Lifespan: infinite</div>
+
+            <div class="stat-box mp">
+                <div><span class="color-hypercubes">Multiverse points:</span> <b>42.30</b></div>
+                <div class="muted">+0.0142/s, unaffected by Time Warp</div>
             </div>
-            <div style="margin-top: 1em;">
-                <div><span class="color-hypercubes">Universe:</span> I · Prime World</div>
-                <div style="color: gray;">Void resonance x14.20</div>
+
+            <div class="stat-box void">
+                <div><span style="color: var(--void);">Universe:</span> <b>I - Prime World</b></div>
+                <div class="muted">Void resonance x14.20</div>
+            </div>
+
+            <div class="stat-box gold">
+                <div><span style="color: var(--gold);">Next break:</span> <b>U-II</b></div>
+                <div class="muted">Cost: 25.00 MP</div>
             </div>
         </div>
 
-        <div style="min-width: 920px;">
-            <div class="panel w3-margin-left" style="display: flex;">
+        <div class="preview-main">
+            <div class="panel w3-margin-left tab-preview">
                 <div class="w3-button w3-bar-item baritem">Altar</div>
-                <div class="w3-button w3-bar-item baritem w3-blue-gray">Universes</div>
+                <div class="w3-button w3-bar-item baritem active-tab">Universes</div>
                 <div class="w3-button w3-bar-item baritem">Perks</div>
             </div>
 
             <div class="panel w3-margin-left w3-margin-top w3-padding">
-                <div class="text-caption"><span class="color-hypercubes"><b>Universes</b></span></div>
-                <div style="color: gray; padding-top: 0.4em;">Unlock each next universe by breaking the previous one. Every universe increases passive Multiverse Point gain, but distorts the base rules harder.</div>
+                <div class="section-title text-caption"><b>Universes</b></div>
+                <div class="muted">Unlock each next universe by breaking the previous one. Every universe increases passive Multiverse Point gain, but distorts the base rules harder.</div>
 
-                <table class="w3-table w3-bordered" style="margin-top: 1.2em;">
-                    <tr style="background-color:#09a0e6;color:white;">
-                        <th>Universe</th>
-                        <th>State</th>
-                        <th>Passive MP</th>
-                        <th>Distortion</th>
-                        <th>Action</th>
-                    </tr>
-                    <tr>
-                        <td><b>I · Prime World</b><br><span style="color: gray;">The original rules remain stable.</span></td>
-                        <td><span style="color: rgb(39, 234, 17);">Current</span></td>
-                        <td>x1.0</td>
-                        <td>None</td>
-                        <td><button class="w3-button button" disabled>Entered</button></td>
-                    </tr>
-                    <tr>
-                        <td><b>II · Strained Kingdom</b><br><span style="color: gray;">Work pays less and upkeep bites harder.</span></td>
-                        <td>Unlocked</td>
-                        <td>x2.5</td>
-                        <td>XP x0.96, income x0.92, expenses x1.08</td>
-                        <td><button class="w3-button button">Enter</button></td>
-                    </tr>
-                    <tr>
-                        <td><b>III · Taxed Arcana</b><br><span style="color: gray;">Magic remains powerful, but every shortcut has a cost.</span></td>
-                        <td style="color: gray;">Locked</td>
-                        <td>x5.0</td>
-                        <td>XP x0.94, income x0.88, expenses x1.18</td>
-                        <td><button class="w3-button button" disabled>Break U-II: 120 MP</button></td>
-                    </tr>
-                </table>
+                <div class="universe-grid">
+                    <div class="universe-card current">
+                        <div class="universe-header">
+                            <div>
+                                <div class="universe-name">I - Prime World</div>
+                                <div class="muted">Stable baseline</div>
+                            </div>
+                            <span class="chip chip-current">Current</span>
+                        </div>
+                        <div class="universe-rule">The original rules remain stable. This world teaches the new MP economy.</div>
+                        <div class="distortion-list">
+                            MP <b>x1.0</b><br>
+                            XP <b>x1.00</b> / Income <b>x1.00</b><br>
+                            Expenses <b>x1.00</b>
+                        </div>
+                    </div>
+
+                    <div class="universe-card unlocked">
+                        <div class="universe-header">
+                            <div>
+                                <div class="universe-name">II - Strained Kingdom</div>
+                                <div class="muted">Economic pressure</div>
+                            </div>
+                            <span class="chip chip-unlocked">Unlocked</span>
+                        </div>
+                        <div class="universe-rule">Work pays less and upkeep bites harder. Early economy choices start to matter.</div>
+                        <div class="distortion-list">
+                            MP <b>x2.5</b><br>
+                            XP <b>x0.96</b> / Income <b>x0.92</b><br>
+                            Expenses <b>x1.08</b>
+                        </div>
+                    </div>
+
+                    <div class="universe-card locked">
+                        <div class="universe-header">
+                            <div>
+                                <div class="universe-name">III - Taxed Arcana</div>
+                                <div class="muted">Magic tolls</div>
+                            </div>
+                            <span class="chip chip-locked">Locked</span>
+                        </div>
+                        <div class="universe-rule">Magic remains powerful, but every shortcut has a cost.</div>
+                        <div class="distortion-list">
+                            MP <b>x5.0</b><br>
+                            XP <b>x0.94</b> / Income <b>x0.88</b><br>
+                            Break U-II: <span class="chip chip-gold">120 MP</span>
+                        </div>
+                    </div>
+                </div>
 
                 <div style="border-bottom: 0.1em solid rgb(24, 210, 217); padding-top: 2em;"></div>
 
                 <div style="padding-top:1em">
-                    <div class="text-caption metaverse-title">Multiverse Upgrades</div>
-                    <table class="w3-table w3-bordered" style="margin-top: 0.7em;">
+                    <div class="section-title text-caption"><b>Multiverse Upgrades</b></div>
+                    <table class="w3-table w3-bordered upgrade-table">
                         <tr>
-                            <td><b>Stable Memory</b><br><span style="color: gray;">+8% all XP per level.</span></td>
-                            <td>Lvl 2</td>
-                            <td>Cost: 21.2 MP</td>
+                            <td><b class="upgrade-name memory">Stable Memory</b><br><span class="muted">+8% all XP per level.</span></td>
+                            <td><span class="chip chip-current">Lvl 2</span></td>
+                            <td><span class="chip chip-gold">21.2 MP</span></td>
                             <td><button class="w3-button button">Buy</button></td>
                         </tr>
                         <tr>
-                            <td><b>Void Cartography</b><br><span style="color: gray;">+18% Multiverse Point gain per level.</span></td>
-                            <td>Lvl 1</td>
-                            <td>Cost: 27.5 MP</td>
+                            <td><b class="upgrade-name labor">Universal Labor</b><br><span class="muted">+10% job income per level.</span></td>
+                            <td><span class="chip chip-current">Lvl 1</span></td>
+                            <td><span class="chip chip-gold">14.7 MP</span></td>
                             <td><button class="w3-button button">Buy</button></td>
                         </tr>
                         <tr>
-                            <td><b>Soft Constants</b><br><span style="color: gray;">-3% expenses per level, capped at -45%.</span></td>
-                            <td>Lvl 0</td>
-                            <td>Cost: 18.0 MP</td>
+                            <td><b class="upgrade-name cartography">Void Cartography</b><br><span class="muted">+18% Multiverse Point gain per level.</span></td>
+                            <td><span class="chip chip-current">Lvl 1</span></td>
+                            <td><span class="chip chip-gold">27.5 MP</span></td>
+                            <td><button class="w3-button button">Buy</button></td>
+                        </tr>
+                        <tr>
+                            <td><b class="upgrade-name constants">Soft Constants</b><br><span class="muted">-3% expenses per level, capped at -45%.</span></td>
+                            <td><span class="chip">Lvl 0</span></td>
+                            <td><span class="chip chip-gold">18.0 MP</span></td>
                             <td><button class="w3-button button">Buy</button></td>
                         </tr>
                     </table>

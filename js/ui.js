@@ -564,6 +564,8 @@ function renderMetaverse() {
     document.getElementById("multiversePointsMetaDisplay").textContent = format(gameData.multiverse_points, 2)
     document.getElementById("multiversePointsMetaGainDisplay").textContent = format(getMultiversePointGain(), 4)
     document.getElementById("multiverseVoidResonanceDisplay").textContent = format(getMultiverseVoidResonance(), 2)
+    renderMultiverseUniverses()
+    renderMultiverseUpgrades()
 
     document.getElementById("currentHypercubesCap").hidden = getHypercubeCap() == Infinity
     document.getElementById("currentHypercubesCapValue").textContent = format(getHypercubeCap())
@@ -623,6 +625,88 @@ function renderMetaverse() {
 
     // Perks
     renderPerks()
+}
+
+function renderMultiverseUniverses() {
+    const summary = document.getElementById("multiverseUniverseSummary")
+    const grid = document.getElementById("multiverseUniverseGrid")
+    if (summary == null || grid == null)
+        return
+
+    const state = getMultiverseState()
+    const currentUniverse = getUniverseInfo()
+    const nextUniverse = state.highest_universe < 10 ? getUniverseInfo(state.highest_universe + 1) : null
+
+    summary.innerHTML =
+        `<div class="rb-stat-box mp"><div><span class="color-hypercubes">Multiverse points:</span> <b>${format(gameData.multiverse_points, 2)}</b></div><div style="color:gray;">+${format(getMultiversePointGain(), 4)}/s real time</div></div>` +
+        `<div class="rb-stat-box void"><div><span class="rb-void">Current universe:</span> <b>${currentUniverse.id} - ${currentUniverse.name}</b></div><div style="color:gray;">Void resonance x${format(getMultiverseVoidResonance(), 2)}</div></div>` +
+        `<div class="rb-stat-box gold"><div><span class="rb-gold">Highest universe:</span> <b>${state.highest_universe}/10</b></div><div style="color:gray;">Breaks: ${formatWhole(state.universe_breaks)}</div></div>` +
+        `<div class="rb-stat-box red"><div><span class="rb-locked">Next break:</span> <b>${nextUniverse == null ? "Observer seal" : "U-" + nextUniverse.id}</b></div><div style="color:gray;">${nextUniverse == null ? "Observer layer prepared" : "Cost: " + format(nextUniverse.unlockCost, 2) + " MP"}</div></div>`
+
+    let html = ""
+    for (const universe of multiverseUniverses) {
+        const current = universe.id == state.current_universe
+        const unlocked = universe.id <= state.highest_universe
+        const cardState = current ? "current" : (unlocked ? "unlocked" : "locked")
+        const chipClass = current ? "rb-current" : (unlocked ? "rb-unlocked" : "rb-locked")
+        const chipText = current ? "Current" : (unlocked ? "Unlocked" : "Locked")
+        let button = ""
+
+        if (current && universe.id == state.highest_universe && universe.id < 10) {
+            const next = getUniverseInfo(universe.id + 1)
+            button = `<button class="w3-button button" onclick="breakCurrentUniverse()" ${canBreakCurrentUniverse() ? "" : "disabled"}>Break: ${format(next.unlockCost, 2)} MP</button>`
+        } else if (unlocked && !current) {
+            button = `<button class="w3-button button" onclick="enterUniverse(${universe.id})">Enter</button>`
+        } else if (current) {
+            button = `<button class="w3-button button" disabled>Entered</button>`
+        } else {
+            button = `<button class="w3-button button" disabled>Break U-${universe.id - 1}</button>`
+        }
+
+        html +=
+            `<div class="rb-universe-card ${cardState}">` +
+                `<div class="rb-universe-header">` +
+                    `<div><div class="rb-universe-name">${universe.id} - ${universe.name}</div><div style="color:gray;">MP x${format(universe.mpMult, 1)}</div></div>` +
+                    `<span class="rb-chip ${chipClass}">${chipText}</span>` +
+                `</div>` +
+                `<div class="rb-universe-rule">${universe.rule}</div>` +
+                `<div class="rb-distortion-list">XP <b>x${format(universe.xpMult, 2)}</b> / Income <b>x${format(universe.incomeMult, 2)}</b><br>Expenses <b>x${format(universe.expenseMult, 2)}</b> / Lifespan <b>x${format(universe.lifespanMult, 2)}</b></div>` +
+                `<div style="margin-top:0.7em;">${button}</div>` +
+            `</div>`
+    }
+
+    grid.innerHTML = html
+    document.getElementById("observerStubPanel").classList.toggle("hidden", !state.observer_stub_unlocked)
+}
+
+function renderMultiverseUpgrades() {
+    const rows = document.getElementById("multiverseUpgradeRows")
+    if (rows == null)
+        return
+
+    const upgradeClass = {
+        stable_memory: "rb-upgrade-memory",
+        universal_labor: "rb-upgrade-labor",
+        long_echo: "rb-upgrade-echo",
+        void_cartography: "rb-upgrade-cartography",
+        soft_constants: "rb-upgrade-constants",
+    }
+
+    let html = ""
+    for (const upgrade in multiverseUpgradeData) {
+        const data = multiverseUpgradeData[upgrade]
+        const level = getMultiverseUpgradeLevel(upgrade)
+        const cost = getMultiverseUpgradeCost(upgrade)
+        html +=
+            `<tr>` +
+                `<td><b class="${upgradeClass[upgrade]}">${data.name}</b><br><span style="color:gray;">${data.description}</span></td>` +
+                `<td><span class="rb-chip rb-current">Lvl ${formatWhole(level)}</span></td>` +
+                `<td><span class="rb-chip rb-gold">${format(cost, 2)} MP</span></td>` +
+                `<td><button class="w3-button button" onclick="buyMultiverseUpgrade('${upgrade}')" ${canBuyMultiverseUpgrade(upgrade) ? "" : "disabled"}>Buy</button></td>` +
+            `</tr>`
+    }
+
+    rows.innerHTML = html
 }
 
 function renderPerks() {
@@ -1198,6 +1282,7 @@ function setLayout(id) {
 
     if (id == 0) {
         document.getElementById("tabcolumnMetaverse").classList.add("hidden")
+        document.getElementById("metaverseTab1").appendChild(document.getElementById("multiverseUniversePage"))
         document.getElementById("metaverseTab1").appendChild(document.getElementById("metaversePage2"))
         setTabMetaverse("metaverseTab1")
 
@@ -1205,6 +1290,7 @@ function setLayout(id) {
     }
     else {
         document.getElementById("tabcolumnMetaverse").classList.remove("hidden")
+        document.getElementById("metaverseTabUniverses").appendChild(document.getElementById("multiverseUniversePage"))
         document.getElementById("metaverseTab2").appendChild(document.getElementById("metaversePage2"))
 
         document.getElementById("maincolumnMetaverse").classList.add("settings-main-column")     

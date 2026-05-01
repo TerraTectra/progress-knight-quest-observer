@@ -550,3 +550,120 @@ button:focus {
 .page {
     max-width: 800px;
 }
+
+/* Reality Break multiverse layer. Keeps the original dark UI base with richer accents. */
+.rb-section-title {
+    background: linear-gradient(90deg, #168aa5, #762b91);
+    color: white;
+    padding: 0.45em 0.7em;
+    margin-bottom: 0.8em;
+}
+
+.rb-multiverse-summary {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 0.8em;
+    margin-top: 1em;
+}
+
+.rb-stat-box {
+    background-color: rgb(40, 40, 40);
+    border: 1px solid rgb(73, 73, 73);
+    padding: 0.7em 0.8em;
+}
+
+.rb-stat-box.mp { border-left: 0.35em solid #18d2d9; }
+.rb-stat-box.void { border-left: 0.35em solid #9b5cff; }
+.rb-stat-box.gold { border-left: 0.35em solid #e5c100; }
+.rb-stat-box.red { border-left: 0.35em solid #e63946; }
+
+.rb-universe-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0.8em;
+    margin-top: 1em;
+}
+
+.rb-universe-card {
+    background-color: rgb(38, 38, 38);
+    border: 1px solid rgb(73, 73, 73);
+    padding: 0.8em;
+    min-height: 11.5em;
+}
+
+.rb-universe-card.current {
+    border-color: #18d2d9;
+    box-shadow: inset 0 0 0 1px rgba(24, 210, 217, 0.2);
+}
+
+.rb-universe-card.unlocked {
+    border-color: #3a8f55;
+}
+
+.rb-universe-card.locked {
+    border-color: #6b3a42;
+    opacity: 0.78;
+}
+
+.rb-universe-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 0.6em;
+}
+
+.rb-universe-name {
+    font-weight: bold;
+    color: white;
+}
+
+.rb-universe-rule {
+    color: rgb(165, 165, 165);
+    margin-top: 0.45em;
+    min-height: 3.2em;
+}
+
+.rb-chip {
+    display: inline-block;
+    padding: 0.12em 0.45em;
+    border: 1px solid currentColor;
+    font-size: 0.9em;
+    white-space: nowrap;
+}
+
+.rb-current { color: #18d2d9; }
+.rb-unlocked { color: rgb(39, 234, 17); }
+.rb-locked { color: #e63946; }
+.rb-gold { color: #e5c100; }
+.rb-void { color: #9b5cff; }
+
+.rb-distortion-list {
+    color: rgb(165, 165, 165);
+    margin-top: 0.7em;
+    line-height: 1.45;
+}
+
+.rb-distortion-list b {
+    color: white;
+}
+
+.rb-upgrade-table {
+    margin-top: 0.7em;
+}
+
+.rb-upgrade-table tr:nth-child(even) {
+    background: rgba(255, 255, 255, 0.025);
+}
+
+.rb-upgrade-memory { color: #66ccff; }
+.rb-upgrade-labor { color: #9cff9c; }
+.rb-upgrade-echo { color: #d2b1ff; }
+.rb-upgrade-cartography { color: #18d2d9; }
+.rb-upgrade-constants { color: #ffb178; }
+
+.rb-observer-stub {
+    margin-top: 1em;
+    padding: 0.8em;
+    border: 1px solid #9b5cff;
+    background-color: rgb(40, 40, 40);
+}

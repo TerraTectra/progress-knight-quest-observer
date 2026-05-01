@@ -731,6 +731,7 @@
 						<div class="tab column" style="display:none" id="metaverse">
 							<div id="tabcolumnMetaverse" class="panel w3-margin-left" style="display: flex">
 								<div class="w3-button w3-bar-item tabButtonMetaverse baritem w3-blue-gray" id="metaverseTab1TabButton" onClick="setTabMetaverse('metaverseTab1')">Altar</div>
+								<div class="w3-button w3-bar-item tabButtonMetaverse baritem" id="metaverseTabUniversesTabButton" onClick="setTabMetaverse('metaverseTabUniverses')">Universes</div>
 								<div class="w3-button w3-bar-item tabButtonMetaverse baritem" id="metaverseTab2TabButton" onClick="setTabMetaverse('metaverseTab2')">Perks</div>
 							</div>
 							<div id="maincolumnMetaverse" class="panel w3-margin-left w3-margin-top">
@@ -805,6 +806,25 @@
 											<div style="color:gray; padding-bottom: 0.3em;">Current multiplier: x<b id="darkMatterMultGain"></b> <span class="color-dark-matter">Dark Matter</span></div>
 											<div style="color:gray; padding-bottom: 0.5em;">Cost: <b id="darkMatterMultCost"></b> <span class="color-hypercubes">Hypercubes</span></div>
 											<button class="w3-button button" id="darkMaterMultButton" onclick="buyDarkMaterMult()">Sacrifice</button>
+										</div>
+									</div>
+								</div>
+								<div id="metaverseTabUniverses" class="tabMetaverse">
+									<div id="multiverseUniversePage" class="page panel page-column w3-padding">
+										<div class="rb-section-title text-caption"><b>Universes</b></div>
+										<div style="color:gray; padding-top: 0.4em;">Unlock each next universe by breaking the previous one. Every universe increases passive Multiverse Point gain, but distorts the base rules harder.</div>
+										<div id="multiverseUniverseSummary" class="rb-multiverse-summary"></div>
+										<div id="multiverseUniverseGrid" class="rb-universe-grid"></div>
+										<div style="border-bottom: 0.1em solid rgb(24, 210, 217); padding-top: 2em;"></div>
+										<div style="padding-top:1em">
+											<div class="rb-section-title text-caption"><b>Multiverse Upgrades</b></div>
+											<table class="w3-table w3-bordered rb-upgrade-table">
+												<tbody id="multiverseUpgradeRows"></tbody>
+											</table>
+										</div>
+										<div id="observerStubPanel" class="rb-observer-stub hidden">
+											<div class="text-caption"><b>Observer layer</b></div>
+											<div style="color:gray;">A sealed third meta layer. It will open after Universe X is completed.</div>
 										</div>
 									</div>
 								</div>

@@ -95,6 +95,49 @@ function buyMultiverseUpgrade(upgrade) {
     return true
 }
 
+function canEnterUniverse(id) {
+    return isMultiverseUnlocked() && id <= getHighestUniverseId()
+}
+
+function enterUniverse(id) {
+    if (!canEnterUniverse(id))
+        return false
+
+    getMultiverseState().current_universe = id
+    return true
+}
+
+function canBreakCurrentUniverse() {
+    const state = getMultiverseState()
+    const nextUniverse = getUniverseInfo(state.current_universe + 1)
+
+    return isMultiverseUnlocked()
+        && state.current_universe == state.highest_universe
+        && state.highest_universe < 10
+        && gameData.multiverse_points >= nextUniverse.unlockCost
+}
+
+function breakCurrentUniverse() {
+    if (!canBreakCurrentUniverse())
+        return false
+
+    const state = getMultiverseState()
+    const nextUniverse = getUniverseInfo(state.current_universe + 1)
+
+    gameData.multiverse_points -= nextUniverse.unlockCost
+    state.highest_universe += 1
+    state.current_universe = state.highest_universe
+    state.universe_breaks += 1
+
+    if (state.highest_universe >= 10)
+        state.observer_stub_unlocked = true
+
+    rebirthReset(false)
+    setTab("metaverse")
+    setTabMetaverse("metaverseTabUniverses")
+    return true
+}
+
 function getMultiverseXpGain() {
     if (!isMultiverseUnlocked())
         return 1
