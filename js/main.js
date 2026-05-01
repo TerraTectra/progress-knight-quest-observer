@@ -414,7 +414,7 @@ function getUnpausedGameSpeed() {
 
     const timeWarpingSpeed = boostWarping * timeWarping.getEffect() * temporalDimension.getEffect() * timeLoop.getEffect() * warpDrive * speedSpeedSpeed * timeIsAFlatCircle
 
-    const gameSpeed = baseGameSpeed * timeWarpingSpeed * getChallengeBonus("time_does_not_fly") * getGottaBeFastGain() * getDarkMatterSkillTimeWarping() 
+    const gameSpeed = baseGameSpeed * timeWarpingSpeed * getChallengeBonus("time_does_not_fly") * getGottaBeFastGain() * getDarkMatterSkillTimeWarping() * gameData.settings.adminGameSpeedMultiplier
 
     if (gameData.active_challenge == "time_does_not_fly" || gameData.active_challenge == "the_darkest_time")
         return Math.pow(gameSpeed, 0.7)
@@ -520,6 +520,24 @@ function setCurrency(index) {
 function setNotation(index) {
     gameData.settings.numberNotation = index
     selectElementInGroup("Notation", index)
+}
+
+function setAdminGameSpeedMultiplier(multiplier) {
+    gameData.settings.adminGameSpeedMultiplier = multiplier
+    selectElementInGroup("AdminGameSpeed", getAdminGameSpeedOptionIndex(multiplier))
+    renderAdminGameSpeedDisplay()
+}
+
+function getAdminGameSpeedOptionIndex(multiplier) {
+    const options = [1, 2, 10, 20, 200]
+    const index = options.indexOf(multiplier)
+    return index == -1 ? 0 : index
+}
+
+function renderAdminGameSpeedDisplay() {
+    const display = document.getElementById("adminGameSpeedDisplay")
+    if (display != null)
+        display.textContent = "x" + Math.round(baseGameSpeed * gameData.settings.adminGameSpeedMultiplier / 4)
 }
 
 function getNet() {

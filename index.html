@@ -898,6 +898,17 @@
 															<button class="w3-button button EnableKeybinds" onClick="setEnableKeybinds(false)">Disabled</button>
 														</td>
 													</tr>
+													<tr>
+														<td>Admin speed</td>
+														<td style="padding: 0.4em">
+															<button class="w3-button button AdminGameSpeed selected" onClick="setAdminGameSpeedMultiplier(1)">x5</button>
+															<button class="w3-button button AdminGameSpeed" onClick="setAdminGameSpeedMultiplier(2)">x10</button>
+															<button class="w3-button button AdminGameSpeed" onClick="setAdminGameSpeedMultiplier(10)">x50</button>
+															<button class="w3-button button AdminGameSpeed" onClick="setAdminGameSpeedMultiplier(20)">x100</button>
+															<button class="w3-button button AdminGameSpeed" onClick="setAdminGameSpeedMultiplier(200)">x1000</button>
+															<span style="margin-left: 0.8em; color: gray;">Current: <span id="adminGameSpeedDisplay">x5</span></span>
+														</td>
+													</tr>
 												</table>
 											</li>
 											<li>

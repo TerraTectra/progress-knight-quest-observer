@@ -15,6 +15,7 @@ function initializeUI() {
     setNotation(peekSettingFromSave("numberNotation"))
     setCurrency(peekSettingFromSave("currencyNotation"))
     setStickySidebar(peekSettingFromSave("stickySidebar"))
+    selectElementInGroup("AdminGameSpeed", getAdminGameSpeedOptionIndex(peekSettingFromSave("adminGameSpeedMultiplier")))
 
     setTheme(peekSettingFromSave("theme"))
     selectElementInGroup("EnableKeybinds", peekSettingFromSave("enableKeybinds") ? 0 : 1)
@@ -811,6 +812,8 @@ function renderSettings() {
     document.getElementById("challengeEssenceGainBuffDisplay").textContent = format(getChallengeBonus("dance_with_the_devil"), 2)
     document.getElementById("challengeEvilGainBuffDisplay").textContent = format(getChallengeBonus("legends_never_die"), 2)
     document.getElementById("challengeDarkMaterGainBuffDisplay").textContent = format(getChallengeBonus("the_darkest_time"), 2)
+    renderAdminGameSpeedDisplay()
+    selectElementInGroup("AdminGameSpeed", getAdminGameSpeedOptionIndex(gameData.settings.adminGameSpeedMultiplier))
 }
 
 function renderRequirements() {
