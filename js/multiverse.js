@@ -23,6 +23,11 @@ const multiverseUpgradeData = {
 }
 
 function getMultiverseState() {
+    if (gameData.multiverse_points == null || isNaN(gameData.multiverse_points) || !isFinite(gameData.multiverse_points))
+        gameData.multiverse_points = 0
+    if (gameData.multiverse_points_lifetime == null || isNaN(gameData.multiverse_points_lifetime) || !isFinite(gameData.multiverse_points_lifetime))
+        gameData.multiverse_points_lifetime = Math.max(0, gameData.multiverse_points)
+
     if (gameData.multiverse == null) {
         gameData.multiverse = {
             current_universe: 1,
@@ -42,13 +47,15 @@ function getMultiverseState() {
     for (const key in multiverseUpgradeData) {
         if (gameData.multiverse.upgrades[key] == null)
             gameData.multiverse.upgrades[key] = 0
+        if (isNaN(gameData.multiverse.upgrades[key]) || !isFinite(gameData.multiverse.upgrades[key]))
+            gameData.multiverse.upgrades[key] = 0
     }
 
-    if (gameData.multiverse.current_universe == null)
+    if (gameData.multiverse.current_universe == null || isNaN(gameData.multiverse.current_universe))
         gameData.multiverse.current_universe = 1
-    if (gameData.multiverse.highest_universe == null)
+    if (gameData.multiverse.highest_universe == null || isNaN(gameData.multiverse.highest_universe))
         gameData.multiverse.highest_universe = 1
-    if (gameData.multiverse.universe_breaks == null)
+    if (gameData.multiverse.universe_breaks == null || isNaN(gameData.multiverse.universe_breaks) || !isFinite(gameData.multiverse.universe_breaks))
         gameData.multiverse.universe_breaks = 0
     if (gameData.multiverse.universe_break_unlocked == null)
         gameData.multiverse.universe_break_unlocked = false
@@ -56,6 +63,10 @@ function getMultiverseState() {
         gameData.multiverse.observer_signal_prepared = false
     if (gameData.multiverse.observer_entry_claimed == null)
         gameData.multiverse.observer_entry_claimed = false
+
+    gameData.multiverse.current_universe = Math.max(1, Math.min(10, Math.floor(gameData.multiverse.current_universe)))
+    gameData.multiverse.highest_universe = Math.max(1, Math.min(10, Math.floor(gameData.multiverse.highest_universe)))
+    gameData.multiverse.current_universe = Math.min(gameData.multiverse.current_universe, gameData.multiverse.highest_universe)
 
     return gameData.multiverse
 }
@@ -74,7 +85,8 @@ function updateMultiverseUnlock() {
 }
 
 function getUniverseInfo(id = getMultiverseState().current_universe) {
-    return multiverseUniverses[Math.max(1, Math.min(10, id)) - 1]
+    const safeId = isNaN(id) ? 1 : id
+    return multiverseUniverses[Math.max(1, Math.min(10, safeId)) - 1]
 }
 
 function getCurrentUniverseId() {
@@ -87,6 +99,32 @@ function getHighestUniverseId() {
 
 function getMultiverseUpgradeLevel(upgrade) {
     return getMultiverseState().upgrades[upgrade] || 0
+}
+
+function getMultiverseItemEffect(itemName) {
+    return function() {
+        const item = gameData.itemData[itemName]
+        if (item == null || typeof item.getEffect != "function")
+            return 1
+
+        const effect = item.getEffect()
+        return isFinite(effect) && !isNaN(effect) ? effect : 1
+    }
+}
+
+function getSafeMultiverseNumber(value, fallback = 1, max = 1e308) {
+    if (value == null || isNaN(value) || !isFinite(value))
+        return fallback
+
+    return Math.max(0, Math.min(max, value))
+}
+
+function softcapMultiverseSource(value, start = 250, power = 0.62) {
+    const safeValue = getSafeMultiverseNumber(value)
+    if (safeValue <= start)
+        return safeValue
+
+    return start * Math.pow(safeValue / start, power)
 }
 
 function getMultiverseUpgradeCost(upgrade) {
@@ -154,14 +192,14 @@ function getMultiverseXpGain() {
     if (!isMultiverseUnlocked())
         return 1
 
-    return getUniverseInfo().xpMult * (1 + getMultiverseUpgradeLevel("stable_memory") * 0.08) * getUniverseSevenXpGain() * getUniverseEightXpGain() * getUniverseNineXpGain() * getUniverseTenXpGain()
+    return getSafeMultiverseNumber(getUniverseInfo().xpMult * (1 + getMultiverseUpgradeLevel("stable_memory") * 0.08) * getUniverseSevenXpGain() * getUniverseEightXpGain() * getUniverseNineXpGain() * getUniverseTenXpGain())
 }
 
 function getMultiverseIncomeGain() {
     if (!isMultiverseUnlocked())
         return 1
 
-    return getUniverseInfo().incomeMult * (1 + getMultiverseUpgradeLevel("universal_labor") * 0.1) * getUniverseTwoIncomeGain() * getUniverseFiveIncomeGain() * getUniverseSevenIncomeGain() * getUniverseEightIncomeGain() * getUniverseNineIncomeGain()
+    return getSafeMultiverseNumber(getUniverseInfo().incomeMult * (1 + getMultiverseUpgradeLevel("universal_labor") * 0.1) * getUniverseTwoIncomeGain() * getUniverseFiveIncomeGain() * getUniverseSevenIncomeGain() * getUniverseEightIncomeGain() * getUniverseNineIncomeGain())
 }
 
 function getMultiverseExpenseGain() {
@@ -169,35 +207,35 @@ function getMultiverseExpenseGain() {
         return 1
 
     const expenseReduction = Math.min(0.45, getMultiverseUpgradeLevel("soft_constants") * 0.03)
-    return getUniverseInfo().expenseMult * (1 - expenseReduction) * getUniverseTwoExpenseGain() * getUniverseThreeExpenseGain() * getUniverseFiveExpenseGain() * getUniverseNineExpenseGain()
+    return getSafeMultiverseNumber(getUniverseInfo().expenseMult * (1 - expenseReduction) * getUniverseTwoExpenseGain() * getUniverseThreeExpenseGain() * getUniverseFiveExpenseGain() * getUniverseNineExpenseGain())
 }
 
 function getMultiverseLifespanGain() {
     if (!isMultiverseUnlocked())
         return 1
 
-    return getUniverseInfo().lifespanMult * (1 + getMultiverseUpgradeLevel("long_echo") * 0.05) * getUniverseFourLifespanGain() * getUniverseSixLifespanGain() * getUniverseEightLifespanGain() * getUniverseTenLifespanGain()
+    return getSafeMultiverseNumber(getUniverseInfo().lifespanMult * (1 + getMultiverseUpgradeLevel("long_echo") * 0.05) * getUniverseFourLifespanGain() * getUniverseSixLifespanGain() * getUniverseEightLifespanGain() * getUniverseTenLifespanGain())
 }
 
 function getMultiverseEvilGain() {
     if (!isMultiverseUnlocked())
         return 1
 
-    return (1 + getMultiverseUpgradeLevel("abyss_tithe") * 0.12) * getUniverseSixEvilGain() * getUniverseNineEvilGain() * getUniverseTenEvilGain()
+    return getSafeMultiverseNumber((1 + getMultiverseUpgradeLevel("abyss_tithe") * 0.12) * getUniverseSixEvilGain() * getUniverseNineEvilGain() * getUniverseTenEvilGain())
 }
 
 function getMultiverseEssenceGain() {
     if (!isMultiverseUnlocked())
         return 1
 
-    return (1 + getMultiverseUpgradeLevel("essence_prism") * 0.10) * getUniverseThreeEssenceGain() * getUniverseSixEssenceGain() * getUniverseNineEssenceGain() * getUniverseTenEssenceGain()
+    return getSafeMultiverseNumber((1 + getMultiverseUpgradeLevel("essence_prism") * 0.10) * getUniverseThreeEssenceGain() * getUniverseSixEssenceGain() * getUniverseNineEssenceGain() * getUniverseTenEssenceGain())
 }
 
 function getMultiverseDarkMatterGain() {
     if (!isMultiverseUnlocked())
         return 1
 
-    return 1 + getMultiverseUpgradeLevel("dark_singularity") * 0.15
+    return getSafeMultiverseNumber(1 + getMultiverseUpgradeLevel("dark_singularity") * 0.15)
 }
 
 function getMultiverseCategoryPower(category, scale) {
@@ -211,10 +249,10 @@ function getMultiverseCategoryPower(category, scale) {
         if (task == null)
             continue
 
-        power += Math.sqrt(task.level + task.maxLevel * 0.25)
+        power += Math.sqrt(Math.max(0, task.level) + Math.max(0, task.maxLevel) * 0.25)
     }
 
-    return 1 + power * scale
+    return getSafeMultiverseNumber(1 + power * scale)
 }
 
 function getMultiverseVoidJobSource() {
@@ -226,14 +264,14 @@ function getMultiverseVoidSkillSource() {
 }
 
 function getMultiverseDarkLayerSource() {
-    const darkMatter = 1 + Math.log10(gameData.dark_matter + 1) * 0.01
-    const hypercubes = 1 + Math.log10(gameData.hypercubes + 1) * 0.025
-    const essence = 1 + Math.max(0, Math.log10(gameData.essence + 1) - 20) * 0.015
-    return darkMatter * hypercubes * essence
+    const darkMatter = 1 + Math.log10(Math.max(0, gameData.dark_matter) + 1) * 0.01
+    const hypercubes = 1 + Math.log10(Math.max(0, gameData.hypercubes) + 1) * 0.025
+    const essence = 1 + Math.max(0, Math.log10(Math.max(0, gameData.essence) + 1) - 20) * 0.015
+    return getSafeMultiverseNumber(darkMatter * hypercubes * essence)
 }
 
 function getMultiverseUniverseSource() {
-    return getUniverseInfo().mpMult * getUniverseParameterGain(getCurrentUniverseId())
+    return getSafeMultiverseNumber(getUniverseInfo().mpMult * getUniverseParameterGain(getCurrentUniverseId()))
 }
 
 function getMultiverseBreakRewardGain() {
@@ -278,40 +316,42 @@ function getUniverseParameterGain(id = getCurrentUniverseId()) {
     if (!isMultiverseUnlocked())
         return 1
 
+    let gain = 1
+
     if (id == 2)
-        return getUniverseTwoBureaucraticOrderGain()
+        gain = getUniverseTwoBureaucraticOrderGain()
 
-    if (id == 3)
-        return getUniverseThreeArcaneComplianceGain()
+    else if (id == 3)
+        gain = getUniverseThreeArcaneComplianceGain()
 
-    if (id == 4)
-        return getUniverseFourTemporalAnchorGain()
+    else if (id == 4)
+        gain = getUniverseFourTemporalAnchorGain()
 
-    if (id == 5)
-        return getUniverseFiveGreedIndexGain()
+    else if (id == 5)
+        gain = getUniverseFiveGreedIndexGain()
 
-    if (id == 6)
-        return getUniverseSixDimmingResonanceGain()
+    else if (id == 6)
+        gain = getUniverseSixDimmingResonanceGain()
 
-    if (id == 7)
-        return getUniverseSevenCausalStabilityGain()
+    else if (id == 7)
+        gain = getUniverseSevenCausalStabilityGain()
 
-    if (id == 8)
-        return getUniverseEightLadderIntegrityGain()
+    else if (id == 8)
+        gain = getUniverseEightLadderIntegrityGain()
 
-    if (id == 9)
-        return getUniverseNineCollapseControlGain()
+    else if (id == 9)
+        gain = getUniverseNineCollapseControlGain()
 
-    if (id == 10)
-        return getUniverseTenObserverSignalGain()
+    else if (id == 10)
+        gain = getUniverseTenObserverSignalGain()
 
-    return 1
+    return getSafeMultiverseNumber(softcapMultiverseSource(gain))
 }
 
 function getUniverseTwoBureaucraticOrderGain() {
     const royalAdministration = gameData.taskData["Royal Administration"]
     const realitySurveying = gameData.taskData["Reality Surveying"]
-    const taxSeal = getBindedItemEffect("Tax Seal")
+    const taxSeal = getMultiverseItemEffect("Tax Seal")
 
     const adminGain = royalAdministration == null ? 1 : 1 + royalAdministration.level * royalAdministration.baseData.effect
     const surveyGain = realitySurveying == null ? 1 : 1 + realitySurveying.level * realitySurveying.baseData.effect
@@ -346,7 +386,7 @@ function getMultiverseSkillsXpGain() {
 function getUniverseThreeArcaneComplianceGain() {
     const arcaneTaxation = gameData.taskData["Arcane Taxation"]
     const spellAuditing = gameData.taskData["Spell Auditing"]
-    const arcaneAbacus = getBindedItemEffect("Arcane Abacus")
+    const arcaneAbacus = getMultiverseItemEffect("Arcane Abacus")
 
     const taxationGain = arcaneTaxation == null ? 1 : 1 + arcaneTaxation.level * arcaneTaxation.baseData.effect
     const auditingGain = spellAuditing == null ? 1 : 1 + spellAuditing.level * spellAuditing.baseData.effect
@@ -359,7 +399,7 @@ function getUniverseThreeMagicGain() {
 
     const arcaneTaxation = gameData.taskData["Arcane Taxation"]
     const spellAuditing = gameData.taskData["Spell Auditing"]
-    const arcaneAbacus = getBindedItemEffect("Arcane Abacus")
+    const arcaneAbacus = getMultiverseItemEffect("Arcane Abacus")
     const taxationGain = arcaneTaxation == null ? 1 : 1 + arcaneTaxation.level * 0.005
     const auditingGain = spellAuditing == null ? 1 : 1 + spellAuditing.level * 0.003
     return taxationGain * auditingGain * arcaneAbacus()
@@ -393,7 +433,7 @@ function getUniverseThreeSkillsXpGain() {
 function getUniverseFourTemporalAnchorGain() {
     const temporalAnchoring = gameData.taskData["Temporal Anchoring"]
     const entropyCalendar = gameData.taskData["Entropy Calendar"]
-    const chronalCompass = getBindedItemEffect("Chronal Compass")
+    const chronalCompass = getMultiverseItemEffect("Chronal Compass")
 
     const anchorGain = temporalAnchoring == null ? 1 : 1 + temporalAnchoring.level * temporalAnchoring.baseData.effect
     const calendarGain = entropyCalendar == null ? 1 : 1 + entropyCalendar.level * entropyCalendar.baseData.effect
@@ -413,7 +453,7 @@ function getUniverseFourGameSpeedGain() {
         return 1
 
     const borrowedSeconds = gameData.taskData["Borrowed Seconds"]
-    const chronalCompass = getBindedItemEffect("Chronal Compass")
+    const chronalCompass = getMultiverseItemEffect("Chronal Compass")
     const secondsGain = borrowedSeconds == null ? 1 : 1 + borrowedSeconds.level * borrowedSeconds.baseData.effect
     return secondsGain * chronalCompass()
 }
@@ -429,7 +469,7 @@ function getUniverseFourSkillsXpGain() {
 function getUniverseFiveGreedIndexGain() {
     const greedAccounting = gameData.taskData["Greed Accounting"]
     const starMarket = gameData.taskData["Star Market"]
-    const debtEngine = getBindedItemEffect("Debt Engine")
+    const debtEngine = getMultiverseItemEffect("Debt Engine")
     const netPressure = Math.max(0, Math.log10(Math.max(1, getIncome()) / Math.max(1, getExpense()))) * 0.025
 
     const accountingGain = greedAccounting == null ? 1 : 1 + greedAccounting.level * greedAccounting.baseData.effect
@@ -442,7 +482,7 @@ function getUniverseFiveIncomeGain() {
         return 1
 
     const greedAccounting = gameData.taskData["Greed Accounting"]
-    const debtEngine = getBindedItemEffect("Debt Engine")
+    const debtEngine = getMultiverseItemEffect("Debt Engine")
     const accountingGain = greedAccounting == null ? 1 : 1 + greedAccounting.level * 0.004
     return accountingGain * debtEngine()
 }
@@ -467,7 +507,7 @@ function getUniverseFiveSkillsXpGain() {
 function getUniverseSixDimmingResonanceGain() {
     const dimmingResonance = gameData.taskData["Dimming Resonance"]
     const abyssalRecycling = gameData.taskData["Abyssal Recycling"]
-    const nullContract = getBindedItemEffect("Null Contract")
+    const nullContract = getMultiverseItemEffect("Null Contract")
     const voidDepth = Math.log10(gameData.evil + 10) * 0.015 + Math.log10(gameData.essence + 10) * 0.01
 
     const resonanceGain = dimmingResonance == null ? 1 : 1 + dimmingResonance.level * dimmingResonance.baseData.effect
@@ -481,7 +521,7 @@ function getUniverseSixVoidGain() {
 
     const dimmingResonance = gameData.taskData["Dimming Resonance"]
     const nullContinuity = gameData.taskData["Null Continuity"]
-    const compass = getBindedItemEffect("Dimmed Compass")
+    const compass = getMultiverseItemEffect("Dimmed Compass")
     const resonanceGain = dimmingResonance == null ? 1 : 1 + dimmingResonance.level * 0.004
     const continuityGain = nullContinuity == null ? 1 : 1 + nullContinuity.level * 0.003
     return resonanceGain * continuityGain * compass()
@@ -492,7 +532,7 @@ function getUniverseSixEvilGain() {
         return 1
 
     const abyssalRecycling = gameData.taskData["Abyssal Recycling"]
-    const nullContract = getBindedItemEffect("Null Contract")
+    const nullContract = getMultiverseItemEffect("Null Contract")
     const recyclingGain = abyssalRecycling == null ? 1 : 1 + abyssalRecycling.level * 0.004
     return recyclingGain * nullContract()
 }
@@ -502,7 +542,7 @@ function getUniverseSixEssenceGain() {
         return 1
 
     const abyssalRecycling = gameData.taskData["Abyssal Recycling"]
-    const nullContract = getBindedItemEffect("Null Contract")
+    const nullContract = getMultiverseItemEffect("Null Contract")
     const recyclingGain = abyssalRecycling == null ? 1 : 1 + abyssalRecycling.level * 0.003
     return recyclingGain * nullContract()
 }
@@ -526,7 +566,7 @@ function getUniverseSixSkillsXpGain() {
 function getUniverseSevenCausalStabilityGain() {
     const causalThreading = gameData.taskData["Causal Threading"]
     const retroactiveTraining = gameData.taskData["Retroactive Training"]
-    const paradoxAnchor = getBindedItemEffect("Paradox Anchor")
+    const paradoxAnchor = getMultiverseItemEffect("Paradox Anchor")
     const breakMemory = 1 + Math.sqrt(getMultiverseState().universe_breaks) * 0.035
 
     const threadingGain = causalThreading == null ? 1 : 1 + causalThreading.level * causalThreading.baseData.effect
@@ -540,7 +580,7 @@ function getUniverseSevenXpGain() {
 
     const causalThreading = gameData.taskData["Causal Threading"]
     const paradoxDiscipline = gameData.taskData["Paradox Discipline"]
-    const paradoxAnchor = getBindedItemEffect("Paradox Anchor")
+    const paradoxAnchor = getMultiverseItemEffect("Paradox Anchor")
     const threadingGain = causalThreading == null ? 1 : 1 + causalThreading.level * 0.0035
     const disciplineGain = paradoxDiscipline == null ? 1 : 1 + paradoxDiscipline.level * 0.0025
     return threadingGain * disciplineGain * paradoxAnchor()
@@ -551,7 +591,7 @@ function getUniverseSevenIncomeGain() {
         return 1
 
     const paradoxDiscipline = gameData.taskData["Paradox Discipline"]
-    const paradoxAnchor = getBindedItemEffect("Paradox Anchor")
+    const paradoxAnchor = getMultiverseItemEffect("Paradox Anchor")
     const disciplineGain = paradoxDiscipline == null ? 1 : 1 + paradoxDiscipline.level * 0.004
     return disciplineGain * paradoxAnchor()
 }
@@ -568,7 +608,7 @@ function getUniverseEightLadderIntegrityGain() {
     const ladderReconstruction = gameData.taskData["Ladder Reconstruction"]
     const sidewaysPromotion = gameData.taskData["Sideways Promotion"]
     const fracturedMastery = gameData.taskData["Fractured Mastery"]
-    const ascensionMap = getBindedItemEffect("Ascension Map")
+    const ascensionMap = getMultiverseItemEffect("Ascension Map")
 
     const ladderGain = ladderReconstruction == null ? 1 : 1 + ladderReconstruction.level * ladderReconstruction.baseData.effect
     const sidewaysGain = sidewaysPromotion == null ? 1 : 1 + sidewaysPromotion.level * sidewaysPromotion.baseData.effect
@@ -582,7 +622,7 @@ function getUniverseEightXpGain() {
 
     const ladderReconstruction = gameData.taskData["Ladder Reconstruction"]
     const fracturedMastery = gameData.taskData["Fractured Mastery"]
-    const ascensionMap = getBindedItemEffect("Ascension Map")
+    const ascensionMap = getMultiverseItemEffect("Ascension Map")
     const ladderGain = ladderReconstruction == null ? 1 : 1 + ladderReconstruction.level * 0.0035
     const masteryGain = fracturedMastery == null ? 1 : 1 + fracturedMastery.level * 0.0025
     return ladderGain * masteryGain * ascensionMap()
@@ -602,7 +642,7 @@ function getUniverseEightLifespanGain() {
         return 1
 
     const fracturedMastery = gameData.taskData["Fractured Mastery"]
-    const ascensionMap = getBindedItemEffect("Ascension Map")
+    const ascensionMap = getMultiverseItemEffect("Ascension Map")
     const masteryGain = fracturedMastery == null ? 1 : 1 + fracturedMastery.level * 0.0025
     return masteryGain * ascensionMap()
 }
@@ -618,7 +658,7 @@ function getUniverseEightSkillsXpGain() {
 function getUniverseNineCollapseControlGain() {
     const collapseContainment = gameData.taskData["Collapse Containment"]
     const lastSignal = gameData.taskData["Last Signal"]
-    const quietBeacon = getBindedItemEffect("Quiet Beacon")
+    const quietBeacon = getMultiverseItemEffect("Quiet Beacon")
     const lifetimeMemory = 1 + Math.log10(gameData.multiverse_points_lifetime + 10) * 0.018
     const breakMemory = 1 + Math.sqrt(getMultiverseState().universe_breaks) * 0.04
 
@@ -632,7 +672,7 @@ function getUniverseNineXpGain() {
         return 1
 
     const collapseContainment = gameData.taskData["Collapse Containment"]
-    const collapseGauge = getBindedItemEffect("Collapse Gauge")
+    const collapseGauge = getMultiverseItemEffect("Collapse Gauge")
     const containmentGain = collapseContainment == null ? 1 : 1 + collapseContainment.level * 0.003
     return containmentGain * collapseGauge()
 }
@@ -659,7 +699,7 @@ function getUniverseNineEvilGain() {
         return 1
 
     const lastSignal = gameData.taskData["Last Signal"]
-    const quietBeacon = getBindedItemEffect("Quiet Beacon")
+    const quietBeacon = getMultiverseItemEffect("Quiet Beacon")
     const signalGain = lastSignal == null ? 1 : 1 + lastSignal.level * 0.003
     return signalGain * quietBeacon()
 }
@@ -669,7 +709,7 @@ function getUniverseNineEssenceGain() {
         return 1
 
     const lastSignal = gameData.taskData["Last Signal"]
-    const quietBeacon = getBindedItemEffect("Quiet Beacon")
+    const quietBeacon = getMultiverseItemEffect("Quiet Beacon")
     const signalGain = lastSignal == null ? 1 : 1 + lastSignal.level * 0.003
     return signalGain * quietBeacon()
 }
@@ -686,7 +726,7 @@ function getUniverseTenObserverSignalGain() {
     const thresholdListening = gameData.taskData["Threshold Listening"]
     const impossibleRoutine = gameData.taskData["Impossible Routine"]
     const witnessPreparation = gameData.taskData["Witness Preparation"]
-    const staticCrown = getBindedItemEffect("Static Crown")
+    const staticCrown = getMultiverseItemEffect("Static Crown")
     const lifetimeMemory = 1 + Math.log10(gameData.multiverse_points_lifetime + 10) * 0.02
     const breakMemory = 1 + Math.sqrt(getMultiverseState().universe_breaks) * 0.045
 
@@ -742,7 +782,7 @@ function getUniverseTenXpGain() {
 
     const thresholdListening = gameData.taskData["Threshold Listening"]
     const impossibleRoutine = gameData.taskData["Impossible Routine"]
-    const observerLens = getBindedItemEffect("Observer Lens")
+    const observerLens = getMultiverseItemEffect("Observer Lens")
     const listeningGain = thresholdListening == null ? 1 : 1 + thresholdListening.level * 0.0028
     const routineGain = impossibleRoutine == null ? 1 : 1 + impossibleRoutine.level * 0.0028
     return listeningGain * routineGain * observerLens()
@@ -753,7 +793,7 @@ function getUniverseTenGameSpeedGain() {
         return 1
 
     const impossibleRoutine = gameData.taskData["Impossible Routine"]
-    const staticCrown = getBindedItemEffect("Static Crown")
+    const staticCrown = getMultiverseItemEffect("Static Crown")
     const routineGain = impossibleRoutine == null ? 1 : 1 + impossibleRoutine.level * 0.0025
     return routineGain * staticCrown()
 }
@@ -804,7 +844,7 @@ function getMultiversePointGain() {
         return 0
 
     const cartography = 1 + getMultiverseUpgradeLevel("void_cartography") * 0.18
-    return 0.001 * getMultiverseVoidResonance() * getMultiverseUniverseSource() * cartography * getMultiverseBreakRewardGain()
+    return getSafeMultiverseNumber(0.001 * getMultiverseVoidResonance() * getMultiverseUniverseSource() * cartography * getMultiverseBreakRewardGain(), 0, 1e300)
 }
 
 function breakUniverseAltarCost() {
@@ -839,7 +879,7 @@ function increaseMultiversePoints() {
     if (!canSimulate() || !isMultiverseUnlocked())
         return
 
-    const gain = getMultiversePointGain() / updateSpeed
+    const gain = getSafeMultiverseNumber(getMultiversePointGain() / updateSpeed, 0, 1e300)
     gameData.multiverse_points += gain
     gameData.multiverse_points_lifetime += gain
 }

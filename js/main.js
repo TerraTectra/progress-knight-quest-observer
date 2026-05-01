@@ -1218,6 +1218,23 @@ function assignMethods() {
 }
 
 function normalizeMetaLayerUnlocks() {
+    for (const key in gameData.requirements) {
+        const requirement = gameData.requirements[key]
+        if (requirement == null || !requirement.completed)
+            continue
+
+        if (permanentUnlocks.includes(key) || metaverseUnlocks.includes(key))
+            continue
+
+        try {
+            if (!requirement.isCompletedActual(false))
+                requirement.completed = false
+        } catch (error) {
+            console.error("Requirement normalization failed:", key, error)
+            requirement.completed = false
+        }
+    }
+
     if (gameData.requirements["Metaverse"] != null && gameData.rebirthFiveCount < 1)
         gameData.requirements["Metaverse"].completed = false
 
@@ -1442,7 +1459,8 @@ function update(needUpdateUI = true) {
     applyExpenses()
     for (const key in gameData.taskData) {
         const task = gameData.taskData[key]
-        if ((task instanceof Skill || task instanceof Job) && gameData.requirements[key].isCompleted()) {
+        const requirement = gameData.requirements[key]
+        if ((task instanceof Skill || task instanceof Job) && requirement != null && requirement.isCompleted()) {
             task.increaseXp()
         }
     }
@@ -1512,7 +1530,13 @@ function applyEvilPerks() {
 
 function updateRequirements() {
     // Call isCompleted on every requirement as that function caches its result in requirement.completed
-    for (const i in gameData.requirements) gameData.requirements[i].isCompleted()
+    for (const i in gameData.requirements) {
+        try {
+            gameData.requirements[i].isCompleted()
+        } catch (error) {
+            console.error("Requirement update failed:", i, error)
+        }
+    }
 }
 
 function updateStats() {
@@ -1655,30 +1679,43 @@ if (!in_offline_progress)
     document.getElementById("mainarea").hidden = false
 
 onResize(window.outerWidth)
-update()
-
-setTab(gameData.settings.selectedTab)
-setTabSettings("settingsTab")
-setTabDarkMatter("shopTab")
-setTabMetaverse("metaverseTab1")
+try {
+    update()
+    setTab(gameData.settings.selectedTab)
+    setTabSettings("settingsTab")
+    setTabDarkMatter("shopTab")
+    setTabMetaverse("metaverseTab1")
+} catch (error) {
+    console.error(error)
+    const errorInfo = document.getElementById("errorInfo")
+    if (errorInfo != null)
+        errorInfo.hidden = false
+}
 
 let ticking = false;
 
 var gameloop = setInterval(function() {
     if (ticking) return;
     ticking = true;
-    update();
-    var ms = Date.now() - lastUpdate
-    if (lastUpdate != 0 && ms >= 10000 && !in_offline_progress)
-        calc_offline_progress(ms)
-    lastUpdate = Date.now()
+    try {
+        update();
+        var ms = Date.now() - lastUpdate
+        if (lastUpdate != 0 && ms >= 10000 && !in_offline_progress)
+            calc_offline_progress(ms)
+        lastUpdate = Date.now()
+    } catch (error) {
+        console.error(error)
+        const errorInfo = document.getElementById("errorInfo")
+        if (errorInfo != null)
+            errorInfo.hidden = false
+    } finally {
+        ticking = false;
+    }
 
     // fps for debug only
     //var thisFrameTime = (thisLoop = new Date) - lastLoop;
     //frameTime += (thisFrameTime - frameTime) / filterStrength;
     //lastLoop = thisLoop;
-
-    ticking = false;
 }, 1000 / updateSpeed)
 var saveloop = setInterval(saveGameData, 3000)
 

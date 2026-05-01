@@ -310,12 +310,16 @@ class TaskRequirement extends Requirement {
     }
 
     getCondition(isHero, requirement) {
+        const task = gameData.taskData[requirement.task]
+        if (task == null)
+            return false
+
         if (isHero && requirement.herequirement != null)
-            return gameData.taskData[requirement.task].level >= requirement.herequirement
-        else if (gameData.taskData[requirement.task].isHero && requirement.isHero)
+            return task.level >= requirement.herequirement
+        else if (task.isHero && requirement.isHero)
             return true
         else
-            return gameData.taskData[requirement.task].level >= requirement.requirement
+            return task.level >= requirement.requirement
     }
 }
 
@@ -423,7 +427,7 @@ class MultiverseUniverseRequirement extends Requirement {
     }
 
     getCondition(isHero, requirement) {
-        if (!isMultiverseUnlocked())
+        if (typeof isMultiverseUnlocked != "function" || !isMultiverseUnlocked())
             return false
 
         if (requirement.universe != null)
@@ -432,8 +436,10 @@ class MultiverseUniverseRequirement extends Requirement {
         if (requirement.currentUniverse != null)
             return getCurrentUniverseId() == requirement.currentUniverse
 
-        if (requirement.task != null)
-            return gameData.taskData[requirement.task].level >= requirement.requirement
+        if (requirement.task != null) {
+            const task = gameData.taskData[requirement.task]
+            return task != null && task.level >= requirement.requirement
+        }
 
         if (requirement.coins != null)
             return gameData.coins >= requirement.coins

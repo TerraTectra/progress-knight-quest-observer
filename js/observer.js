@@ -39,6 +39,13 @@ const observerSubjectStages = [
     { id: "u10", name: "Universe X", job: "Threshold witness", skill: "Witness Preparation", universe: 10, threshold: 12300, opWeight: 13, difficulty: 4.65 },
 ]
 
+function getSafeObserverNumber(value, fallback = 0, max = 1e308) {
+    if (value == null || isNaN(value) || !isFinite(value))
+        return fallback
+
+    return Math.max(0, Math.min(max, value))
+}
+
 function getObserverState() {
     if (gameData.observer == null)
         gameData.observer = {}
@@ -145,7 +152,8 @@ function grantObserverEntryLegacy(multiverse) {
 
     if (state.subjects.length == 0) {
         const subject = createObserverSubject(true)
-        subject.rank = signal >= getObserverSignalRequirement() * 1.8 ? "common" : "trash"
+        const signalRequirement = typeof getObserverSignalRequirement === "function" ? getObserverSignalRequirement() : 280
+        subject.rank = signal >= signalRequirement * 1.8 ? "common" : "trash"
         subject.ai_xp += Math.min(45, signal * 0.08)
         subject.last_action = "Inherited a fragment of the Observer Signal."
     }
@@ -281,7 +289,7 @@ function getObserverSpeedMultiplier(subject) {
     const instructions = 1 + getObserverUpgradeLevel("clear_instructions") * 0.1
     const briefing = 1 + Math.max(0, stage.universe - 1) * getObserverUpgradeLevel("universe_briefing") * 0.03
     const cleanBonus = getObserverCleanSpeedBonus(subject)
-    return rank.speed * command.speed * instructions * briefing * cleanBonus * getObserverAiLevelSpeed(subject) / stage.difficulty
+    return getSafeObserverNumber(rank.speed * command.speed * instructions * briefing * cleanBonus * getObserverAiLevelSpeed(subject) / stage.difficulty, 0)
 }
 
 function getObserverCleanSpeedBonus(subject) {
@@ -301,7 +309,7 @@ function getObserverSubjectOpGain(subject) {
     const stageValue = 0.035 + universeValue * stage.opWeight
     const cleanBonus = 1 + Math.min(0.85, Math.log10(subject.clean_time + 10) * 0.11)
     const clearBonus = 1 + subject.completed_universe_x * 0.32
-    return stageValue * rank.op * command.op * memory * cleanBonus * clearBonus * getObserverAiLevelOp(subject)
+    return getSafeObserverNumber(stageValue * rank.op * command.op * memory * cleanBonus * clearBonus * getObserverAiLevelOp(subject), 0)
 }
 
 function getObserverPointsGain() {
@@ -314,11 +322,11 @@ function getObserverPointsGain() {
         gain += getObserverSubjectOpGain(subject)
     }
 
-    return gain
+    return getSafeObserverNumber(gain, 0)
 }
 
 function getObserverAiXpToNext(subject) {
-    return 30 * Math.pow(subject.ai_level, 1.58)
+    return getSafeObserverNumber(30 * Math.pow(subject.ai_level, 1.58), 30)
 }
 
 function getObserverAiXpGain(subject) {
@@ -326,7 +334,7 @@ function getObserverAiXpGain(subject) {
     const command = getObserverCommand()
     const stage = getObserverSubjectStage(subject)
     const briefing = 1 + getObserverUpgradeLevel("universe_briefing") * 0.04 * Math.max(0, stage.universe - 1)
-    return (0.12 + stage.universe * 0.03 + subject.stage_index * 0.01) * rank.xp * command.xp * getObserverCleanXpBonus(subject) * briefing
+    return getSafeObserverNumber((0.12 + stage.universe * 0.03 + subject.stage_index * 0.01) * rank.xp * command.xp * getObserverCleanXpBonus(subject) * briefing, 0)
 }
 
 function updateObserver() {
@@ -352,12 +360,14 @@ function updateObserverSubjects() {
 
         subject.clean_time += 1 / updateSpeed
         subject.best_clean_time = Math.max(subject.best_clean_time, subject.clean_time)
-        subject.progress += getObserverSpeedMultiplier(subject) / updateSpeed
-        subject.ai_xp += getObserverAiXpGain(subject) / updateSpeed
+        subject.progress += getSafeObserverNumber(getObserverSpeedMultiplier(subject) / updateSpeed, 0)
+        subject.ai_xp += getSafeObserverNumber(getObserverAiXpGain(subject) / updateSpeed, 0)
 
-        while (subject.ai_xp >= getObserverAiXpToNext(subject)) {
+        let levelGuard = 0
+        while (subject.ai_xp >= getObserverAiXpToNext(subject) && levelGuard < 100) {
             subject.ai_xp -= getObserverAiXpToNext(subject)
             subject.ai_level += 1
+            levelGuard += 1
             subject.last_action = "Improved routing discipline to AI level " + subject.ai_level + "."
         }
 

@@ -137,8 +137,8 @@ function renderSideBar() {
     document.getElementById("timeWarpingDisplay").textContent = "x" + format(getUnpausedGameSpeed() / baseGameSpeed, 2)
 
     document.getElementById("hypercubesDisplay").textContent = formatTreshold(gameData.hypercubes)
-    document.getElementById("multiversePointsDisplay").textContent = format(gameData.multiverse_points, 2)
-    document.getElementById("multiversePointsGainDisplay").textContent = format(getMultiversePointGain(), 4)
+    document.getElementById("multiversePointsDisplay").textContent = format(gameData.multiverse_points || 0, 2)
+    document.getElementById("multiversePointsGainDisplay").textContent = format(typeof getMultiversePointGain == "function" ? getMultiversePointGain() : 0, 4)
 
 
     document.getElementById("hypercubeCapText").hidden = gameData.rebirthFiveCount == 0 || getTotalPerkPoints() > 0
@@ -262,6 +262,7 @@ function renderJobs() {
         if (!(task instanceof Job)) continue
 
         const row = getRowByName(task.name)
+        if (row == null) continue
 
         task.querySelector(".level", row).textContent = formatLevel(task.level)
         task.querySelector(".xpGain", row).textContent = task.getXpGainFormatted()
@@ -301,6 +302,7 @@ function renderSkills() {
         if (!(task instanceof Skill)) continue
 
         const row = getRowByName(task.name)
+        if (row == null) continue
 
         task.querySelector(".level", row).textContent = formatLevel(task.level)
         task.querySelector(".xpGain", row).textContent = task.getXpGainFormatted()
@@ -337,6 +339,7 @@ function renderShop() {
     for (const key in gameData.itemData) {
         const item = gameData.itemData[key]
         const row = getRowByName(item.name)
+        if (row == null) continue
         const button = row.querySelector(".button")
         button.disabled = gameData.coins < item.getExpense()
         const name = button.querySelector(".name")
@@ -676,12 +679,14 @@ function renderMultiverseUniverses() {
     const state = getMultiverseState()
     const currentUniverse = getUniverseInfo()
     const nextUniverse = state.highest_universe < 10 ? getUniverseInfo(state.highest_universe + 1) : null
+    const observerSignal = typeof getObserverSignalStrength == "function" ? getObserverSignalStrength() : 0
+    const observerSignalRequirement = typeof getObserverSignalRequirement == "function" ? getObserverSignalRequirement() : 280
 
     const summaryHtml =
         `<div class="rb-stat-box mp"><div><span class="color-hypercubes">Multiverse points:</span> <b>${format(gameData.multiverse_points, 2)}</b></div><div style="color:gray;">+${format(getMultiversePointGain(), 4)}/s real time</div></div>` +
         `<div class="rb-stat-box void"><div><span class="rb-void">Current universe:</span> <b>${currentUniverse.id} - ${currentUniverse.name}</b></div><div style="color:gray;">${getUniverseParameterName()} x${format(getUniverseParameterGain(), 2)}</div></div>` +
         `<div class="rb-stat-box gold"><div><span class="rb-gold">Highest universe:</span> <b>${state.highest_universe}/10</b></div><div style="color:gray;">Breaks: ${formatWhole(state.universe_breaks)}</div></div>` +
-        `<div class="rb-stat-box red"><div><span class="rb-locked">Next break:</span> <b>${nextUniverse == null ? "Observer signal" : "U-" + nextUniverse.id}</b></div><div style="color:gray;">${nextUniverse == null ? format(getObserverSignalStrength(), 2) + " / " + format(getObserverSignalRequirement(), 2) : (state.universe_break_unlocked ? "Cost: " + format(nextUniverse.unlockCost, 2) + " MP" : "Sealed until Metaverse altar: Break Universe")}</div></div>`
+        `<div class="rb-stat-box red"><div><span class="rb-locked">Next break:</span> <b>${nextUniverse == null ? "Observer signal" : "U-" + nextUniverse.id}</b></div><div style="color:gray;">${nextUniverse == null ? format(observerSignal, 2) + " / " + format(observerSignalRequirement, 2) : (state.universe_break_unlocked ? "Cost: " + format(nextUniverse.unlockCost, 2) + " MP" : "Sealed until Metaverse altar: Break Universe")}</div></div>`
 
     if (summary.dataset.renderSignature != summaryHtml) {
         summary.innerHTML = summaryHtml
@@ -749,16 +754,22 @@ function renderObserverSignalPanel() {
     if (panel == null)
         return
 
+    if (typeof getMultiverseState != "function" || typeof getHighestUniverseId != "function") {
+        panel.classList.add("hidden")
+        return
+    }
+
     const state = getMultiverseState()
     const shouldShow = getHighestUniverseId() >= 10 || state.observer_signal_prepared || state.observer_stub_unlocked
     panel.classList.toggle("hidden", !shouldShow)
     if (!shouldShow)
         return
 
-    const signal = getObserverSignalStrength()
-    const required = getObserverSignalRequirement()
-    const progress = getObserverSignalProgress() * 100
+    const signal = typeof getObserverSignalStrength == "function" ? getObserverSignalStrength() : 0
+    const required = typeof getObserverSignalRequirement == "function" ? getObserverSignalRequirement() : 280
+    const progress = required > 0 ? Math.min(100, signal / required * 100) : 0
     const prepared = state.observer_signal_prepared
+    const canPrepare = typeof canPrepareObserverSignal == "function" && canPrepareObserverSignal()
 
     panel.innerHTML =
         `<div class="text-caption"><b>Observer Signal</b></div>` +
@@ -766,7 +777,7 @@ function renderObserverSignalPanel() {
         `<div class="rb-distortion-list">Signal: <b>${format(signal, 2)}</b> / ${format(required, 2)} (${format(progress, 1)}%)</div>` +
         `<div class="rb-observer-meter"><div style="width:${Math.min(100, progress)}%"></div></div>` +
         `<div style="color:gray; padding-top:0.5em;">${prepared ? "The signal is prepared. The Observer can now be entered." : "Prepare the signal to unlock the third global layer."}</div>` +
-        `<button class="w3-button button" style="margin-top:0.7em;" onclick="${prepared ? "enterObserverLayer()" : "prepareObserverSignal()"}" ${prepared || canPrepareObserverSignal() ? "" : "disabled"}>${prepared ? "Enter Observer" : "Prepare Observer Signal"}</button>`
+        `<button class="w3-button button" style="margin-top:0.7em;" onclick="${prepared ? "enterObserverLayer()" : "prepareObserverSignal()"}" ${prepared || canPrepare ? "" : "disabled"}>${prepared ? "Enter Observer" : "Prepare Observer Signal"}</button>`
 }
 
 function renderMultiverseUpgrades() {
@@ -1015,7 +1026,14 @@ function renderRequirements() {
     for (const key in gameData.requirements) {
         const requirement = gameData.requirements[key]
         for (const element of requirement.elements) {
-            if (requirement.isCompleted()) {
+            let completed = false
+            try {
+                completed = requirement.isCompleted()
+            } catch (error) {
+                console.error("Requirement render failed:", key, error)
+            }
+
+            if (completed) {
                 element.classList.remove("hidden")
             } else {
                 element.classList.add("hidden")
@@ -1037,6 +1055,7 @@ function createRequiredRow(categoryName) {
     const requiredRow = document.querySelector(".requiredRowTemplate").content.firstElementChild.cloneNode(true)
     requiredRow.classList.add("requiredRow")
     requiredRow.classList.add(removeSpaces(categoryName))
+    requiredRow.classList.add("hidden")
     requiredRow.id = categoryName
     return requiredRow
 }
@@ -1061,6 +1080,7 @@ function createHeaderRow(templates, categoryType, categoryName) {
     headerRow.style.color = (gameData.settings.theme == 2) ? headerRowTextColors[categoryName] : "#ffffff"
     headerRow.classList.add(removeSpaces(categoryName))
     headerRow.classList.add("headerRow")
+    headerRow.classList.add("hidden")
 
     return headerRow
 }
@@ -1070,6 +1090,7 @@ function createRow(templates, name, categoryName, categoryType) {
     row.getElementsByClassName("name")[0].textContent = name
     row.getElementsByClassName("tooltipText")[0].textContent = tooltips[name]
     row.id = "row" + removeSpaces(removeStrangeCharacters(name))
+    row.classList.add("hidden")
 
     if (categoryType == itemCategories) {
         row.getElementsByClassName("button")[0].onclick = categoryName == "Properties" ? () => { setCurrentProperty(name) } : () => { setMisc(name) }
@@ -1130,9 +1151,9 @@ function updateRequiredRows(data, categoryType) {
             const nextIndex = i + 1
             if (nextIndex >= category.length) {break}
             const nextEntityName = category[nextIndex]
-            nextEntityRequirements = gameData.requirements[nextEntityName]
+            const nextEntityRequirements = gameData.requirements[nextEntityName]
 
-            if (!nextEntityRequirements.isCompleted()) {
+            if (nextEntityRequirements != null && !nextEntityRequirements.isCompleted()) {
                 nextEntity = data[nextEntityName]
                 break
             }
@@ -1142,7 +1163,11 @@ function updateRequiredRows(data, categoryType) {
             requiredRow.classList.add("hiddenTask")
         } else {
             requiredRow.classList.remove("hiddenTask")
-            const requirementObject = gameData.requirements[nextEntity.name]            
+            const requirementObject = gameData.requirements[nextEntity.name]
+            if (requirementObject == null) {
+                requiredRow.classList.add("hiddenTask")
+                continue
+            }
             const requirements = requirementObject.requirements
 
             const coinElement = requiredRow.querySelector(".coins")
@@ -1166,6 +1191,10 @@ function updateRequiredRows(data, categoryType) {
             let effectText = ""
             if (data == gameData.taskData) {
                 const task = gameData.taskData[nextEntity.name]
+                if (task == null) {
+                    requiredRow.classList.add("hiddenTask")
+                    continue
+                }
                 effectElement.classList.remove("hiddenTask")
                 effectValueElement.textContent = task.unlocked ? (task.baseData.description != null ? task.baseData.description : "Income") : "Unknown"
 
@@ -1190,6 +1219,7 @@ function updateRequiredRows(data, categoryType) {
                             finalText += " Universe " + getHighestUniverseId() + "/" + requirement.universe + ","
                         else if (requirement.task != null) {
                             const task = gameData.taskData[requirement.task]
+                            if (task == null) continue
                             if (task.level < requirement.requirement)
                                 finalText += " " + requirement.task + " " + formatLevel(task.level) + "/" + formatLevel(requirement.requirement) + ","
                         }
@@ -1203,6 +1233,7 @@ function updateRequiredRows(data, categoryType) {
                     levelElement.classList.remove("hiddenTask")
                     for (const requirement of requirements) {
                         const task = gameData.taskData[requirement.task]
+                        if (task == null) continue
                         if (task.level >= requirement.requirement) continue
                         finalText += " " + requirement.task + " " + formatLevel(task.level) + "/" + formatLevel(requirement.requirement) + ","
                     }
