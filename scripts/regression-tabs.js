@@ -96,6 +96,78 @@ async function runScenario(browser, name, setup) {
     if (globals.hasGameError)
         failures.push(`${name}: tempData.hasError is true`)
 
+    const stableButtonTabs = ["multiverse", "metaverse", "observer"]
+    const buttonStabilityFailures = await page.evaluate(tabIds => {
+        const failures = []
+
+        function visible(element) {
+            return element != null
+                && !element.classList.contains("hidden")
+                && getComputedStyle(element).display != "none"
+                && element.getBoundingClientRect().width > 0
+                && element.getBoundingClientRect().height > 0
+        }
+
+        function getVisibleButtons(tabId) {
+            const tab = document.getElementById(tabId)
+            if (!visible(tab))
+                return []
+
+            return Array.from(tab.querySelectorAll("button, input[type='button'], input[type='checkbox']"))
+                .filter(visible)
+        }
+
+        for (const tabId of tabIds) {
+            const tabButton = document.getElementById(tabId + "TabButton")
+            if (!visible(tabButton))
+                continue
+
+            setTab(tabId)
+            updateUI()
+
+            const before = getVisibleButtons(tabId)
+            if (before.length == 0)
+                continue
+
+            for (let i = 0; i < before.length; i++)
+                before[i].__rbStableButtonId = tabId + "-" + i
+
+            const beforeSignature = before.map(button => ({
+                marker: button.__rbStableButtonId,
+                text: button.textContent.trim(),
+                disabled: Boolean(button.disabled),
+            }))
+
+            for (let i = 0; i < 12; i++)
+                updateUI()
+
+            const after = getVisibleButtons(tabId)
+            const afterSignature = after.map(button => ({
+                marker: button.__rbStableButtonId || "",
+                text: button.textContent.trim(),
+                disabled: Boolean(button.disabled),
+            }))
+
+            if (after.length != before.length) {
+                failures.push(tabId + " changed visible button count during stable updates")
+                continue
+            }
+
+            for (let i = 0; i < beforeSignature.length; i++) {
+                const beforeButton = beforeSignature[i]
+                const afterButton = afterSignature[i]
+                if (beforeButton.marker == "" || afterButton.marker != beforeButton.marker)
+                    failures.push(tabId + " rebuilt button " + (beforeButton.text || "#" + i) + " during stable updates")
+                else if (afterButton.text != beforeButton.text)
+                    failures.push(tabId + " changed button text from " + beforeButton.text + " to " + afterButton.text)
+            }
+        }
+
+        return failures
+    }, stableButtonTabs)
+
+    failures.push(...buttonStabilityFailures.map(failure => `${name}: ${failure}`))
+
     const integrityFailures = await page.evaluate(() => {
         const failures = []
         for (const key in gameData.requirements) {
