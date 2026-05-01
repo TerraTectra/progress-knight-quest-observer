@@ -68,6 +68,7 @@ function addMultipliers() {
         } else if (skillCategories["Void Manipulation"].includes(task.name)) {
             task.xpMultipliers.push(getBindedItemEffect("Void Necklace"))
             task.xpMultipliers.push(getBindedItemEffect("Void Orb"))
+            task.xpMultipliers.push(getUniverseSixVoidGain)
         } else if (jobCategories["The Arcane Association"].includes(task.name)) {
             task.xpMultipliers.push(getBindedTaskEffect("Mana Control"))
             task.xpMultipliers.push(getTaaAndMagicXpGain)
@@ -77,6 +78,7 @@ function addMultipliers() {
             task.xpMultipliers.push(getBindedTaskEffect("Void Amplification"))
             task.xpMultipliers.push(getBindedItemEffect("Void Armor"))
             task.xpMultipliers.push(getBindedItemEffect("Void Dust"))
+            task.xpMultipliers.push(getUniverseSixVoidGain)
         } else if (jobCategories["Galactic Council"].includes(task.name)) {
             task.xpMultipliers.push(getBindedItemEffect("Celestial Robe"))
             task.xpMultipliers.push(getBindedTaskEffect("Epiphany"))
@@ -100,6 +102,9 @@ function addMultipliers() {
         } else if (skillCategories["Universe V Commerce"].includes(task.name)) {
             task.xpMultipliers.push(getBindedItemEffect("Star Ledger"))
             task.xpMultipliers.push(getUniverseFiveSkillsXpGain)
+        } else if (skillCategories["Universe VI Void Studies"].includes(task.name)) {
+            task.xpMultipliers.push(getBindedItemEffect("Dimmed Compass"))
+            task.xpMultipliers.push(getUniverseSixSkillsXpGain)
         }
     }
 

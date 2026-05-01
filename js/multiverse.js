@@ -169,21 +169,21 @@ function getMultiverseLifespanGain() {
     if (!isMultiverseUnlocked())
         return 1
 
-    return getUniverseInfo().lifespanMult * (1 + getMultiverseUpgradeLevel("long_echo") * 0.05) * getUniverseFourLifespanGain()
+    return getUniverseInfo().lifespanMult * (1 + getMultiverseUpgradeLevel("long_echo") * 0.05) * getUniverseFourLifespanGain() * getUniverseSixLifespanGain()
 }
 
 function getMultiverseEvilGain() {
     if (!isMultiverseUnlocked())
         return 1
 
-    return 1 + getMultiverseUpgradeLevel("abyss_tithe") * 0.12
+    return (1 + getMultiverseUpgradeLevel("abyss_tithe") * 0.12) * getUniverseSixEvilGain()
 }
 
 function getMultiverseEssenceGain() {
     if (!isMultiverseUnlocked())
         return 1
 
-    return (1 + getMultiverseUpgradeLevel("essence_prism") * 0.10) * getUniverseThreeEssenceGain()
+    return (1 + getMultiverseUpgradeLevel("essence_prism") * 0.10) * getUniverseThreeEssenceGain() * getUniverseSixEssenceGain()
 }
 
 function getMultiverseCategoryPower(category, scale) {
@@ -239,6 +239,9 @@ function getUniverseParameterName(id = getCurrentUniverseId()) {
     if (id == 5)
         return "Greed index"
 
+    if (id == 6)
+        return "Dimming resonance"
+
     if (id == 1)
         return "Prime stability"
 
@@ -260,6 +263,9 @@ function getUniverseParameterGain(id = getCurrentUniverseId()) {
 
     if (id == 5)
         return getUniverseFiveGreedIndexGain()
+
+    if (id == 6)
+        return getUniverseSixDimmingResonanceGain()
 
     return 1
 }
@@ -418,6 +424,65 @@ function getUniverseFiveSkillsXpGain() {
 
     const starMarket = gameData.taskData["Star Market"]
     return starMarket == null ? 1 : 1 + starMarket.level * 0.008
+}
+
+function getUniverseSixDimmingResonanceGain() {
+    const dimmingResonance = gameData.taskData["Dimming Resonance"]
+    const abyssalRecycling = gameData.taskData["Abyssal Recycling"]
+    const nullContract = getBindedItemEffect("Null Contract")
+    const voidDepth = Math.log10(gameData.evil + 10) * 0.015 + Math.log10(gameData.essence + 10) * 0.01
+
+    const resonanceGain = dimmingResonance == null ? 1 : 1 + dimmingResonance.level * dimmingResonance.baseData.effect
+    const recyclingGain = abyssalRecycling == null ? 1 : 1 + abyssalRecycling.level * abyssalRecycling.baseData.effect
+    return (resonanceGain + voidDepth) * recyclingGain * nullContract()
+}
+
+function getUniverseSixVoidGain() {
+    if (!isMultiverseUnlocked() || getCurrentUniverseId() != 6)
+        return 1
+
+    const dimmingResonance = gameData.taskData["Dimming Resonance"]
+    const nullContinuity = gameData.taskData["Null Continuity"]
+    const compass = getBindedItemEffect("Dimmed Compass")
+    const resonanceGain = dimmingResonance == null ? 1 : 1 + dimmingResonance.level * 0.004
+    const continuityGain = nullContinuity == null ? 1 : 1 + nullContinuity.level * 0.003
+    return resonanceGain * continuityGain * compass()
+}
+
+function getUniverseSixEvilGain() {
+    if (!isMultiverseUnlocked() || getCurrentUniverseId() != 6)
+        return 1
+
+    const abyssalRecycling = gameData.taskData["Abyssal Recycling"]
+    const nullContract = getBindedItemEffect("Null Contract")
+    const recyclingGain = abyssalRecycling == null ? 1 : 1 + abyssalRecycling.level * 0.004
+    return recyclingGain * nullContract()
+}
+
+function getUniverseSixEssenceGain() {
+    if (!isMultiverseUnlocked() || getCurrentUniverseId() != 6)
+        return 1
+
+    const abyssalRecycling = gameData.taskData["Abyssal Recycling"]
+    const nullContract = getBindedItemEffect("Null Contract")
+    const recyclingGain = abyssalRecycling == null ? 1 : 1 + abyssalRecycling.level * 0.003
+    return recyclingGain * nullContract()
+}
+
+function getUniverseSixLifespanGain() {
+    if (!isMultiverseUnlocked() || getCurrentUniverseId() != 6)
+        return 1
+
+    const nullContinuity = gameData.taskData["Null Continuity"]
+    return nullContinuity == null ? 1 : 1 + nullContinuity.level * 0.003
+}
+
+function getUniverseSixSkillsXpGain() {
+    if (!isMultiverseUnlocked())
+        return 1
+
+    const nullContinuity = gameData.taskData["Null Continuity"]
+    return nullContinuity == null ? 1 : 1 + nullContinuity.level * 0.008
 }
 
 function getMultiverseVoidResonance() {

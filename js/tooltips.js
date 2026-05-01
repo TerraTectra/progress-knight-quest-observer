@@ -228,6 +228,11 @@ const tooltips = {
     "Star Market": "Trade futures on stars that have not formed yet. This improves Greed index and Universe V Commerce training.",
     "Star Ledger": "A ledger written in stellar debt. It improves Universe V Commerce training.",
     "Debt Engine": "An engine that burns liabilities as fuel. It improves Universe V MP gain and income recovery.",
+    "Dimming Resonance": "Universe VI dims ordinary progress. Learn to resonate with the Void and turn its pressure into Multiverse Point gain.",
+    "Abyssal Recycling": "Recycle failed void-runs into usable darkness. This improves Evil and Essence gain inside Dimming Void.",
+    "Null Continuity": "Hold a thin thread of identity through the nothingness. This restores part of Universe VI lifespan pressure and improves Void Studies training.",
+    "Dimmed Compass": "A compass that only points toward places reality forgot. It improves Universe VI Void Studies training.",
+    "Null Contract": "An agreement signed with the absence between worlds. It improves Universe VI MP, Evil, and Essence gain.",
 
     "Strong Hope": "Another Faint Hope buff?!",
     "Ruler of the Metaverse": "Now you are thinking with portals",

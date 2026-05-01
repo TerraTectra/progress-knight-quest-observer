@@ -281,6 +281,10 @@ const skillBaseData = {
     "Greed Accounting": { name: "Greed Accounting", maxXp: 1.2e11, heroxp: 750, effect: 0.004, description: "U-V MP + Income" },
     "Debt Transmutation": { name: "Debt Transmutation", maxXp: 4e11, heroxp: 765, effect: -0.003, description: "U-V Expenses" },
     "Star Market": { name: "Star Market", maxXp: 1.5e12, heroxp: 780, effect: 0.004, description: "U-V MP + Trade XP" },
+
+    "Dimming Resonance": { name: "Dimming Resonance", maxXp: 4e12, heroxp: 800, effect: 0.0035, description: "U-VI MP + Void XP" },
+    "Abyssal Recycling": { name: "Abyssal Recycling", maxXp: 1.2e13, heroxp: 815, effect: 0.003, description: "U-VI Evil + Essence" },
+    "Null Continuity": { name: "Null Continuity", maxXp: 4e13, heroxp: 830, effect: 0.003, description: "U-VI Lifespan + Void Studies XP" },
 }
 
 const itemBaseData = {
@@ -349,6 +353,8 @@ const itemBaseData = {
     "Chronal Compass": { name: "Chronal Compass", expense: 1.5e31, effect: 1.14, description: "U-IV MP + Gamespeed", heromult: 21, heroeffect: 1e8 },
     "Star Ledger": { name: "Star Ledger", expense: 8e33, effect: 1.6, description: "Universe V Commerce XP", heromult: 22, heroeffect: 1e8 },
     "Debt Engine": { name: "Debt Engine", expense: 6e35, effect: 1.13, description: "U-V MP + Income", heromult: 23, heroeffect: 1e8 },
+    "Dimmed Compass": { name: "Dimmed Compass", expense: 4e38, effect: 1.55, description: "Universe VI Void Studies XP", heromult: 24, heroeffect: 1e8 },
+    "Null Contract": { name: "Null Contract", expense: 3e40, effect: 1.12, description: "U-VI MP + Evil + Essence", heromult: 25, heroeffect: 1e8 },
 }
 
 const requirementsBaseData = {
@@ -524,6 +530,10 @@ const requirementsBaseData = {
     "Greed Accounting": new MultiverseUniverseRequirement([getQuerySelector("Greed Accounting")], [{ universe: 5 }]),
     "Debt Transmutation": new MultiverseUniverseRequirement([getQuerySelector("Debt Transmutation")], [{ universe: 5 }, { task: "Greed Accounting", requirement: 20 }]),
     "Star Market": new MultiverseUniverseRequirement([getQuerySelector("Star Market")], [{ universe: 5 }, { task: "Debt Transmutation", requirement: 35 }]),
+    "Universe VI Void Studies": new MultiverseUniverseRequirement([removeSpaces(".Universe VI Void Studies")], [{ universe: 6 }]),
+    "Dimming Resonance": new MultiverseUniverseRequirement([getQuerySelector("Dimming Resonance")], [{ universe: 6 }]),
+    "Abyssal Recycling": new MultiverseUniverseRequirement([getQuerySelector("Abyssal Recycling")], [{ universe: 6 }, { task: "Dimming Resonance", requirement: 20 }]),
+    "Null Continuity": new MultiverseUniverseRequirement([getQuerySelector("Null Continuity")], [{ universe: 6 }, { task: "Abyssal Recycling", requirement: 35 }]),
 
     // Properties
     "Homeless": new CoinRequirement([getQuerySelector("Homeless")], [{ requirement: 0 }]),
@@ -589,6 +599,8 @@ const requirementsBaseData = {
     "Chronal Compass": new MultiverseUniverseRequirement([getQuerySelector("Chronal Compass")], [{ universe: 4 }, { task: "Borrowed Seconds", requirement: 25 }, { coins: itemBaseData["Chronal Compass"].expense * 100 }]),
     "Star Ledger": new MultiverseUniverseRequirement([getQuerySelector("Star Ledger")], [{ universe: 5 }, { task: "Greed Accounting", requirement: 10 }, { coins: itemBaseData["Star Ledger"].expense * 100 }]),
     "Debt Engine": new MultiverseUniverseRequirement([getQuerySelector("Debt Engine")], [{ universe: 5 }, { task: "Debt Transmutation", requirement: 25 }, { coins: itemBaseData["Debt Engine"].expense * 100 }]),
+    "Dimmed Compass": new MultiverseUniverseRequirement([getQuerySelector("Dimmed Compass")], [{ universe: 6 }, { task: "Dimming Resonance", requirement: 10 }, { coins: itemBaseData["Dimmed Compass"].expense * 100 }]),
+    "Null Contract": new MultiverseUniverseRequirement([getQuerySelector("Null Contract")], [{ universe: 6 }, { task: "Abyssal Recycling", requirement: 25 }, { coins: itemBaseData["Null Contract"].expense * 100 }]),
     
 
     // Milestones
@@ -662,12 +674,13 @@ const skillCategories = {
     "Multiverse Skills": ["Royal Administration", "Paperwork Evasion", "Reality Surveying"],
     "Universe III Arts": ["Arcane Taxation", "Mana Tariff", "Spell Auditing"],
     "Universe IV Chronology": ["Temporal Anchoring", "Borrowed Seconds", "Entropy Calendar"],
-    "Universe V Commerce": ["Greed Accounting", "Debt Transmutation", "Star Market"]
+    "Universe V Commerce": ["Greed Accounting", "Debt Transmutation", "Star Market"],
+    "Universe VI Void Studies": ["Dimming Resonance", "Abyssal Recycling", "Null Continuity"]
 }
 
 const itemCategories = {
     "Properties": ["Homeless", "Tent", "Wooden Hut", "Cottage", "House", "Large House", "Small Palace", "Grand Palace", "Town Ruler", "City Ruler", "Nation Ruler", "Pocket Dimension", "Void Realm", "Void Universe", "Astral Realm", "Galactic Throne", "Spaceship", "Planet", "Ringworld", "Stellar Neighborhood", "Galaxy", "Supercluster", "Galaxy Filament", "Observable Universe", "Multiverse", "Quantum World", "Boötes Void"],
-    "Misc": ["Book", "Dumbbells", "Personal Squire", "Steel Longsword", "Butler", "Sapphire Charm", "Study Desk", "Library", "Observatory", "Mind's Eye", "Void Necklace", "Void Armor", "Void Blade", "Void Orb", "Void Dust", "Celestial Robe", "Universe Fragment", "Multiverse Fragment", "Stairway to heaven", "Highway to hell", "Tesseract", "Desintegration", "Custom Galaxy", "Hypersphere", "Royal Ledger", "Tax Seal", "Taxed Grimoire", "Arcane Abacus", "Broken Hourglass", "Chronal Compass", "Star Ledger", "Debt Engine"]
+    "Misc": ["Book", "Dumbbells", "Personal Squire", "Steel Longsword", "Butler", "Sapphire Charm", "Study Desk", "Library", "Observatory", "Mind's Eye", "Void Necklace", "Void Armor", "Void Blade", "Void Orb", "Void Dust", "Celestial Robe", "Universe Fragment", "Multiverse Fragment", "Stairway to heaven", "Highway to hell", "Tesseract", "Desintegration", "Custom Galaxy", "Hypersphere", "Royal Ledger", "Tax Seal", "Taxed Grimoire", "Arcane Abacus", "Broken Hourglass", "Chronal Compass", "Star Ledger", "Debt Engine", "Dimmed Compass", "Null Contract"]
 }
 
 const headerRowColors = {
@@ -686,6 +699,7 @@ const headerRowColors = {
     "Universe III Arts": "#C71585",
     "Universe IV Chronology": "#5a7dff",
     "Universe V Commerce": "#d5a80c",
+    "Universe VI Void Studies": "#762B91",
     "Void Manipulation": "#762B91",
     "Celestial Powers": "#D5C010",
     "Properties_Auto": "#21cc5e",
@@ -715,6 +729,7 @@ const headerRowTextColors = {
     "Universe III Arts": "white",
     "Universe IV Chronology": "white",
     "Universe V Commerce": "purple",
+    "Universe VI Void Studies": "white",
     "Void Manipulation": "white",
     "Celestial Powers": "purple",
     "Properties_Auto": "purple",
