@@ -184,6 +184,69 @@ function enterUniverse(id) {
     return true
 }
 
+function getUniverseBreakRequirement(id = getCurrentUniverseId()) {
+    const requirements = {
+        1: { parameter: 1.18, task: null, taskLevel: 0 },
+        2: { parameter: 1.55, task: "Reality Surveying", taskLevel: 35 },
+        3: { parameter: 1.65, task: "Spell Auditing", taskLevel: 40 },
+        4: { parameter: 1.72, task: "Entropy Calendar", taskLevel: 42 },
+        5: { parameter: 1.85, task: "Star Market", taskLevel: 45 },
+        6: { parameter: 2.00, task: "Null Continuity", taskLevel: 48 },
+        7: { parameter: 1.55, task: "Retroactive Training", taskLevel: 50 },
+        8: { parameter: 1.85, task: "Fractured Mastery", taskLevel: 54 },
+        9: { parameter: 1.75, task: "Last Signal", taskLevel: 58 },
+    }
+
+    return requirements[id] || null
+}
+
+function getUniverseBreakParameterProgress(id = getCurrentUniverseId()) {
+    const requirement = getUniverseBreakRequirement(id)
+    if (requirement == null || requirement.parameter <= 0)
+        return 1
+
+    return Math.min(1, getUniverseParameterGain(id) / requirement.parameter)
+}
+
+function getUniverseBreakTaskProgress(id = getCurrentUniverseId()) {
+    const requirement = getUniverseBreakRequirement(id)
+    if (requirement == null || requirement.task == null)
+        return 1
+
+    const task = gameData.taskData[requirement.task]
+    if (task == null || requirement.taskLevel <= 0)
+        return 0
+
+    return Math.min(1, task.level / requirement.taskLevel)
+}
+
+function getUniverseBreakProgress(id = getCurrentUniverseId()) {
+    const requirement = getUniverseBreakRequirement(id)
+    if (requirement == null)
+        return 1
+
+    return Math.min(getUniverseBreakParameterProgress(id), getUniverseBreakTaskProgress(id))
+}
+
+function isUniverseBreakRequirementCompleted(id = getCurrentUniverseId()) {
+    return getUniverseBreakProgress(id) >= 1
+}
+
+function getUniverseBreakRequirementText(id = getCurrentUniverseId()) {
+    const requirement = getUniverseBreakRequirement(id)
+    if (requirement == null)
+        return "No further universe break."
+
+    let text = getUniverseParameterName(id) + " " + format(getUniverseParameterGain(id), 2) + "/" + format(requirement.parameter, 2)
+    if (requirement.task != null) {
+        const task = gameData.taskData[requirement.task]
+        const level = task == null ? 0 : task.level
+        text += ", " + requirement.task + " " + formatWhole(level) + "/" + formatWhole(requirement.taskLevel)
+    }
+
+    return text
+}
+
 function canBreakCurrentUniverse() {
     const state = getMultiverseState()
     const nextUniverse = getUniverseInfo(state.current_universe + 1)
@@ -192,6 +255,7 @@ function canBreakCurrentUniverse() {
         && state.universe_break_unlocked
         && state.current_universe == state.highest_universe
         && state.highest_universe < 10
+        && isUniverseBreakRequirementCompleted(state.current_universe)
         && gameData.multiverse_points >= nextUniverse.unlockCost
 }
 

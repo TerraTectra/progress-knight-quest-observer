@@ -740,7 +740,7 @@ function renderMultiverseUniverses() {
         `<div class="rb-stat-box mp"><div><span class="color-hypercubes">Multiverse points:</span> <b>${format(gameData.multiverse_points, 2)}</b></div><div style="color:gray;">+${format(getMultiversePointGain(), 4)}/s real time</div></div>` +
         `<div class="rb-stat-box void"><div><span class="rb-void">Current universe:</span> <b>${currentUniverse.id} - ${currentUniverse.name}</b></div><div style="color:gray;">${getUniverseParameterName()} x${format(getUniverseParameterGain(), 2)}</div></div>` +
         `<div class="rb-stat-box gold"><div><span class="rb-gold">Highest universe:</span> <b>${state.highest_universe}/10</b></div><div style="color:gray;">Breaks: ${formatWhole(state.universe_breaks)}</div></div>` +
-        `<div class="rb-stat-box red"><div><span class="rb-locked">Next break:</span> <b>${nextUniverse == null ? "Observer signal" : "U-" + nextUniverse.id}</b></div><div style="color:gray;">${nextUniverse == null ? format(observerSignal, 2) + " / " + format(observerSignalRequirement, 2) : (state.universe_break_unlocked ? "Cost: " + format(nextUniverse.unlockCost, 2) + " MP" : "Sealed until Metaverse altar: Break Universe")}</div></div>`
+        `<div class="rb-stat-box red"><div><span class="rb-locked">Next break:</span> <b>${nextUniverse == null ? "Observer signal" : "U-" + nextUniverse.id}</b></div><div style="color:gray;">${nextUniverse == null ? format(observerSignal, 2) + " / " + format(observerSignalRequirement, 2) : (state.universe_break_unlocked ? "Cost: " + format(nextUniverse.unlockCost, 2) + " MP; " + getUniverseBreakRequirementText(state.current_universe) : "Sealed until Metaverse altar: Break Universe")}</div></div>`
 
     if (summary.dataset.renderSignature != summaryHtml) {
         summary.innerHTML = summaryHtml
@@ -760,6 +760,7 @@ function renderMultiverseUniverses() {
         format(getMultiversePointGain(), 4),
         format(getTotalUniversePassiveWeight(), 2),
         format(getObserverSignalStrength(), 2),
+        format(getUniverseBreakProgress(), 3),
     ].join("|")
 
     if (grid.dataset.renderSignature == gridSignature) {
@@ -797,7 +798,7 @@ function renderMultiverseUniverses() {
                     `<span class="rb-chip ${chipClass}">${chipText}</span>` +
                 `</div>` +
                 `<div class="rb-universe-rule">${universe.rule}</div>` +
-                `<div class="rb-distortion-list">XP <b>x${format(universe.xpMult, 2)}</b> / Income <b>x${format(universe.incomeMult, 2)}</b><br>Expenses <b>x${format(universe.expenseMult, 2)}</b> / Lifespan <b>x${format(universe.lifespanMult, 2)}</b><br>${getUniverseParameterName(universe.id)} <b>x${format(getUniverseParameterGain(universe.id), 2)}</b>${unlocked ? "<br>Passive MP weight <b>x" + format(passiveWeight, 2) + "</b>" : ""}</div>` +
+                `<div class="rb-distortion-list">XP <b>x${format(universe.xpMult, 2)}</b> / Income <b>x${format(universe.incomeMult, 2)}</b><br>Expenses <b>x${format(universe.expenseMult, 2)}</b> / Lifespan <b>x${format(universe.lifespanMult, 2)}</b><br>${getUniverseParameterName(universe.id)} <b>x${format(getUniverseParameterGain(universe.id), 2)}</b>${unlocked ? "<br>Passive MP weight <b>x" + format(passiveWeight, 2) + "</b>" : ""}${current && universe.id == state.highest_universe && universe.id < 10 ? "<br>Break requirement: <b>" + getUniverseBreakRequirementText(universe.id) + "</b>" : ""}</div>` +
                 `<div style="margin-top:0.7em;">${button}</div>` +
             `</div>`
     }
