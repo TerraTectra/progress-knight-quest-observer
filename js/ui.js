@@ -764,11 +764,6 @@ function renderMultiverseUniverses() {
         state.observer_stub_unlocked ? 1 : 0,
         state.observer_signal_prepared ? 1 : 0,
         canBreak ? 1 : 0,
-        format(getUniverseParameterGain(), 2),
-        format(getMultiversePointGain(), 4),
-        format(getTotalUniversePassiveWeight(), 2),
-        format(getObserverSignalStrength(), 2),
-        format(getUniverseBreakProgress(), 3),
     ].join("|")
 
     if (grid.dataset.renderSignature == gridSignature) {
@@ -837,6 +832,9 @@ function renderObserverSignalPanel() {
     const progress = required > 0 ? Math.min(100, signal / required * 100) : 0
     const prepared = state.observer_signal_prepared
     const canPrepare = typeof canPrepareObserverSignal == "function" && canPrepareObserverSignal()
+    const signature = [prepared ? 1 : 0, canPrepare ? 1 : 0, Math.floor(progress / 5)].join("|")
+    if (panel.dataset.renderSignature == signature)
+        return
 
     panel.innerHTML =
         `<div class="text-caption"><b>Observer Signal</b></div>` +
@@ -845,6 +843,7 @@ function renderObserverSignalPanel() {
         `<div class="rb-observer-meter"><div style="width:${Math.min(100, progress)}%"></div></div>` +
         `<div style="color:gray; padding-top:0.5em;">${prepared ? "The signal is prepared. The Observer can now be entered." : "Prepare the signal to unlock the third global layer."}</div>` +
         `<button class="w3-button button" style="margin-top:0.7em;" onclick="${prepared ? "enterObserverLayer()" : "prepareObserverSignal()"}" ${prepared || canPrepare ? "" : "disabled"}>${prepared ? "Enter Observer" : "Prepare Observer Signal"}</button>`
+    panel.dataset.renderSignature = signature
 }
 
 function renderMultiverseUpgrades() {

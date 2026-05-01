@@ -242,6 +242,31 @@ async function runScenario(browser, name, setup) {
 
         failures.push(...watchFailures.map(failure => `${name}: ${failure}`))
 
+        const observerButtonStabilityFailures = await page.evaluate(() => {
+            const failures = []
+            if (typeof closeObservedObserverSubject == "function")
+                closeObservedObserverSubject()
+            setTab("observer")
+            updateUI()
+            const subjectButton = document.querySelector("#observerSubjectGrid button")
+            const upgradeButton = document.querySelector("#observerUpgradeRows button")
+            if (subjectButton == null)
+                failures.push("Observer subject button is missing")
+            if (upgradeButton == null)
+                failures.push("Observer upgrade button is missing")
+
+            for (let i = 0; i < 12; i++)
+                updateUI()
+
+            if (subjectButton != null && document.querySelector("#observerSubjectGrid button") !== subjectButton)
+                failures.push("Observer subject buttons are rebuilt during stable updates")
+            if (upgradeButton != null && document.querySelector("#observerUpgradeRows button") !== upgradeButton)
+                failures.push("Observer upgrade buttons are rebuilt during stable updates")
+            return failures
+        })
+
+        failures.push(...observerButtonStabilityFailures.map(failure => `${name}: ${failure}`))
+
         const progressionFailures = await page.evaluate(() => {
             const failures = []
             const subject = gameData.observer && gameData.observer.subjects ? gameData.observer.subjects[0] : null
@@ -865,6 +890,78 @@ async function runScenario(browser, name, setup) {
         })
 
         failures.push(...universeFailures.map(failure => `${name}: ${failure}`))
+
+        const observerGateFailures = await page.evaluate(() => {
+            const failures = []
+            if (typeof canEnterObserverLayer != "function" || typeof prepareObserverSignal != "function" || typeof enterObserverLayer != "function")
+                return ["Observer gate helpers are missing"]
+
+            gameData.multiverse_unlocked = true
+            gameData.multiverse.current_universe = 10
+            gameData.multiverse.highest_universe = 10
+            gameData.multiverse.observer_signal_prepared = false
+            gameData.multiverse.observer_entry_claimed = false
+            gameData.observer.active = false
+
+            const tasks = {
+                "Threshold Listening": 220,
+                "Impossible Routine": 220,
+                "Witness Preparation": 220,
+                "Observer Alignment": 220,
+            }
+
+            for (const key in tasks) {
+                if (gameData.taskData[key] != null) {
+                    gameData.taskData[key].level = tasks[key]
+                    gameData.taskData[key].maxLevel = tasks[key]
+                }
+            }
+
+            if (canEnterObserverLayer())
+                failures.push("Observer layer can be entered before signal preparation")
+            if (!prepareObserverSignal())
+                failures.push("Observer signal could not be prepared with U-X route")
+            if (!canEnterObserverLayer())
+                failures.push("Observer layer cannot be entered after signal preparation")
+            if (!enterObserverLayer())
+                failures.push("Observer layer did not enter after signal preparation")
+            if (!gameData.observer.active)
+                failures.push("Observer layer did not activate")
+            if (!(gameData.observer.subjects && gameData.observer.subjects.length > 0))
+                failures.push("Observer entry did not create first subject")
+
+            updateUI()
+            const visibleButtons = Array.from(document.querySelectorAll(".tabButton"))
+                .filter(button => !button.classList.contains("hidden") && getComputedStyle(button).display != "none")
+                .map(button => button.textContent.trim())
+            if (!(visibleButtons.length == 1 && visibleButtons[0] == "Observer"))
+                failures.push("Observer entry does not hide non-Observer tabs")
+
+            gameData.observer.active = false
+            gameData.multiverse.observer_entry_claimed = false
+            return failures
+        })
+
+        failures.push(...observerGateFailures.map(failure => `${name}: ${failure}`))
+
+        const multiverseButtonStabilityFailures = await page.evaluate(() => {
+            const failures = []
+            gameData.observer.active = false
+            setTab("multiverse")
+            updateUI()
+            const button = document.querySelector("#multiverseUniverseGrid button")
+            if (button == null)
+                return ["Multiverse universe button is missing"]
+
+            for (let i = 0; i < 12; i++)
+                updateUI()
+
+            if (document.querySelector("#multiverseUniverseGrid button") !== button)
+                failures.push("Multiverse universe buttons are rebuilt during stable updates")
+            return failures
+        })
+
+        failures.push(...multiverseButtonStabilityFailures.map(failure => `${name}: ${failure}`))
 
         const evilBridgeFailures = await page.evaluate(() => {
             const failures = []

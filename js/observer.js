@@ -1775,10 +1775,35 @@ function renderObserverSubjects() {
         return
 
     const state = getObserverState()
+    const signature = state.subjects.map(subject => {
+        const rankCost = getObserverRankUpgradeCost(subject)
+        const characterCost = getObserverSubjectCharacterCost(subject)
+        return [
+            subject.id,
+            subject.rank,
+            subject.personality,
+            subject.stage_index,
+            subject.bot_focus_job,
+            subject.bot_focus_skill,
+            Math.floor(subject.ai_level),
+            Math.floor(subject.character_level),
+            Math.floor(subject.completed_universe_x),
+            Math.floor(getObserverStageProgress(subject) / 10),
+            isFinite(rankCost) && state.points >= rankCost ? 1 : 0,
+            state.points >= characterCost ? 1 : 0,
+        ].join(":")
+    }).join("|")
+
     if (state.subjects.length == 0) {
-        grid.innerHTML = `<div style="color:gray;">No subjects yet. Add the first one for free.</div>`
+        if (grid.dataset.renderSignature != "empty") {
+            grid.innerHTML = `<div style="color:gray;">No subjects yet. Add the first one for free.</div>`
+            grid.dataset.renderSignature = "empty"
+        }
         return
     }
+
+    if (grid.dataset.renderSignature == signature)
+        return
 
     let html = ""
     for (const subject of state.subjects) {
@@ -1821,6 +1846,7 @@ function renderObserverSubjects() {
     }
 
     grid.innerHTML = html
+    grid.dataset.renderSignature = signature
 }
 
 function renderObservedObserverSubject() {
@@ -1953,6 +1979,13 @@ function renderObserverUpgrades() {
     if (rows == null)
         return
 
+    const signature = Object.keys(observerUpgradeData).map(key => {
+        const cost = getObserverUpgradeCost(key)
+        return key + ":" + getObserverUpgradeLevel(key) + ":" + (getObserverState().points >= cost ? 1 : 0)
+    }).join("|")
+    if (rows.dataset.renderSignature == signature)
+        return
+
     let html = ""
     for (const key in observerUpgradeData) {
         const data = observerUpgradeData[key]
@@ -1968,4 +2001,5 @@ function renderObserverUpgrades() {
     }
 
     rows.innerHTML = html
+    rows.dataset.renderSignature = signature
 }
