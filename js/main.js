@@ -1,8 +1,15 @@
-onerror = () => {
-    document.getElementById("errorInfo").hidden = false
+onerror = (message, source, lineno, colno, error) => {
+    console.error("Unhandled game error:", error || message, source, lineno, colno)
+    const errorInfo = document.getElementById("errorInfo")
+    if (errorInfo != null)
+        errorInfo.hidden = false
+
     tempData.hasError = true
     setTimeout(() => {
-        document.getElementById("errorInfo").hidden = true
+        const currentErrorInfo = document.getElementById("errorInfo")
+        if (currentErrorInfo != null)
+            currentErrorInfo.hidden = true
+        tempData.hasError = false
     }, 30 * 1000)
 }
 
@@ -1107,7 +1114,7 @@ function isAlive() {
         else 
             deathText.classList.add("hidden")        
     }
-    return condition && !tempData.hasError
+    return condition
 }
 
 function canSimulate() {

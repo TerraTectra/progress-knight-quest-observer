@@ -95,6 +95,55 @@ async function runScenario(browser, name, setup) {
 
     if (globals.hasGameError)
         failures.push(`${name}: tempData.hasError is true`)
+
+    const integrityFailures = await page.evaluate(() => {
+        const failures = []
+        for (const key in gameData.requirements) {
+            const requirement = gameData.requirements[key]
+            if (requirement == null || requirement.querySelectors == null || requirement.querySelectors.length == 0)
+                continue
+
+            const found = requirement.querySelectors.some(selector => document.querySelector(selector) != null)
+            if (!found)
+                failures.push(`Requirement ${key} has no DOM target`)
+        }
+
+        function rowId(entityName) {
+            return "row" + removeSpaces(removeStrangeCharacters(entityName))
+        }
+
+        for (const category in jobCategories) {
+            for (const job of jobCategories[category]) {
+                if (gameData.taskData[job] == null)
+                    failures.push(`Job ${job} is missing from taskData`)
+                if (document.getElementById(rowId(job)) == null)
+                    failures.push(`Job ${job} has no row`)
+            }
+        }
+
+        for (const category in skillCategories) {
+            for (const skill of skillCategories[category]) {
+                if (gameData.taskData[skill] == null)
+                    failures.push(`Skill ${skill} is missing from taskData`)
+                if (document.getElementById(rowId(skill)) == null)
+                    failures.push(`Skill ${skill} has no row`)
+            }
+        }
+
+        for (const category in itemCategories) {
+            for (const item of itemCategories[category]) {
+                if (gameData.itemData[item] == null)
+                    failures.push(`Item ${item} is missing from itemData`)
+                if (document.getElementById(rowId(item)) == null)
+                    failures.push(`Item ${item} has no row`)
+            }
+        }
+
+        return failures
+    })
+
+    failures.push(...integrityFailures.map(failure => `${name}: ${failure}`))
+
     if (name == "early") {
         const earlyMultiverseFailures = await page.evaluate(() => {
             const failures = []
@@ -106,6 +155,48 @@ async function runScenario(browser, name, setup) {
         })
 
         failures.push(...earlyMultiverseFailures.map(failure => `${name}: ${failure}`))
+
+        const earlyUnlockFailures = await page.evaluate(() => {
+            const failures = []
+            const visibleTaskNames = Array.from(document.querySelectorAll("#jobTable tr, #skillTable tr"))
+                .filter(element => getComputedStyle(element).display != "none" && !element.classList.contains("hidden") && !element.classList.contains("hiddenTask"))
+                .map(element => {
+                    const nameElement = element.querySelector(".name")
+                    return nameElement == null ? "" : nameElement.textContent.trim()
+                })
+                .filter(Boolean)
+
+            const allowedAtStart = ["Beggar", "Concentration", "Strength"]
+            const unexpected = visibleTaskNames.filter(name => !allowedAtStart.includes(name))
+            for (const taskName of unexpected)
+                failures.push(`Task ${taskName} is visible too early`)
+
+            if (!visibleTaskNames.includes("Beggar"))
+                failures.push("Beggar is not visible at start")
+            if (!visibleTaskNames.includes("Concentration"))
+                failures.push("Concentration is not visible at start")
+            if (!visibleTaskNames.includes("Strength"))
+                failures.push("Strength is not visible at start")
+
+            return failures
+        })
+
+        failures.push(...earlyUnlockFailures.map(failure => `${name}: ${failure}`))
+
+        const stabilityFailures = await page.evaluate(() => {
+            const failures = []
+            const before = gameData.days
+            tempData.hasError = true
+            if (typeof canSimulate == "function" && !canSimulate())
+                failures.push("Transient UI error flag stops simulation")
+            update(false)
+            tempData.hasError = false
+            if (!(gameData.days > before))
+                failures.push("Game does not advance after transient UI error flag")
+            return failures
+        })
+
+        failures.push(...stabilityFailures.map(failure => `${name}: ${failure}`))
     }
     if (name == "observer" && (!globals.observerSubjects[0] || globals.observerSubjects[0].rank != "trash"))
         failures.push(`${name}: first observer subject must be free Trash rank`)

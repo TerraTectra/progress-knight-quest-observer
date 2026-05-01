@@ -1121,7 +1121,7 @@ function updateObserver() {
     const state = getObserverState()
     updateObserverVisibility()
 
-    if (!state.active || gameData.paused || tempData.hasError)
+    if (!state.active || gameData.paused)
         return
 
     updateObserverSubjects()
