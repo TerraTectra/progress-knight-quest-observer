@@ -380,6 +380,83 @@ async function runScenario(browser, name, setup) {
             if (!(streakImproved.clean_time > streakBase.clean_time))
                 failures.push("Streak Preservation does not preserve more clean streak after mistakes")
 
+            for (const key in gameData.observer.upgrades)
+                gameData.observer.upgrades[key] = 0
+
+            const baseVisionary = {
+                id: 9006,
+                rank: "rare",
+                personality: "visionary",
+                stage_index: 12,
+                progress: 9000,
+                ai_level: 12,
+                character_level: 0,
+                bot_job_level: 65,
+                bot_skill_level: 65,
+                bot_items: [],
+                milestones: {},
+                bot_log: [],
+            }
+            const trainedVisionary = {
+                id: 9007,
+                rank: "rare",
+                personality: "visionary",
+                stage_index: 12,
+                progress: 9000,
+                ai_level: 12,
+                character_level: 12,
+                bot_job_level: 65,
+                bot_skill_level: 65,
+                bot_items: [],
+                milestones: {},
+                bot_log: [],
+            }
+            normalizeObserverSubject(baseVisionary)
+            normalizeObserverSubject(trainedVisionary)
+            if (!(getObserverEffectiveSpeedMultiplier(trainedVisionary) > getObserverEffectiveSpeedMultiplier(baseVisionary)))
+                failures.push("Character mastery does not improve Visionary late speed")
+            if (!(getObserverSubjectOpGain(trainedVisionary) > getObserverSubjectOpGain(baseVisionary)))
+                failures.push("Character mastery does not improve Visionary late OP gain")
+            if (!(getObserverSubjectAdaptation(trainedVisionary) > getObserverSubjectAdaptation(baseVisionary)))
+                failures.push("Character mastery does not improve Visionary adaptation")
+
+            const baseImpulsive = {
+                id: 9008,
+                rank: "common",
+                personality: "impulsive",
+                stage_index: 7,
+                progress: 2300,
+                ai_level: 8,
+                character_level: 0,
+                bot_job_level: 38,
+                bot_skill_level: 38,
+                bot_items: [],
+                milestones: {},
+                bot_log: [],
+            }
+            const trainedImpulsive = {
+                id: 9009,
+                rank: "common",
+                personality: "impulsive",
+                stage_index: 7,
+                progress: 2300,
+                ai_level: 8,
+                character_level: 12,
+                bot_job_level: 38,
+                bot_skill_level: 38,
+                bot_items: [],
+                milestones: {},
+                bot_log: [],
+            }
+            normalizeObserverSubject(baseImpulsive)
+            normalizeObserverSubject(trainedImpulsive)
+            const baseImpulsiveProfile = getObserverPersonalityStageProfile(baseImpulsive)
+            const trainedImpulsiveProfile = getObserverPersonalityStageProfile(trainedImpulsive)
+            if (!(trainedImpulsiveProfile.speed > baseImpulsiveProfile.speed))
+                failures.push("Character mastery does not improve Impulsive speed")
+            if (!(trainedImpulsiveProfile.mistake < baseImpulsiveProfile.mistake))
+                failures.push("Character mastery does not soften Impulsive mistakes")
+
             subject.bot_evil = 0
             subject.stage_index = 1
             subject.progress = observerSubjectStages[1].threshold + 1

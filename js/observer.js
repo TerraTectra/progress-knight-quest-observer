@@ -540,6 +540,81 @@ function getObserverSubjectPersonality(subject) {
     return observerPersonalityData[subject.personality] || observerPersonalityData.methodical
 }
 
+function getObserverCharacterMastery(subject) {
+    const level = Math.max(0, subject.character_level || 0)
+    return Math.min(1.15, Math.log2(level + 1) * 0.24)
+}
+
+function getObserverPersonalityAdaptationBonus(subject, stage = null) {
+    stage = stage || getObserverSubjectStage(subject)
+    const mastery = getObserverCharacterMastery(subject)
+    const id = subject.personality || "methodical"
+    const band = getObserverStageBand(stage)
+
+    if (id == "timid")
+        return mastery * 0.035
+    if (id == "impulsive")
+        return mastery * (band == "early" || band == "void" ? 0.045 : 0.025)
+    if (id == "studious")
+        return mastery * 0.055
+    if (id == "greedy")
+        return mastery * (band == "multiverse" || band == "reality" || band == "late" || band == "threshold" ? 0.05 : 0.025)
+    if (id == "methodical")
+        return mastery * 0.07
+    if (id == "visionary")
+        return mastery * (stage.universe >= 2 ? 0.09 : 0.035)
+
+    return mastery * 0.035
+}
+
+function applyObserverCharacterMasteryToProfile(subject, profile, stage) {
+    const mastery = getObserverCharacterMastery(subject)
+    if (mastery <= 0)
+        return
+
+    const id = subject.personality || "methodical"
+    const band = getObserverStageBand(stage)
+
+    if (id == "timid") {
+        profile.speed *= 1 + mastery * 0.045
+        profile.route *= 1 + mastery * 0.075
+        profile.op *= 1 + mastery * 0.045
+        profile.purchase *= 1 + mastery * 0.045
+        profile.mistake *= Math.max(0.72, 1 - mastery * 0.12)
+    } else if (id == "impulsive") {
+        profile.speed *= 1 + mastery * 0.14
+        profile.xp *= 1 + mastery * 0.055
+        profile.route *= 1 + mastery * 0.065
+        profile.purchase *= 1 + mastery * 0.075
+        profile.mistake *= Math.max(0.7, 1 - mastery * 0.16)
+    } else if (id == "studious") {
+        profile.xp *= 1 + mastery * 0.13
+        profile.aiXp *= 1 + mastery * 0.16
+        profile.route *= 1 + mastery * 0.055
+        profile.op *= 1 + mastery * 0.04
+        profile.mistake *= Math.max(0.78, 1 - mastery * 0.08)
+    } else if (id == "greedy") {
+        profile.income *= 1 + mastery * 0.14
+        profile.purchase *= 1 + mastery * 0.1
+        profile.op *= 1 + mastery * (band == "multiverse" || band == "reality" || band == "late" || band == "threshold" ? 0.1 : 0.055)
+        profile.route *= 1 + mastery * 0.035
+        profile.mistake *= Math.max(0.82, 1 - mastery * 0.07)
+    } else if (id == "methodical") {
+        profile.route *= 1 + mastery * 0.12
+        profile.aiXp *= 1 + mastery * 0.075
+        profile.op *= 1 + mastery * 0.055
+        profile.purchase *= 1 + mastery * 0.045
+        profile.mistake *= Math.max(0.68, 1 - mastery * 0.14)
+    } else if (id == "visionary") {
+        const lateFocus = stage.universe >= 2 ? 1.5 : 1
+        profile.speed *= 1 + mastery * 0.07 * lateFocus
+        profile.op *= 1 + mastery * 0.075 * lateFocus
+        profile.xp *= 1 + mastery * 0.06 * lateFocus
+        profile.route *= 1 + mastery * 0.08 * lateFocus
+        profile.mistake *= Math.max(0.66, 1 - mastery * 0.12 * lateFocus)
+    }
+}
+
 function getObserverPersonalityStageProfile(subject, stage = null) {
     stage = stage || getObserverSubjectStage(subject)
     const band = getObserverStageBand(stage)
@@ -583,6 +658,8 @@ function getObserverPersonalityStageProfile(subject, stage = null) {
         profile.mistake *= stage.universe >= 2 ? 0.88 : 0.96
         profile.route *= stage.universe >= 2 ? 1.1 : 1.02
     }
+
+    applyObserverCharacterMasteryToProfile(subject, profile, stage)
 
     const characterLevel = Math.max(0, subject.character_level || 0)
     const characterBoost = 1 + Math.min(0.75, characterLevel * 0.035)
@@ -755,10 +832,11 @@ function getObserverSubjectAdaptation(subject) {
     const upgrades = getObserverUpgradeLevel("better_instincts") * 0.035
     const patronage = getObserverUpgradeLevel("hidden_patronage") * 0.018
     const thresholdIntuition = stage.universe >= 8 ? getObserverUpgradeLevel("threshold_intuition") * 0.055 : 0
+    const characterAdaptation = getObserverPersonalityAdaptationBonus(subject, stage)
     const stagePressure = Math.max(0, stage.difficulty - 1) * 0.12
     const rankControl = Math.max(0.35, rank.choice * rank.thrift * personalityProfile.route)
 
-    return getSafeObserverNumber(Math.max(0.35, rankControl + ai + milestones + upgrades + patronage + thresholdIntuition - stagePressure), 1, 2.45)
+    return getSafeObserverNumber(Math.max(0.35, rankControl + ai + milestones + upgrades + patronage + thresholdIntuition + characterAdaptation - stagePressure), 1, 2.55)
 }
 
 function getObserverBotXpToNext(level, stageIndex) {
@@ -1252,7 +1330,19 @@ function getObserverCleanLogTierFromTime(cleanTime) {
 function getObserverCleanStreakRetention(subject) {
     const preservation = getObserverUpgradeLevel("streak_preservation") * 0.08
     const discipline = Math.max(0, getObserverSubjectAdaptation(subject) - 1) * 0.06
-    return Math.min(0.72, preservation + discipline)
+    const mastery = getObserverCharacterMastery(subject)
+    let personalityRetention = 0
+
+    if (subject.personality == "timid")
+        personalityRetention = mastery * 0.055
+    else if (subject.personality == "methodical")
+        personalityRetention = mastery * 0.075
+    else if (subject.personality == "studious")
+        personalityRetention = mastery * 0.045
+    else if (subject.personality == "visionary" && getObserverSubjectStage(subject).universe >= 2)
+        personalityRetention = mastery * 0.06
+
+    return Math.min(0.78, preservation + discipline + personalityRetention)
 }
 
 function applyObserverSubjectMistake(subject) {
