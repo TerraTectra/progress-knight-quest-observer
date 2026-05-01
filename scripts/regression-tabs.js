@@ -300,6 +300,86 @@ async function runScenario(browser, name, setup) {
             if (!(getObserverSubjectOpGain(legendary) > getObserverSubjectOpGain(trash)))
                 failures.push("Legendary subject does not generate more OP than Trash in U-X")
 
+            for (const key in gameData.observer.upgrades)
+                gameData.observer.upgrades[key] = 0
+
+            const thresholdStage = observerSubjectStages[13]
+            const thresholdBaseSpeed = getObserverEffectiveSpeedMultiplier(legendary)
+            const thresholdBaseOp = getObserverSubjectOpGain(legendary)
+            const thresholdBaseMistake = getObserverPhaseMistakeMultiplier(thresholdStage)
+            gameData.observer.upgrades.threshold_intuition = 5
+            if (!(getObserverEffectiveSpeedMultiplier(legendary) > thresholdBaseSpeed))
+                failures.push("Threshold Intuition does not improve late Observer subject speed")
+            if (!(getObserverSubjectOpGain(legendary) > thresholdBaseOp))
+                failures.push("Threshold Intuition does not improve late Observer OP gain")
+            if (!(getObserverPhaseMistakeMultiplier(thresholdStage) < thresholdBaseMistake))
+                failures.push("Threshold Intuition does not reduce late mistake pressure")
+
+            gameData.observer.upgrades.threshold_intuition = 0
+            const reserveSubject = {
+                id: 9003,
+                rank: "common",
+                personality: "greedy",
+                stage_index: 8,
+                progress: 3000,
+                ai_level: 10,
+                character_level: 0,
+                bot_job_level: 45,
+                bot_skill_level: 45,
+                bot_items: [],
+                milestones: {},
+                bot_log: [],
+            }
+            normalizeObserverSubject(reserveSubject)
+            const reserveBase = getObserverBotPurchaseReserve(reserveSubject)
+            gameData.observer.upgrades.hidden_patronage = 5
+            const reserveImproved = getObserverBotPurchaseReserve(reserveSubject)
+            if (!(reserveImproved < reserveBase))
+                failures.push("Hidden Patronage does not lower subject purchase reserve")
+
+            gameData.observer.upgrades.hidden_patronage = 0
+            const randomBefore = Math.random
+            Math.random = () => 0.99
+            const streakBase = {
+                id: 9004,
+                rank: "common",
+                personality: "methodical",
+                stage_index: 5,
+                progress: 1500,
+                clean_time: 1000,
+                ai_level: 5,
+                character_level: 0,
+                bot_job_level: 28,
+                bot_skill_level: 28,
+                bot_items: [],
+                milestones: {},
+                bot_log: [],
+            }
+            const streakImproved = {
+                id: 9005,
+                rank: "common",
+                personality: "methodical",
+                stage_index: 5,
+                progress: 1500,
+                clean_time: 1000,
+                ai_level: 5,
+                character_level: 0,
+                bot_job_level: 28,
+                bot_skill_level: 28,
+                bot_items: [],
+                milestones: {},
+                bot_log: [],
+            }
+            normalizeObserverSubject(streakBase)
+            normalizeObserverSubject(streakImproved)
+            gameData.observer.upgrades.streak_preservation = 0
+            applyObserverSubjectMistake(streakBase)
+            gameData.observer.upgrades.streak_preservation = 5
+            applyObserverSubjectMistake(streakImproved)
+            Math.random = randomBefore
+            if (!(streakImproved.clean_time > streakBase.clean_time))
+                failures.push("Streak Preservation does not preserve more clean streak after mistakes")
+
             subject.bot_evil = 0
             subject.stage_index = 1
             subject.progress = observerSubjectStages[1].threshold + 1
