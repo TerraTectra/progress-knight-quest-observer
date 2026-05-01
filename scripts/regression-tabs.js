@@ -68,7 +68,12 @@ async function runScenario(browser, name, setup) {
         hasGameError: Boolean(window.tempData && window.tempData.hasError),
         selectedTab: window.gameData && window.gameData.settings && window.gameData.settings.selectedTab,
         observerSubjects: window.gameData && window.gameData.observer && window.gameData.observer.subjects
-            ? window.gameData.observer.subjects.map(subject => ({ rank: subject.rank, personality: subject.personality }))
+            ? window.gameData.observer.subjects.map(subject => ({
+                rank: subject.rank,
+                personality: subject.personality,
+                opGain: typeof getObserverSubjectOpGain == "function" ? getObserverSubjectOpGain(subject) : 0,
+                logLength: subject.bot_log && Array.isArray(subject.bot_log) ? subject.bot_log.length : 0,
+            }))
             : [],
     }))
 
@@ -90,6 +95,10 @@ async function runScenario(browser, name, setup) {
         failures.push(`${name}: tempData.hasError is true`)
     if (name == "observer" && (!globals.observerSubjects[0] || globals.observerSubjects[0].rank != "trash"))
         failures.push(`${name}: first observer subject must be free Trash rank`)
+    if (name == "observer" && (!globals.observerSubjects[0] || !(globals.observerSubjects[0].opGain > 0)))
+        failures.push(`${name}: first observer subject must generate Observer Points`)
+    if (name == "observer" && (!globals.observerSubjects[0] || globals.observerSubjects[0].logLength <= 0))
+        failures.push(`${name}: first observer subject must keep a decision log`)
     if (name == "late") {
         const upgradeFailures = await page.evaluate(() => {
             if (typeof multiverseUpgradeData == "undefined")
@@ -288,6 +297,10 @@ const observerSetup = () => {
     gameData.observer.points = 1000000
     if (typeof buyObserverSubject === "function")
         buyObserverSubject()
+    if (typeof updateObserverSubjects === "function") {
+        for (let i = 0; i < 120; i++)
+            updateObserverSubjects()
+    }
     updateRequirements()
     updateUI()
 }
