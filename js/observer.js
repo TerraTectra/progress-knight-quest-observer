@@ -95,6 +95,22 @@ const observerBotItems = [
     { name: "Observer Lens", stage: 13, cost: 3600000, quality: 0.2 },
 ]
 
+const observerStageResourceData = {
+    rebirth: { rebirths: 1, log: "Touched the amulet and restarted with a cleaner memory." },
+    evil: { evil: 1, rebirths: 1, log: "Accepted Evil and opened the first dark route." },
+    void: { evil: 25, rebirths: 1, log: "Reached the Void route and learned to keep Evil between runs." },
+    multiverse: { mp: 1, log: "Opened the Multiverse signal and started earning MP." },
+    u2: { mp: 8, log: "Broke into Universe II and began tracking bureaucracy." },
+    u3: { mp: 22, log: "Entered Universe III and adjusted to arcane tariffs." },
+    u4: { mp: 48, log: "Entered Universe IV and anchored the first time fracture." },
+    u5: { mp: 95, log: "Entered Universe V and learned to survive greedy expenses." },
+    u6: { evil: 90, mp: 180, log: "Entered Universe VI and routed through dimming Void pressure." },
+    u7: { mp: 340, log: "Entered Universe VII and stabilized causality." },
+    u8: { mp: 640, log: "Entered Universe VIII and rebuilt the broken ladder." },
+    u9: { evil: 220, mp: 1150, log: "Entered Universe IX and contained the collapse." },
+    u10: { evil: 420, mp: 2200, log: "Entered Universe X and heard the Observer threshold." },
+}
+
 function getSafeObserverNumber(value, fallback = 0, max = 1e308) {
     if (value == null || isNaN(value) || !isFinite(value))
         return fallback
@@ -727,6 +743,19 @@ function getObserverBotTargetLevel(subject) {
     return Math.max(5, subject.stage_index * 9 + getObserverSubjectStage(subject).universe * 8 + 14)
 }
 
+function getObserverSubjectAdaptation(subject) {
+    const stage = getObserverSubjectStage(subject)
+    const rank = getObserverBotRank(subject)
+    const personalityProfile = getObserverPersonalityStageProfile(subject, stage)
+    const ai = Math.min(0.55, Math.log2(Math.max(1, subject.ai_level)) * 0.045)
+    const milestones = Math.min(0.35, getObserverSubjectMilestoneCount(subject) * 0.035)
+    const upgrades = getObserverUpgradeLevel("better_instincts") * 0.035
+    const stagePressure = Math.max(0, stage.difficulty - 1) * 0.12
+    const rankControl = Math.max(0.35, rank.choice * rank.thrift * personalityProfile.route)
+
+    return getSafeObserverNumber(Math.max(0.35, rankControl + ai + milestones + upgrades - stagePressure), 1, 2.25)
+}
+
 function getObserverBotXpToNext(level, stageIndex) {
     return 16 + Math.pow(level + 2, 1.34) * (1 + stageIndex * 0.08)
 }
@@ -756,7 +785,8 @@ function getObserverSubjectRouteQuality(subject) {
     const mistakePenalty = Math.max(0.72, 1 - Math.min(0.28, subject.mistakes * 0.0035))
     const instinctBonus = getObserverUpgradeLevel("better_instincts") * 0.035
     const personalityProfile = getObserverPersonalityStageProfile(subject)
-    const quality = (0.56 + jobFit * 0.19 + skillFit * 0.22 + property.quality + itemQuality + instinctBonus) * mistakePenalty * personalityProfile.route
+    const adaptation = getObserverSubjectAdaptation(subject)
+    const quality = (0.5 + jobFit * 0.2 + skillFit * 0.24 + property.quality + itemQuality + instinctBonus) * mistakePenalty * personalityProfile.route * Math.sqrt(adaptation)
     subject.bot_route_quality = getSafeObserverNumber(Math.max(0.52, Math.min(1.85, quality)), 1)
     return subject.bot_route_quality
 }
@@ -1064,6 +1094,10 @@ function getObserverSpeedMultiplier(subject) {
     return getSafeObserverNumber(rank.speed * getObserverRankStageSpeed(subject) * personality.speed * personalityProfile.speed * getObserverSubjectMilestoneMultiplier(subject, "speed") * instructions * briefing * getObserverPhaseSpeedMultiplier(stage) * cleanBonus * getObserverAiLevelSpeed(subject) / (stage.difficulty * repeatClearDrag), 0)
 }
 
+function getObserverEffectiveSpeedMultiplier(subject) {
+    return getSafeObserverNumber(getObserverSpeedMultiplier(subject) * (0.86 + getObserverSubjectAdaptation(subject) * 0.14), 0)
+}
+
 function getObserverCleanSpeedBonus(subject) {
     return 1 + Math.min(0.45, Math.log10(subject.clean_time + 10) * 0.09)
 }
@@ -1087,7 +1121,8 @@ function getObserverSubjectOpGain(subject) {
     const clearBonus = 1 + Math.log2(subject.completed_universe_x + 1) * 0.35
     const routeQuality = getObserverSubjectRouteQuality(subject)
     const levelDepth = 1 + Math.min(0.55, Math.log2((subject.bot_job_level || 1) + (subject.bot_skill_level || 1)) * 0.045)
-    return getSafeObserverNumber(stageValue * progressValue * universeDepth * rank.op * getObserverRankStageOp(subject) * personality.op * personalityProfile.op * getObserverSubjectMilestoneMultiplier(subject, "op") * memory * getObserverPhaseOpMultiplier(stage) * cleanBonus * clearBonus * getObserverAiLevelOp(subject) * getObserverRosterSupportBonus() * routeQuality * levelDepth, 0)
+    const adaptationValue = 0.84 + getObserverSubjectAdaptation(subject) * 0.16
+    return getSafeObserverNumber(stageValue * progressValue * universeDepth * rank.op * getObserverRankStageOp(subject) * personality.op * personalityProfile.op * getObserverSubjectMilestoneMultiplier(subject, "op") * memory * getObserverPhaseOpMultiplier(stage) * cleanBonus * clearBonus * getObserverAiLevelOp(subject) * getObserverRosterSupportBonus() * routeQuality * levelDepth * adaptationValue, 0)
 }
 
 function getObserverPointsGain() {
@@ -1146,9 +1181,10 @@ function updateObserverSubjects() {
         updateObserverSubjectPurchases(subject, dt)
 
         const routeQuality = getObserverSubjectRouteQuality(subject)
-        subject.progress += getSafeObserverNumber(getObserverSpeedMultiplier(subject) * (0.76 + routeQuality * 0.28) / updateSpeed, 0)
+        const effectiveSpeed = getObserverEffectiveSpeedMultiplier(subject)
+        subject.progress += getSafeObserverNumber(effectiveSpeed * (0.76 + routeQuality * 0.28) / updateSpeed, 0)
         subject.ai_xp += getSafeObserverNumber(getObserverAiXpGain(subject) * (0.75 + routeQuality * 0.25) / updateSpeed, 0)
-        subject.bot_age_days += getSafeObserverNumber((0.55 + getObserverSpeedMultiplier(subject) * 0.18) / updateSpeed, 0)
+        subject.bot_age_days += getSafeObserverNumber((0.55 + effectiveSpeed * 0.18) / updateSpeed, 0)
         subject.bot_coins += getSafeObserverNumber(getObserverBotIncome(subject) * (0.55 + routeQuality * 0.45) / updateSpeed, 0, 1e300)
         subject.bot_evil += getSafeObserverNumber((subject.stage_index >= 2 ? getObserverSubjectOpGain(subject) * 0.014 * routeQuality : 0) / updateSpeed, 0, 1e300)
         subject.bot_mp += getSafeObserverNumber((subject.stage_index >= 4 ? getObserverSubjectOpGain(subject) * 0.009 * routeQuality * getObserverSubjectStage(subject).universe : 0) / updateSpeed, 0, 1e300)
@@ -1166,7 +1202,8 @@ function updateObserverSubjects() {
         const personality = getObserverSubjectPersonality(subject)
         const stage = getObserverSubjectStage(subject)
         const personalityProfile = getObserverPersonalityStageProfile(subject, stage)
-        const mistakeChance = 0.000045 * rank.mistake * getObserverRankStageMistake(subject) * personality.mistake * personalityProfile.mistake * getObserverSubjectMilestoneMultiplier(subject, "mistake") * stage.difficulty * getObserverAiLevelMistake(subject) * getObserverMistakeMultiplier() * getObserverPhaseMistakeMultiplier(stage)
+        const adaptationMistakeRelief = Math.max(0.55, 1 - Math.min(0.45, (getObserverSubjectAdaptation(subject) - 0.65) * 0.28))
+        const mistakeChance = 0.000045 * rank.mistake * getObserverRankStageMistake(subject) * personality.mistake * personalityProfile.mistake * getObserverSubjectMilestoneMultiplier(subject, "mistake") * stage.difficulty * getObserverAiLevelMistake(subject) * getObserverMistakeMultiplier() * getObserverPhaseMistakeMultiplier(stage) * adaptationMistakeRelief
         if (Math.random() < mistakeChance) {
             applyObserverSubjectMistake(subject)
         }
@@ -1195,7 +1232,19 @@ function applyObserverSubjectMistake(subject) {
     const previousThreshold = getObserverPreviousThreshold(subject.stage_index)
     const stageSpan = stage.threshold - previousThreshold
     const recovery = Math.max(0.35, 1 - getObserverUpgradeLevel("mistake_recovery") * 0.1)
-    const rollback = stageSpan * (0.08 + observerRankData[subject.rank].mistake * 0.025) * recovery
+    const adaptation = getObserverSubjectAdaptation(subject)
+    const correctionChance = Math.min(0.42, Math.max(0, adaptation - 1) * 0.18)
+
+    if (Math.random() < correctionChance) {
+        subject.progress = Math.max(previousThreshold, subject.progress - stageSpan * 0.025 * recovery)
+        subject.last_action = getObserverNearMissMessage(subject)
+        subject.bot_job_xp = Math.max(0, subject.bot_job_xp * 0.93)
+        subject.bot_skill_xp = Math.max(0, subject.bot_skill_xp * 0.93)
+        pushObserverSubjectLog(subject, subject.last_action)
+        return
+    }
+
+    const rollback = stageSpan * (0.08 + observerRankData[subject.rank].mistake * 0.025) * recovery / Math.max(0.72, Math.sqrt(adaptation))
 
     subject.progress = Math.max(previousThreshold, subject.progress - rollback)
 
@@ -1205,15 +1254,36 @@ function applyObserverSubjectMistake(subject) {
         subject.route_resets += 1
         subject.last_action = getObserverMistakeMessage(subject, true)
         subject.bot_coins = Math.max(0, subject.bot_coins * 0.72)
+        if (subject.bot_items.length > 0 && Math.random() < 0.35)
+            subject.bot_items.pop()
         pushObserverSubjectLog(subject, subject.last_action)
         return
     }
 
     subject.last_action = getObserverMistakeMessage(subject, false)
     subject.bot_coins = Math.max(0, subject.bot_coins * 0.88)
+    if (observerRankData[subject.rank].debtLoss > 0.18 && subject.bot_items.length > 0 && Math.random() < observerRankData[subject.rank].debtLoss * 0.12)
+        subject.bot_items.pop()
     subject.bot_job_xp = Math.max(0, subject.bot_job_xp * 0.72)
     subject.bot_skill_xp = Math.max(0, subject.bot_skill_xp * 0.72)
     pushObserverSubjectLog(subject, subject.last_action)
+}
+
+function getObserverNearMissMessage(subject) {
+    if (subject.personality == "timid")
+        return "Almost froze, but corrected the route before losing the phase."
+    if (subject.personality == "impulsive")
+        return "Caught a bad shortcut at the last moment."
+    if (subject.personality == "studious")
+        return "Found the mistake in the notes before it became fatal."
+    if (subject.personality == "greedy")
+        return "Cancelled a risky purchase before it ruined the run."
+    if (subject.personality == "methodical")
+        return "Corrected a small routing error before it spread."
+    if (subject.personality == "visionary")
+        return "Saw the distortion early enough to avoid a full mistake."
+
+    return "Corrected the route before the mistake became fatal."
 }
 
 function getObserverMistakeMessage(subject, slippedPhase) {
@@ -1240,6 +1310,7 @@ function getObserverMistakeMessage(subject, slippedPhase) {
 
 function advanceObserverSubject(subject) {
     let advanced = false
+    const advancedStages = []
     while (subject.progress >= getObserverSubjectStage(subject).threshold) {
         if (subject.stage_index >= observerSubjectStages.length - 1) {
             subject.completed_universe_x += 1
@@ -1268,6 +1339,7 @@ function advanceObserverSubject(subject) {
 
         subject.stage_index += 1
         advanced = true
+        advancedStages.push(getObserverSubjectStage(subject))
     }
 
     if (advanced) {
@@ -1280,8 +1352,27 @@ function advanceObserverSubject(subject) {
         subject.bot_next_purchase = Math.min(subject.bot_next_purchase, 1.5)
         subject.last_action = getObserverStageAdvanceMessage(subject, stage)
         subject.bot_rebirths += stage.id == "rebirth" || stage.id == "evil" || stage.id == "void" ? 1 : 0
+        for (const advancedStage of advancedStages) {
+            applyObserverStageResource(subject, advancedStage)
+        }
         pushObserverSubjectLog(subject, subject.last_action)
     }
+}
+
+function applyObserverStageResource(subject, stage) {
+    const data = observerStageResourceData[stage.id]
+    if (data == null)
+        return
+
+    if (data.rebirths != null)
+        subject.bot_rebirths = Math.max(subject.bot_rebirths, data.rebirths)
+    if (data.evil != null)
+        subject.bot_evil = Math.max(subject.bot_evil, data.evil)
+    if (data.mp != null)
+        subject.bot_mp = Math.max(subject.bot_mp, data.mp)
+
+    if (data.log != null)
+        pushObserverSubjectLog(subject, data.log)
 }
 
 function getObserverStageAdvanceMessage(subject, stage) {

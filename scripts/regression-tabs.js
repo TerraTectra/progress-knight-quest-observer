@@ -265,6 +265,48 @@ async function runScenario(browser, name, setup) {
             if (!unlocked)
                 failures.push("Observer subject milestones did not unlock through Multiverse signal")
 
+            const trash = {
+                id: 9001,
+                rank: "trash",
+                personality: "impulsive",
+                stage_index: 13,
+                progress: 10000,
+                ai_level: 8,
+                character_level: 0,
+                bot_job_level: 40,
+                bot_skill_level: 40,
+                bot_items: [],
+                milestones: {},
+                bot_log: [],
+            }
+            const legendary = {
+                id: 9002,
+                rank: "legendary",
+                personality: "visionary",
+                stage_index: 13,
+                progress: 10000,
+                ai_level: 8,
+                character_level: 0,
+                bot_job_level: 40,
+                bot_skill_level: 40,
+                bot_items: [],
+                milestones: {},
+                bot_log: [],
+            }
+            normalizeObserverSubject(trash)
+            normalizeObserverSubject(legendary)
+            if (!(getObserverEffectiveSpeedMultiplier(legendary) > getObserverEffectiveSpeedMultiplier(trash)))
+                failures.push("Legendary subject is not faster than Trash in U-X")
+            if (!(getObserverSubjectOpGain(legendary) > getObserverSubjectOpGain(trash)))
+                failures.push("Legendary subject does not generate more OP than Trash in U-X")
+
+            subject.bot_evil = 0
+            subject.stage_index = 1
+            subject.progress = observerSubjectStages[1].threshold + 1
+            advanceObserverSubject(subject)
+            if (!((subject.bot_evil || 0) >= 1))
+                failures.push("Observer subject does not gain bot Evil when entering Evil route")
+
             return failures
         })
 
