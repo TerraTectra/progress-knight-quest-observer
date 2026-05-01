@@ -263,8 +263,19 @@ class Item {
     getExpense(heroic) {
         if (heroic === undefined)
             heroic = this.isHero
-        return (heroic ? 4 * Math.pow(10, this.baseData.heromult) * heroIncomeMult : 1)
-            * applyMultipliers(this.baseData.expense, this.expenseMultipliers)
+        const baseExpense = (heroic ? 4 * Math.pow(10, this.baseData.heromult) * heroIncomeMult : 1)
+            * this.baseData.expense
+
+        if (baseExpense <= 0)
+            return 0
+
+        const expense = applyMultipliers(baseExpense, this.expenseMultipliers)
+        if (expense == Infinity)
+            return Infinity
+        if (expense == null || isNaN(expense) || expense <= 0)
+            return baseExpense * 0.01
+
+        return Math.max(expense, baseExpense * 0.01)
     }
 }
 

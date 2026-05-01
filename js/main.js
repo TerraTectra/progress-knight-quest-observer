@@ -338,7 +338,11 @@ function getEssenceXpGain() {
 function applyMultipliers(value, multipliers) {
     var finalMultiplier = 1
     multipliers.forEach((multiplierFunction) => {
-        finalMultiplier *= multiplierFunction()
+        const multiplier = multiplierFunction()
+        if (multiplier == null || isNaN(multiplier))
+            return
+
+        finalMultiplier *= multiplier
     })
     return value * finalMultiplier
 }
@@ -588,15 +592,22 @@ function getIncome() {
 
 function getExpense() {
     var expense = 0
-    expense += gameData.currentProperty.getExpense()
+    if (gameData.currentProperty != null && typeof gameData.currentProperty.getExpense == "function")
+        expense += gameData.currentProperty.getExpense()
     for (misc of gameData.currentMisc) {
-        expense += misc.getExpense()
+        if (misc != null && typeof misc.getExpense == "function")
+            expense += misc.getExpense()
     }
     return expense
 }
 
 function increaseCoins() {
     gameData.coins += applySpeed(getIncome())
+}
+
+function isItemRequirementCompleted(itemName) {
+    const requirement = gameData.requirements[itemName]
+    return requirement != null && requirement.isCompleted()
 }
 
 function autoPerks() {
@@ -653,46 +664,58 @@ function autoBuy() {
     if (!autoBuyEnabled) return
 
     const income = getIncome()
-    const reserve = income * 0.1
-    let miscExpense = 0
+    if (income <= 0 || isNaN(income))
+        return
 
-    for (const key in gameData.currentMisc) {
-        miscExpense += gameData.currentMisc[key].getExpense()
+    const budget = income * 0.9
+    let usedExpense = 0
+    const nextMisc = []
+
+    for (const itemName of itemCategories["Misc"]) {
+        const misc = gameData.itemData[itemName]
+        if (misc == null || gameData.currentMisc.indexOf(misc) == -1 || !isItemRequirementCompleted(itemName))
+            continue
+
+        const expense = misc.getExpense()
+        if (expense + usedExpense <= budget) {
+            nextMisc.push(misc)
+            usedExpense += expense
+        }
     }
 
+    let bestProperty = gameData.itemData["Homeless"]
     let propertyExpense = 0
-    for (const key in gameData.itemData) {
-        const requirement = gameData.requirements[key]
-        if (requirement != null && requirement.isCompleted()) {
-            const item = gameData.itemData[key]
-            const expense = item.getExpense()
 
-            if (itemCategories['Properties'].indexOf(key) != -1) {
-                if (expense + miscExpense <= income - reserve && expense >= propertyExpense) {
-                    gameData.currentProperty = item
-                    propertyExpense = expense
-                }
-            }
+    for (const itemName of itemCategories["Properties"]) {
+        const item = gameData.itemData[itemName]
+        if (item == null || !isItemRequirementCompleted(itemName))
+            continue
+
+        const expense = item.getExpense()
+        if (expense + usedExpense <= budget && expense >= propertyExpense) {
+            bestProperty = item
+            propertyExpense = expense
         }
     }
 
-    let usedExpense = propertyExpense + miscExpense
+    if (bestProperty != null)
+        gameData.currentProperty = bestProperty
 
-    for (const key in gameData.itemData) {
-        const requirement = gameData.requirements[key]
-        if (requirement != null && requirement.isCompleted()) {
-            const item = gameData.itemData[key]
-            const expense = item.getExpense()
-            if (itemCategories['Misc'].indexOf(key) != -1) {
-                if (expense + usedExpense <= income - reserve) {
-                    if (gameData.currentMisc.indexOf(item) == -1) {
-                        gameData.currentMisc.push(item)
-                        usedExpense += expense
-                    }
-                }
-            }
+    usedExpense += propertyExpense
+
+    for (const itemName of itemCategories["Misc"]) {
+        const item = gameData.itemData[itemName]
+        if (item == null || nextMisc.indexOf(item) != -1 || !isItemRequirementCompleted(itemName))
+            continue
+
+        const expense = item.getExpense()
+        if (expense + usedExpense <= budget) {
+            nextMisc.push(item)
+            usedExpense += expense
         }
-    }   
+    }
+
+    gameData.currentMisc = nextMisc
 }
 
 function increaseDays() {
