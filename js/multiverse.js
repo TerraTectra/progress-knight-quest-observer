@@ -301,14 +301,14 @@ function getMultiverseXpGain() {
     if (!isMultiverseUnlocked())
         return 1
 
-    return getSafeMultiverseNumber(getUniverseInfo().xpMult * getMultiverseUpgradeMultiplier("stable_memory") * getUniverseSevenXpGain() * getUniverseEightXpGain() * getUniverseNineXpGain() * getUniverseTenXpGain())
+    return getSafeMultiverseNumber(getUniverseInfo().xpMult * getActiveUniverseDistortionRelief("xp") * getMultiverseUpgradeMultiplier("stable_memory") * getUniverseSevenXpGain() * getUniverseEightXpGain() * getUniverseNineXpGain() * getUniverseTenXpGain())
 }
 
 function getMultiverseIncomeGain() {
     if (!isMultiverseUnlocked())
         return 1
 
-    return getSafeMultiverseNumber(getUniverseInfo().incomeMult * getMultiverseUpgradeMultiplier("universal_labor") * getUniverseTwoIncomeGain() * getUniverseFiveIncomeGain() * getUniverseSevenIncomeGain() * getUniverseEightIncomeGain() * getUniverseNineIncomeGain())
+    return getSafeMultiverseNumber(getUniverseInfo().incomeMult * getActiveUniverseDistortionRelief("income") * getMultiverseUpgradeMultiplier("universal_labor") * getUniverseTwoIncomeGain() * getUniverseFiveIncomeGain() * getUniverseSevenIncomeGain() * getUniverseEightIncomeGain() * getUniverseNineIncomeGain())
 }
 
 function getMultiverseExpenseGain() {
@@ -316,35 +316,35 @@ function getMultiverseExpenseGain() {
         return 1
 
     const expenseReduction = getMultiverseExpenseReduction()
-    return getSafeMultiverseNumber(getUniverseInfo().expenseMult * (1 - expenseReduction) * getUniverseTwoExpenseGain() * getUniverseThreeExpenseGain() * getUniverseFiveExpenseGain() * getUniverseNineExpenseGain())
+    return getSafeMultiverseNumber(getUniverseInfo().expenseMult * getActiveUniverseDistortionRelief("expense") * (1 - expenseReduction) * getUniverseTwoExpenseGain() * getUniverseThreeExpenseGain() * getUniverseFiveExpenseGain() * getUniverseNineExpenseGain())
 }
 
 function getMultiverseLifespanGain() {
     if (!isMultiverseUnlocked())
         return 1
 
-    return getSafeMultiverseNumber(getUniverseInfo().lifespanMult * getMultiverseUpgradeMultiplier("long_echo") * getUniverseFourLifespanGain() * getUniverseSixLifespanGain() * getUniverseEightLifespanGain() * getUniverseTenLifespanGain())
+    return getSafeMultiverseNumber(getUniverseInfo().lifespanMult * getActiveUniverseDistortionRelief("lifespan") * getMultiverseUpgradeMultiplier("long_echo") * getUniverseFourLifespanGain() * getUniverseSixLifespanGain() * getUniverseEightLifespanGain() * getUniverseTenLifespanGain())
 }
 
 function getMultiverseEvilGain() {
     if (!isMultiverseUnlocked())
         return 1
 
-    return getSafeMultiverseNumber(getMultiverseUpgradeMultiplier("abyss_tithe") * getUniverseSixEvilGain() * getUniverseNineEvilGain() * getUniverseTenEvilGain())
+    return getSafeMultiverseNumber(getActiveUniverseDistortionRelief("evil") * getMultiverseUpgradeMultiplier("abyss_tithe") * getUniverseSixEvilGain() * getUniverseNineEvilGain() * getUniverseTenEvilGain())
 }
 
 function getMultiverseEssenceGain() {
     if (!isMultiverseUnlocked())
         return 1
 
-    return getSafeMultiverseNumber(getMultiverseUpgradeMultiplier("essence_prism") * getUniverseThreeEssenceGain() * getUniverseSixEssenceGain() * getUniverseNineEssenceGain() * getUniverseTenEssenceGain())
+    return getSafeMultiverseNumber(getActiveUniverseDistortionRelief("essence") * getMultiverseUpgradeMultiplier("essence_prism") * getUniverseThreeEssenceGain() * getUniverseSixEssenceGain() * getUniverseNineEssenceGain() * getUniverseTenEssenceGain())
 }
 
 function getMultiverseDarkMatterGain() {
     if (!isMultiverseUnlocked())
         return 1
 
-    return getSafeMultiverseNumber(getMultiverseUpgradeMultiplier("dark_singularity") * getUniverseNineDarkMatterGain() * getUniverseTenDarkMatterGain())
+    return getSafeMultiverseNumber(getActiveUniverseDistortionRelief("darkMatter") * getMultiverseUpgradeMultiplier("dark_singularity") * getUniverseNineDarkMatterGain() * getUniverseTenDarkMatterGain())
 }
 
 function getMultiverseCategoryPower(category, scale) {
@@ -385,6 +385,43 @@ function getMultiverseUniverseSource() {
 
 function getMultiverseBreakRewardGain() {
     return getMultiverseState().universe_break_unlocked ? 1.25 : 1
+}
+
+function getActiveUniverseDistortionRelief(type) {
+    if (!isMultiverseUnlocked())
+        return 1
+
+    if (getActiveUniverseDistortionRelief.isCalculating)
+        return 1
+
+    const id = getCurrentUniverseId()
+    if (id <= 1)
+        return 1
+
+    getActiveUniverseDistortionRelief.isCalculating = true
+    try {
+        const parameter = getUniverseParameterGain(id)
+        const progress = Math.max(0, Math.min(1.5, parameter - 1))
+        const depth = Math.max(0, id - 1)
+
+        const reliefByType = {
+            xp: 0.018,
+            income: 0.016,
+            expense: 0.014,
+            lifespan: 0.013,
+            evil: 0.012,
+            essence: 0.012,
+            darkMatter: 0.010,
+        }
+
+        const relief = (reliefByType[type] || 0) * depth * progress
+        if (type == "expense")
+            return Math.max(0.68, 1 - relief)
+
+        return getSafeMultiverseNumber(1 + relief, 1, 2.2)
+    } finally {
+        getActiveUniverseDistortionRelief.isCalculating = false
+    }
 }
 
 function getUniverseParameterName(id = getCurrentUniverseId()) {
@@ -502,12 +539,14 @@ function getTotalUniversePassiveWeight() {
 
 function getUniverseTwoBureaucraticOrderGain() {
     const royalAdministration = gameData.taskData["Royal Administration"]
+    const paperworkEvasion = gameData.taskData["Paperwork Evasion"]
     const realitySurveying = gameData.taskData["Reality Surveying"]
     const taxSeal = getMultiverseItemEffect("Tax Seal")
 
     const adminGain = royalAdministration == null ? 1 : 1 + royalAdministration.level * royalAdministration.baseData.effect + getTaskLevelPower("Royal Administration", 0.012, 1.8) - 1
+    const paperworkGain = paperworkEvasion == null ? 1 : 1 + Math.abs(paperworkEvasion.level * paperworkEvasion.baseData.effect) + getTaskLevelPower("Paperwork Evasion", 0.010, 1.55) - 1
     const surveyGain = realitySurveying == null ? 1 : 1 + realitySurveying.level * realitySurveying.baseData.effect + getTaskLevelPower("Reality Surveying", 0.009, 1.5) - 1
-    return adminGain * surveyGain * taxSeal()
+    return adminGain * paperworkGain * surveyGain * taxSeal()
 }
 
 function getUniverseTwoIncomeGain() {

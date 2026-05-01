@@ -355,15 +355,24 @@ async function runScenario(browser, name, setup) {
 
             const u2BaseParameter = getUniverseParameterGain(2)
             const u2BaseWeight = getUniversePassiveWeight(2)
+            const u2BaseIncome = getMultiverseIncomeGain()
+            const u2BaseExpense = getMultiverseExpenseGain()
             gameData.taskData["Royal Administration"].level = 160
+            gameData.taskData["Paperwork Evasion"].level = 160
             gameData.taskData["Reality Surveying"].level = 120
             const u2ImprovedParameter = getUniverseParameterGain(2)
             const u2ImprovedWeight = getUniversePassiveWeight(2)
+            const u2ImprovedIncome = getMultiverseIncomeGain()
+            const u2ImprovedExpense = getMultiverseExpenseGain()
 
             if (!(u2ImprovedParameter > u2BaseParameter))
                 failures.push("Universe II parameter does not grow from its skills")
             if (!(u2ImprovedWeight > u2BaseWeight))
                 failures.push("Universe II passive MP weight does not grow from its parameter")
+            if (!(u2ImprovedIncome > u2BaseIncome))
+                failures.push("Universe II parameter relief does not improve income")
+            if (!(u2ImprovedExpense < u2BaseExpense))
+                failures.push("Universe II parameter relief does not reduce expenses")
 
             gameData.multiverse.current_universe = 5
             gameData.multiverse.highest_universe = 5
