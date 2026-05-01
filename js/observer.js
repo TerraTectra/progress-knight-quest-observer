@@ -149,8 +149,6 @@ function getObserverState() {
         state.lifetime_points = 0
     if (state.subjects == null)
         state.subjects = []
-    if (state.command == null)
-        state.command = "balanced"
     if (state.next_subject_id == null)
         state.next_subject_id = state.subjects.length + 1
     if (state.observed_subject_id == null || isNaN(state.observed_subject_id))
@@ -1753,21 +1751,8 @@ function renderObserver() {
 
 function renderObserverCommands() {
     const element = document.getElementById("observerCommandRows")
-    if (element == null)
-        return
-
-    const state = getObserverState()
-    let html = ""
-    for (const key in observerCommandData) {
-        const data = observerCommandData[key]
-        const active = key == state.command
-        html +=
-            `<button class="w3-button button rb-observer-command ${active ? "active" : ""}" onclick="setObserverCommand('${key}')">` +
-                `<b>${data.name}</b><br><span>${data.description}</span>` +
-            `</button>`
-    }
-
-    element.innerHTML = html
+    if (element != null)
+        element.remove()
 }
 
 function renderObserverSubjects() {

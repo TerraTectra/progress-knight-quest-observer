@@ -34,6 +34,7 @@ function getMultiverseState() {
             highest_universe: 1,
             universe_breaks: 0,
             universe_break_unlocked: false,
+            universe_mastery: {},
             upgrades: {},
             observer_stub_unlocked: false,
             observer_signal_prepared: false,
@@ -43,6 +44,8 @@ function getMultiverseState() {
 
     if (gameData.multiverse.upgrades == null)
         gameData.multiverse.upgrades = {}
+    if (gameData.multiverse.universe_mastery == null || typeof gameData.multiverse.universe_mastery != "object")
+        gameData.multiverse.universe_mastery = {}
 
     for (const key in multiverseUpgradeData) {
         if (gameData.multiverse.upgrades[key] == null)
@@ -68,6 +71,13 @@ function getMultiverseState() {
     gameData.multiverse.current_universe = Math.max(1, Math.min(10, Math.floor(gameData.multiverse.current_universe)))
     gameData.multiverse.highest_universe = Math.max(1, Math.min(10, Math.floor(gameData.multiverse.highest_universe)))
     gameData.multiverse.current_universe = Math.min(gameData.multiverse.current_universe, gameData.multiverse.highest_universe)
+
+    for (let id = 1; id <= 10; id++) {
+        const key = String(id)
+        if (gameData.multiverse.universe_mastery[key] == null || isNaN(gameData.multiverse.universe_mastery[key]) || !isFinite(gameData.multiverse.universe_mastery[key]))
+            gameData.multiverse.universe_mastery[key] = 1
+        gameData.multiverse.universe_mastery[key] = getSafeMultiverseNumber(gameData.multiverse.universe_mastery[key], 1, 1e300)
+    }
 
     return gameData.multiverse
 }
@@ -198,6 +208,7 @@ function enterUniverse(id) {
     if (!canEnterUniverse(id))
         return false
 
+    rememberUniverseParameter()
     getMultiverseState().current_universe = id
     return true
 }
@@ -284,6 +295,7 @@ function breakCurrentUniverse() {
     const state = getMultiverseState()
     const nextUniverse = getUniverseInfo(state.current_universe + 1)
 
+    rememberUniverseParameter(state.current_universe)
     gameData.multiverse_points -= nextUniverse.unlockCost
     state.highest_universe += 1
     state.current_universe = state.highest_universe
@@ -497,6 +509,40 @@ function getUniverseParameterGain(id = getCurrentUniverseId()) {
     return getSafeMultiverseNumber(softcapMultiverseSource(gain))
 }
 
+function getRememberedUniverseParameter(id) {
+    const state = getMultiverseState()
+    const key = String(Math.max(1, Math.min(10, Math.floor(id))))
+    return getSafeMultiverseNumber(state.universe_mastery[key], 1, 1e300)
+}
+
+function rememberUniverseParameter(id = getCurrentUniverseId()) {
+    if (!isMultiverseUnlocked())
+        return 1
+
+    const state = getMultiverseState()
+    const safeId = Math.max(1, Math.min(10, Math.floor(id)))
+    if (safeId > state.highest_universe)
+        return 1
+
+    const key = String(safeId)
+    const current = getUniverseParameterGain(safeId)
+    const remembered = getRememberedUniverseParameter(safeId)
+    state.universe_mastery[key] = getSafeMultiverseNumber(Math.max(remembered, current), 1, 1e300)
+    return state.universe_mastery[key]
+}
+
+function getBestUniverseParameterGain(id) {
+    if (!isMultiverseUnlocked())
+        return 1
+
+    const safeId = Math.max(1, Math.min(10, Math.floor(id)))
+    const remembered = getRememberedUniverseParameter(safeId)
+    if (safeId == getCurrentUniverseId())
+        return rememberUniverseParameter(safeId)
+
+    return remembered
+}
+
 function getUniverseOnePrimeStabilityGain() {
     const voidJobs = getMultiverseVoidJobSource()
     const voidSkills = getMultiverseVoidSkillSource()
@@ -517,7 +563,7 @@ function getUniversePassiveWeight(id) {
     if (universe == null)
         return 0
 
-    const parameter = getUniverseParameterGain(id)
+    const parameter = getBestUniverseParameterGain(id)
     const breakMemory = 1 + Math.sqrt(getMultiverseState().universe_breaks) * 0.035
     const activeBonus = id == getCurrentUniverseId() ? 1.18 : 1
     const depthBonus = 1 + Math.pow(id - 1, 1.12) * 0.025
@@ -1155,6 +1201,8 @@ function increaseMultiversePoints() {
 
     if (!canSimulate() || !isMultiverseUnlocked())
         return
+
+    rememberUniverseParameter()
 
     // MP is a real-time passive layer. Do not route this through applySpeed:
     // Time Warping, admin speed, and universe game-speed effects must not multiply it.

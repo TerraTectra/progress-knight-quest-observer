@@ -27,6 +27,7 @@
         highest_universe: 1,
         universe_breaks: 0,
         universe_break_unlocked: false,
+        universe_mastery: {},
         upgrades: {
             stable_memory: 0,
             universal_labor: 0,
@@ -46,7 +47,6 @@
         points: 0,
         lifetime_points: 0,
         subjects: [],
-        command: "balanced",
         next_subject_id: 1,
         observed_subject_id: null,
         upgrades: {

@@ -743,6 +743,9 @@ async function runScenario(browser, name, setup) {
                 clearRouteProgress()
                 gameData.multiverse.current_universe = universeId
                 gameData.multiverse.highest_universe = Math.max(10, universeId)
+                gameData.multiverse.universe_mastery = {}
+                if (typeof getMultiverseState == "function")
+                    getMultiverseState()
 
                 const route = universeRoutes[universeId]
                 const baseParameter = getUniverseParameterGain(universeId)
@@ -760,6 +763,26 @@ async function runScenario(browser, name, setup) {
                 if (!(improvedMpGain > baseMpGain))
                     failures.push(`Universe ${universeId} route does not improve total passive MP gain`)
             }
+
+            clearRouteProgress()
+            gameData.multiverse.current_universe = 5
+            gameData.multiverse.highest_universe = 10
+            gameData.multiverse.universe_mastery = {}
+            if (typeof getMultiverseState == "function")
+                getMultiverseState()
+            const u5FreshWeight = getUniversePassiveWeight(5)
+            trainRoute(universeRoutes[5], 260)
+            const u5MasteredWeight = getUniversePassiveWeight(5)
+            const u5Mastery = gameData.multiverse.universe_mastery["5"]
+            clearRouteProgress()
+            gameData.multiverse.current_universe = 6
+            const u5RememberedWeight = getUniversePassiveWeight(5)
+            if (!(u5Mastery > 1))
+                failures.push("Universe V mastery memory did not record trained parameter")
+            if (!(u5MasteredWeight > u5FreshWeight))
+                failures.push("Universe V mastery did not improve active passive weight")
+            if (!(u5RememberedWeight > u5FreshWeight))
+                failures.push("Universe V passive MP weight was lost after leaving the universe")
 
             clearRouteProgress()
             gameData.multiverse.current_universe = 2
