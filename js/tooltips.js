@@ -243,6 +243,11 @@ const tooltips = {
     "Fractured Mastery": "Mastery no longer arrives in order. Collect fractured lessons to improve skill training and lifespan in Universe VIII.",
     "Broken Rung": "A rung from a ladder that never reached the same place twice. It improves Universe VIII Broken Ladder training.",
     "Ascension Map": "A map of routes that do not point upward. It improves Universe VIII MP gain, XP recovery, and lifespan recovery.",
+    "Collapse Containment": "Universe IX is quiet because most causes have already collapsed. Contain the collapse to turn instability into MP and XP recovery.",
+    "Silent Economy": "Trade in a world where market signals arrive after the crash. This softens Universe IX expenses and restores income.",
+    "Last Signal": "Hold on to the last signal before total silence. It improves Collapse control, Evil gain, and Essence gain inside Universe IX.",
+    "Collapse Gauge": "A gauge that measures how much reality is left before the next silence. It improves Universe IX Quiet Collapse training.",
+    "Quiet Beacon": "A beacon that shines only when no one can see it. It improves Universe IX MP, Evil, and Essence gain.",
 
     "Strong Hope": "Another Faint Hope buff?!",
     "Ruler of the Metaverse": "Now you are thinking with portals",

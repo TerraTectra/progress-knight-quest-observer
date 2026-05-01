@@ -293,6 +293,10 @@ const skillBaseData = {
     "Ladder Reconstruction": { name: "Ladder Reconstruction", maxXp: 4e15, heroxp: 900, effect: 0.0028, description: "U-VIII MP + All XP" },
     "Sideways Promotion": { name: "Sideways Promotion", maxXp: 1.3e16, heroxp: 915, effect: 0.003, description: "U-VIII Income + Job XP" },
     "Fractured Mastery": { name: "Fractured Mastery", maxXp: 4.5e16, heroxp: 930, effect: 0.003, description: "U-VIII Skill XP + Lifespan" },
+
+    "Collapse Containment": { name: "Collapse Containment", maxXp: 1.4e17, heroxp: 950, effect: 0.0025, description: "U-IX MP + All XP" },
+    "Silent Economy": { name: "Silent Economy", maxXp: 4.8e17, heroxp: 965, effect: -0.0025, description: "U-IX Expenses + Income" },
+    "Last Signal": { name: "Last Signal", maxXp: 1.6e18, heroxp: 980, effect: 0.0025, description: "U-IX MP + Evil + Essence" },
 }
 
 const itemBaseData = {
@@ -367,6 +371,8 @@ const itemBaseData = {
     "Paradox Anchor": { name: "Paradox Anchor", expense: 1.5e45, effect: 1.11, description: "U-VII MP + XP + Income", heromult: 27, heroeffect: 1e8 },
     "Broken Rung": { name: "Broken Rung", expense: 9e47, effect: 1.45, description: "Universe VIII Ladder XP", heromult: 28, heroeffect: 1e8 },
     "Ascension Map": { name: "Ascension Map", expense: 7e49, effect: 1.10, description: "U-VIII MP + XP + Lifespan", heromult: 29, heroeffect: 1e8 },
+    "Collapse Gauge": { name: "Collapse Gauge", expense: 5e52, effect: 1.42, description: "Universe IX Collapse XP", heromult: 30, heroeffect: 1e8 },
+    "Quiet Beacon": { name: "Quiet Beacon", expense: 4e54, effect: 1.10, description: "U-IX MP + Evil + Essence", heromult: 31, heroeffect: 1e8 },
 }
 
 const requirementsBaseData = {
@@ -554,6 +560,10 @@ const requirementsBaseData = {
     "Ladder Reconstruction": new MultiverseUniverseRequirement([getQuerySelector("Ladder Reconstruction")], [{ universe: 8 }]),
     "Sideways Promotion": new MultiverseUniverseRequirement([getQuerySelector("Sideways Promotion")], [{ universe: 8 }, { task: "Ladder Reconstruction", requirement: 20 }]),
     "Fractured Mastery": new MultiverseUniverseRequirement([getQuerySelector("Fractured Mastery")], [{ universe: 8 }, { task: "Sideways Promotion", requirement: 35 }]),
+    "Universe IX Quiet Collapse": new MultiverseUniverseRequirement([removeSpaces(".Universe IX Quiet Collapse")], [{ universe: 9 }]),
+    "Collapse Containment": new MultiverseUniverseRequirement([getQuerySelector("Collapse Containment")], [{ universe: 9 }]),
+    "Silent Economy": new MultiverseUniverseRequirement([getQuerySelector("Silent Economy")], [{ universe: 9 }, { task: "Collapse Containment", requirement: 20 }]),
+    "Last Signal": new MultiverseUniverseRequirement([getQuerySelector("Last Signal")], [{ universe: 9 }, { task: "Silent Economy", requirement: 35 }]),
 
     // Properties
     "Homeless": new CoinRequirement([getQuerySelector("Homeless")], [{ requirement: 0 }]),
@@ -625,6 +635,8 @@ const requirementsBaseData = {
     "Paradox Anchor": new MultiverseUniverseRequirement([getQuerySelector("Paradox Anchor")], [{ universe: 7 }, { task: "Paradox Discipline", requirement: 25 }, { coins: itemBaseData["Paradox Anchor"].expense * 100 }]),
     "Broken Rung": new MultiverseUniverseRequirement([getQuerySelector("Broken Rung")], [{ universe: 8 }, { task: "Ladder Reconstruction", requirement: 10 }, { coins: itemBaseData["Broken Rung"].expense * 100 }]),
     "Ascension Map": new MultiverseUniverseRequirement([getQuerySelector("Ascension Map")], [{ universe: 8 }, { task: "Sideways Promotion", requirement: 25 }, { coins: itemBaseData["Ascension Map"].expense * 100 }]),
+    "Collapse Gauge": new MultiverseUniverseRequirement([getQuerySelector("Collapse Gauge")], [{ universe: 9 }, { task: "Collapse Containment", requirement: 10 }, { coins: itemBaseData["Collapse Gauge"].expense * 100 }]),
+    "Quiet Beacon": new MultiverseUniverseRequirement([getQuerySelector("Quiet Beacon")], [{ universe: 9 }, { task: "Silent Economy", requirement: 25 }, { coins: itemBaseData["Quiet Beacon"].expense * 100 }]),
     
 
     // Milestones
@@ -701,12 +713,13 @@ const skillCategories = {
     "Universe V Commerce": ["Greed Accounting", "Debt Transmutation", "Star Market"],
     "Universe VI Void Studies": ["Dimming Resonance", "Abyssal Recycling", "Null Continuity"],
     "Universe VII Causality": ["Causal Threading", "Paradox Discipline", "Retroactive Training"],
-    "Universe VIII Broken Ladder": ["Ladder Reconstruction", "Sideways Promotion", "Fractured Mastery"]
+    "Universe VIII Broken Ladder": ["Ladder Reconstruction", "Sideways Promotion", "Fractured Mastery"],
+    "Universe IX Quiet Collapse": ["Collapse Containment", "Silent Economy", "Last Signal"]
 }
 
 const itemCategories = {
     "Properties": ["Homeless", "Tent", "Wooden Hut", "Cottage", "House", "Large House", "Small Palace", "Grand Palace", "Town Ruler", "City Ruler", "Nation Ruler", "Pocket Dimension", "Void Realm", "Void Universe", "Astral Realm", "Galactic Throne", "Spaceship", "Planet", "Ringworld", "Stellar Neighborhood", "Galaxy", "Supercluster", "Galaxy Filament", "Observable Universe", "Multiverse", "Quantum World", "Boötes Void"],
-    "Misc": ["Book", "Dumbbells", "Personal Squire", "Steel Longsword", "Butler", "Sapphire Charm", "Study Desk", "Library", "Observatory", "Mind's Eye", "Void Necklace", "Void Armor", "Void Blade", "Void Orb", "Void Dust", "Celestial Robe", "Universe Fragment", "Multiverse Fragment", "Stairway to heaven", "Highway to hell", "Tesseract", "Desintegration", "Custom Galaxy", "Hypersphere", "Royal Ledger", "Tax Seal", "Taxed Grimoire", "Arcane Abacus", "Broken Hourglass", "Chronal Compass", "Star Ledger", "Debt Engine", "Dimmed Compass", "Null Contract", "Causality Needle", "Paradox Anchor", "Broken Rung", "Ascension Map"]
+    "Misc": ["Book", "Dumbbells", "Personal Squire", "Steel Longsword", "Butler", "Sapphire Charm", "Study Desk", "Library", "Observatory", "Mind's Eye", "Void Necklace", "Void Armor", "Void Blade", "Void Orb", "Void Dust", "Celestial Robe", "Universe Fragment", "Multiverse Fragment", "Stairway to heaven", "Highway to hell", "Tesseract", "Desintegration", "Custom Galaxy", "Hypersphere", "Royal Ledger", "Tax Seal", "Taxed Grimoire", "Arcane Abacus", "Broken Hourglass", "Chronal Compass", "Star Ledger", "Debt Engine", "Dimmed Compass", "Null Contract", "Causality Needle", "Paradox Anchor", "Broken Rung", "Ascension Map", "Collapse Gauge", "Quiet Beacon"]
 }
 
 const headerRowColors = {
@@ -728,6 +741,7 @@ const headerRowColors = {
     "Universe VI Void Studies": "#762B91",
     "Universe VII Causality": "#b14cff",
     "Universe VIII Broken Ladder": "#ff7a1a",
+    "Universe IX Quiet Collapse": "#4f5d75",
     "Void Manipulation": "#762B91",
     "Celestial Powers": "#D5C010",
     "Properties_Auto": "#21cc5e",
@@ -760,6 +774,7 @@ const headerRowTextColors = {
     "Universe VI Void Studies": "white",
     "Universe VII Causality": "white",
     "Universe VIII Broken Ladder": "purple",
+    "Universe IX Quiet Collapse": "white",
     "Void Manipulation": "white",
     "Celestial Powers": "purple",
     "Properties_Auto": "purple",

@@ -111,6 +111,9 @@ function addMultipliers() {
         } else if (skillCategories["Universe VIII Broken Ladder"].includes(task.name)) {
             task.xpMultipliers.push(getBindedItemEffect("Broken Rung"))
             task.xpMultipliers.push(getUniverseEightSkillsXpGain)
+        } else if (skillCategories["Universe IX Quiet Collapse"].includes(task.name)) {
+            task.xpMultipliers.push(getBindedItemEffect("Collapse Gauge"))
+            task.xpMultipliers.push(getUniverseNineSkillsXpGain)
         }
     }
 
