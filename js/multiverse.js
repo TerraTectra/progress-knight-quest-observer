@@ -169,7 +169,7 @@ function getMultiverseLifespanGain() {
     if (!isMultiverseUnlocked())
         return 1
 
-    return getUniverseInfo().lifespanMult * (1 + getMultiverseUpgradeLevel("long_echo") * 0.05)
+    return getUniverseInfo().lifespanMult * (1 + getMultiverseUpgradeLevel("long_echo") * 0.05) * getUniverseFourLifespanGain()
 }
 
 function getMultiverseEvilGain() {
@@ -233,6 +233,9 @@ function getUniverseParameterName(id = getCurrentUniverseId()) {
     if (id == 3)
         return "Arcane compliance"
 
+    if (id == 4)
+        return "Temporal anchor"
+
     if (id == 1)
         return "Prime stability"
 
@@ -248,6 +251,9 @@ function getUniverseParameterGain(id = getCurrentUniverseId()) {
 
     if (id == 3)
         return getUniverseThreeArcaneComplianceGain()
+
+    if (id == 4)
+        return getUniverseFourTemporalAnchorGain()
 
     return 1
 }
@@ -332,6 +338,42 @@ function getUniverseThreeSkillsXpGain() {
 
     const spellAuditing = gameData.taskData["Spell Auditing"]
     return spellAuditing == null ? 1 : 1 + spellAuditing.level * 0.008
+}
+
+function getUniverseFourTemporalAnchorGain() {
+    const temporalAnchoring = gameData.taskData["Temporal Anchoring"]
+    const entropyCalendar = gameData.taskData["Entropy Calendar"]
+    const chronalCompass = getBindedItemEffect("Chronal Compass")
+
+    const anchorGain = temporalAnchoring == null ? 1 : 1 + temporalAnchoring.level * temporalAnchoring.baseData.effect
+    const calendarGain = entropyCalendar == null ? 1 : 1 + entropyCalendar.level * entropyCalendar.baseData.effect
+    return anchorGain * calendarGain * chronalCompass()
+}
+
+function getUniverseFourLifespanGain() {
+    if (!isMultiverseUnlocked() || getCurrentUniverseId() != 4)
+        return 1
+
+    const temporalAnchoring = gameData.taskData["Temporal Anchoring"]
+    return temporalAnchoring == null ? 1 : 1 + temporalAnchoring.level * 0.004
+}
+
+function getUniverseFourGameSpeedGain() {
+    if (!isMultiverseUnlocked() || getCurrentUniverseId() != 4)
+        return 1
+
+    const borrowedSeconds = gameData.taskData["Borrowed Seconds"]
+    const chronalCompass = getBindedItemEffect("Chronal Compass")
+    const secondsGain = borrowedSeconds == null ? 1 : 1 + borrowedSeconds.level * borrowedSeconds.baseData.effect
+    return secondsGain * chronalCompass()
+}
+
+function getUniverseFourSkillsXpGain() {
+    if (!isMultiverseUnlocked())
+        return 1
+
+    const entropyCalendar = gameData.taskData["Entropy Calendar"]
+    return entropyCalendar == null ? 1 : 1 + entropyCalendar.level * 0.008
 }
 
 function getMultiverseVoidResonance() {

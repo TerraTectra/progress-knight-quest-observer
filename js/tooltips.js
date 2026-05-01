@@ -218,6 +218,11 @@ const tooltips = {
     "Spell Auditing": "Audit unstable rituals before they are cast. This improves Arcane compliance and Essence flow in Universe III.",
     "Taxed Grimoire": "A grimoire stamped by the auditors of Taxed Arcana. It improves Universe III Arts training.",
     "Arcane Abacus": "A counting tool for impossible mana debts. It improves Universe III MP gain and magic progress.",
+    "Temporal Anchoring": "Thin Time tears years out of each run. Anchor the timeline to turn lifespan pressure into Multiverse Point gain.",
+    "Borrowed Seconds": "Borrow seconds from failed timelines. This restores some speed inside Universe IV, but only while you remain there.",
+    "Entropy Calendar": "A calendar that records days before they happen. It improves Temporal anchor strength and Universe IV training.",
+    "Broken Hourglass": "The sand falls in both directions. It improves Universe IV Chronology training.",
+    "Chronal Compass": "A compass that points toward the longest timeline. It improves Universe IV MP gain and speed recovery.",
 
     "Strong Hope": "Another Faint Hope buff?!",
     "Ruler of the Metaverse": "Now you are thinking with portals",

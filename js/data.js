@@ -273,6 +273,10 @@ const skillBaseData = {
     "Arcane Taxation": { name: "Arcane Taxation", maxXp: 4e8, heroxp: 650, effect: 0.005, description: "U-III MP + Magic XP" },
     "Mana Tariff": { name: "Mana Tariff", maxXp: 1.2e9, heroxp: 665, effect: -0.003, description: "U-III Expenses" },
     "Spell Auditing": { name: "Spell Auditing", maxXp: 4e9, heroxp: 680, effect: 0.004, description: "U-III MP + Essence" },
+
+    "Temporal Anchoring": { name: "Temporal Anchoring", maxXp: 6e9, heroxp: 700, effect: 0.004, description: "U-IV MP + Lifespan" },
+    "Borrowed Seconds": { name: "Borrowed Seconds", maxXp: 1.8e10, heroxp: 715, effect: 0.003, description: "U-IV Gamespeed" },
+    "Entropy Calendar": { name: "Entropy Calendar", maxXp: 7e10, heroxp: 730, effect: 0.004, description: "U-IV MP + Chronology XP" },
 }
 
 const itemBaseData = {
@@ -337,6 +341,8 @@ const itemBaseData = {
     "Tax Seal": { name: "Tax Seal", expense: 2e22, effect: 1.18, description: "U-II MP Gain", heromult: 17, heroeffect: 1e8 },
     "Taxed Grimoire": { name: "Taxed Grimoire", expense: 9e24, effect: 1.7, description: "Universe III Arts XP", heromult: 18, heroeffect: 1e8 },
     "Arcane Abacus": { name: "Arcane Abacus", expense: 4e26, effect: 1.16, description: "U-III MP + Magic XP", heromult: 19, heroeffect: 1e8 },
+    "Broken Hourglass": { name: "Broken Hourglass", expense: 2e29, effect: 1.65, description: "Universe IV Chronology XP", heromult: 20, heroeffect: 1e8 },
+    "Chronal Compass": { name: "Chronal Compass", expense: 1.5e31, effect: 1.14, description: "U-IV MP + Gamespeed", heromult: 21, heroeffect: 1e8 },
 }
 
 const requirementsBaseData = {
@@ -504,6 +510,10 @@ const requirementsBaseData = {
     "Arcane Taxation": new MultiverseUniverseRequirement([getQuerySelector("Arcane Taxation")], [{ universe: 3 }]),
     "Mana Tariff": new MultiverseUniverseRequirement([getQuerySelector("Mana Tariff")], [{ universe: 3 }, { task: "Arcane Taxation", requirement: 20 }]),
     "Spell Auditing": new MultiverseUniverseRequirement([getQuerySelector("Spell Auditing")], [{ universe: 3 }, { task: "Mana Tariff", requirement: 35 }]),
+    "Universe IV Chronology": new MultiverseUniverseRequirement([removeSpaces(".Universe IV Chronology")], [{ universe: 4 }]),
+    "Temporal Anchoring": new MultiverseUniverseRequirement([getQuerySelector("Temporal Anchoring")], [{ universe: 4 }]),
+    "Borrowed Seconds": new MultiverseUniverseRequirement([getQuerySelector("Borrowed Seconds")], [{ universe: 4 }, { task: "Temporal Anchoring", requirement: 20 }]),
+    "Entropy Calendar": new MultiverseUniverseRequirement([getQuerySelector("Entropy Calendar")], [{ universe: 4 }, { task: "Borrowed Seconds", requirement: 35 }]),
 
     // Properties
     "Homeless": new CoinRequirement([getQuerySelector("Homeless")], [{ requirement: 0 }]),
@@ -565,6 +575,8 @@ const requirementsBaseData = {
     "Tax Seal": new MultiverseUniverseRequirement([getQuerySelector("Tax Seal")], [{ universe: 2 }, { task: "Paperwork Evasion", requirement: 25 }, { coins: itemBaseData["Tax Seal"].expense * 100 }]),
     "Taxed Grimoire": new MultiverseUniverseRequirement([getQuerySelector("Taxed Grimoire")], [{ universe: 3 }, { task: "Arcane Taxation", requirement: 10 }, { coins: itemBaseData["Taxed Grimoire"].expense * 100 }]),
     "Arcane Abacus": new MultiverseUniverseRequirement([getQuerySelector("Arcane Abacus")], [{ universe: 3 }, { task: "Mana Tariff", requirement: 25 }, { coins: itemBaseData["Arcane Abacus"].expense * 100 }]),
+    "Broken Hourglass": new MultiverseUniverseRequirement([getQuerySelector("Broken Hourglass")], [{ universe: 4 }, { task: "Temporal Anchoring", requirement: 10 }, { coins: itemBaseData["Broken Hourglass"].expense * 100 }]),
+    "Chronal Compass": new MultiverseUniverseRequirement([getQuerySelector("Chronal Compass")], [{ universe: 4 }, { task: "Borrowed Seconds", requirement: 25 }, { coins: itemBaseData["Chronal Compass"].expense * 100 }]),
     
 
     // Milestones
@@ -636,12 +648,13 @@ const skillCategories = {
     "Almightiness": ["Yin Yang", "Parallel Universe", "Higher Dimensions", "Epiphany"],
     "Darkness": ["Dark Prince", "Dark Ruler", "Immortal Ruler", "Dark Magician", "Universal Ruler", "Blinded By Darkness"],
     "Multiverse Skills": ["Royal Administration", "Paperwork Evasion", "Reality Surveying"],
-    "Universe III Arts": ["Arcane Taxation", "Mana Tariff", "Spell Auditing"]
+    "Universe III Arts": ["Arcane Taxation", "Mana Tariff", "Spell Auditing"],
+    "Universe IV Chronology": ["Temporal Anchoring", "Borrowed Seconds", "Entropy Calendar"]
 }
 
 const itemCategories = {
     "Properties": ["Homeless", "Tent", "Wooden Hut", "Cottage", "House", "Large House", "Small Palace", "Grand Palace", "Town Ruler", "City Ruler", "Nation Ruler", "Pocket Dimension", "Void Realm", "Void Universe", "Astral Realm", "Galactic Throne", "Spaceship", "Planet", "Ringworld", "Stellar Neighborhood", "Galaxy", "Supercluster", "Galaxy Filament", "Observable Universe", "Multiverse", "Quantum World", "Boötes Void"],
-    "Misc": ["Book", "Dumbbells", "Personal Squire", "Steel Longsword", "Butler", "Sapphire Charm", "Study Desk", "Library", "Observatory", "Mind's Eye", "Void Necklace", "Void Armor", "Void Blade", "Void Orb", "Void Dust", "Celestial Robe", "Universe Fragment", "Multiverse Fragment", "Stairway to heaven", "Highway to hell", "Tesseract", "Desintegration", "Custom Galaxy", "Hypersphere", "Royal Ledger", "Tax Seal", "Taxed Grimoire", "Arcane Abacus"]
+    "Misc": ["Book", "Dumbbells", "Personal Squire", "Steel Longsword", "Butler", "Sapphire Charm", "Study Desk", "Library", "Observatory", "Mind's Eye", "Void Necklace", "Void Armor", "Void Blade", "Void Orb", "Void Dust", "Celestial Robe", "Universe Fragment", "Multiverse Fragment", "Stairway to heaven", "Highway to hell", "Tesseract", "Desintegration", "Custom Galaxy", "Hypersphere", "Royal Ledger", "Tax Seal", "Taxed Grimoire", "Arcane Abacus", "Broken Hourglass", "Chronal Compass"]
 }
 
 const headerRowColors = {
@@ -658,6 +671,7 @@ const headerRowColors = {
     "Darkness": "#8c6a0b",
     "Multiverse Skills": "#168aa5",
     "Universe III Arts": "#C71585",
+    "Universe IV Chronology": "#5a7dff",
     "Void Manipulation": "#762B91",
     "Celestial Powers": "#D5C010",
     "Properties_Auto": "#21cc5e",
@@ -685,6 +699,7 @@ const headerRowTextColors = {
     "Darkness": "gold",
     "Multiverse Skills": "white",
     "Universe III Arts": "white",
+    "Universe IV Chronology": "white",
     "Void Manipulation": "white",
     "Celestial Powers": "purple",
     "Properties_Auto": "purple",
