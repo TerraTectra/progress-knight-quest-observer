@@ -51,6 +51,7 @@
         upgrades: {
             clear_instructions: 0,
             shared_memory: 0,
+            route_drills: 0,
             error_filter: 0,
             talent_shaping: 0,
             universe_briefing: 0,

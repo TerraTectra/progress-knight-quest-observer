@@ -17,6 +17,7 @@ const observerCommandData = {
 const observerUpgradeData = {
     clear_instructions: { name: "Clear Instructions", baseCost: 12, costMult: 2.25, description: "+10% subject speed per level." },
     shared_memory: { name: "Shared Memory", baseCost: 18, costMult: 2.35, description: "+12% Observer Point gain per level." },
+    route_drills: { name: "Route Drills", baseCost: 22, costMult: 2.35, description: "+14% AI XP gain per level." },
     error_filter: { name: "Error Filter", baseCost: 25, costMult: 2.45, description: "-8% mistake chance per level, capped at -70%." },
     talent_shaping: { name: "Talent Shaping", baseCost: 45, costMult: 2.65, description: "Improves rank odds for new subjects." },
     universe_briefing: { name: "Universe Briefing", baseCost: 70, costMult: 2.8, description: "Subjects handle later universes faster." },
@@ -74,6 +75,13 @@ function getObserverState() {
     for (const subject of state.subjects) {
         normalizeObserverSubject(subject, state)
     }
+
+    let nextId = 1
+    for (const subject of state.subjects) {
+        if (subject.id != null && !isNaN(subject.id))
+            nextId = Math.max(nextId, Math.floor(subject.id) + 1)
+    }
+    state.next_subject_id = Math.max(state.next_subject_id, nextId)
 
     return state
 }
@@ -172,7 +180,7 @@ function enterObserverLayer() {
 function grantObserverEntryLegacy(multiverse) {
     const state = getObserverState()
     const signal = typeof getObserverSignalStrength === "function" ? getObserverSignalStrength() : 0
-    const bonusPoints = Math.max(10, Math.sqrt(Math.max(1, signal)) * 2.5)
+    const bonusPoints = Math.min(140, Math.max(10, Math.sqrt(Math.max(1, signal)) * 1.8))
 
     state.points += bonusPoints
     state.lifetime_points += bonusPoints
@@ -212,7 +220,7 @@ function getObserverSubjectCost() {
     if (state.subjects.length == 0)
         return 0
 
-    return 35 * Math.pow(1.78, state.subjects.length - 1)
+    return 32 * Math.pow(1.82, state.subjects.length - 1)
 }
 
 function buyObserverSubject() {
@@ -315,7 +323,8 @@ function getObserverSpeedMultiplier(subject) {
     const instructions = 1 + getObserverUpgradeLevel("clear_instructions") * 0.1
     const briefing = 1 + Math.max(0, stage.universe - 1) * getObserverUpgradeLevel("universe_briefing") * 0.03
     const cleanBonus = getObserverCleanSpeedBonus(subject)
-    return getSafeObserverNumber(rank.speed * command.speed * instructions * briefing * cleanBonus * getObserverAiLevelSpeed(subject) / stage.difficulty, 0)
+    const repeatClearDrag = 1 + Math.sqrt(subject.completed_universe_x) * 0.12
+    return getSafeObserverNumber(rank.speed * command.speed * instructions * briefing * cleanBonus * getObserverAiLevelSpeed(subject) / (stage.difficulty * repeatClearDrag), 0)
 }
 
 function getObserverCleanSpeedBonus(subject) {
@@ -331,10 +340,10 @@ function getObserverSubjectOpGain(subject) {
     const command = getObserverCommand()
     const memory = 1 + getObserverUpgradeLevel("shared_memory") * 0.12
     const stage = getObserverSubjectStage(subject)
-    const universeValue = 0.035 * stage.universe + 0.018 * subject.stage_index
-    const stageValue = 0.035 + universeValue * stage.opWeight
+    const universeValue = 0.027 * stage.universe + 0.013 * subject.stage_index
+    const stageValue = 0.03 + universeValue * stage.opWeight
     const cleanBonus = 1 + Math.min(0.85, Math.log10(subject.clean_time + 10) * 0.11)
-    const clearBonus = 1 + subject.completed_universe_x * 0.32
+    const clearBonus = 1 + Math.log2(subject.completed_universe_x + 1) * 0.35
     return getSafeObserverNumber(stageValue * rank.op * command.op * memory * cleanBonus * clearBonus * getObserverAiLevelOp(subject), 0)
 }
 
@@ -360,7 +369,8 @@ function getObserverAiXpGain(subject) {
     const command = getObserverCommand()
     const stage = getObserverSubjectStage(subject)
     const briefing = 1 + getObserverUpgradeLevel("universe_briefing") * 0.04 * Math.max(0, stage.universe - 1)
-    return getSafeObserverNumber((0.12 + stage.universe * 0.03 + subject.stage_index * 0.01) * rank.xp * command.xp * getObserverCleanXpBonus(subject) * briefing, 0)
+    const drills = 1 + getObserverUpgradeLevel("route_drills") * 0.14
+    return getSafeObserverNumber((0.12 + stage.universe * 0.03 + subject.stage_index * 0.01) * rank.xp * command.xp * getObserverCleanXpBonus(subject) * briefing * drills, 0)
 }
 
 function updateObserver() {
@@ -515,7 +525,7 @@ function renderObserver() {
     document.getElementById("observerPointsGainDisplay").textContent = format(getObserverPointsGain(), 3)
     document.getElementById("observerSubjectCountDisplay").textContent = formatWhole(state.subjects.length)
     document.getElementById("observerBestRunDisplay").textContent = "U-" + getObserverBestUniverse()
-    document.getElementById("observerGlobalBoostDisplay").textContent = "x" + format((1 + getObserverUpgradeLevel("clear_instructions") * 0.1) * (1 + getObserverUpgradeLevel("shared_memory") * 0.12), 2)
+    document.getElementById("observerGlobalBoostDisplay").textContent = "x" + format((1 + getObserverUpgradeLevel("clear_instructions") * 0.1) * (1 + getObserverUpgradeLevel("shared_memory") * 0.12) * (1 + getObserverUpgradeLevel("route_drills") * 0.14), 2)
 
     const subjectCost = getObserverSubjectCost()
     const subjectButton = document.getElementById("buyObserverSubjectButton")

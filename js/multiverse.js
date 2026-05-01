@@ -896,7 +896,7 @@ function getObserverSignalStrength() {
 }
 
 function getObserverSignalRequirement() {
-    return 280
+    return 420
 }
 
 function getObserverSignalProgress() {
