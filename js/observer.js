@@ -44,6 +44,37 @@ const observerSubjectStages = [
     { id: "u10", name: "Universe X", job: "Threshold witness", skill: "Witness Preparation", universe: 10, threshold: 12300, opWeight: 13, difficulty: 4.65 },
 ]
 
+const observerBotRankData = {
+    trash: { choice: 0.42, thrift: 0.45, rebirth: 0.38, purchase: 0.45, wrongRoute: 0.34, debtLoss: 0.42 },
+    common: { choice: 0.6, thrift: 0.62, rebirth: 0.58, purchase: 0.6, wrongRoute: 0.18, debtLoss: 0.22 },
+    skilled: { choice: 0.78, thrift: 0.78, rebirth: 0.76, purchase: 0.78, wrongRoute: 0.1, debtLoss: 0.12 },
+    rare: { choice: 0.9, thrift: 0.9, rebirth: 0.9, purchase: 0.9, wrongRoute: 0.055, debtLoss: 0.075 },
+    epic: { choice: 1.04, thrift: 1.02, rebirth: 1.05, purchase: 1.05, wrongRoute: 0.028, debtLoss: 0.04 },
+    legendary: { choice: 1.22, thrift: 1.18, rebirth: 1.25, purchase: 1.22, wrongRoute: 0.01, debtLoss: 0.018 },
+}
+
+const observerBotProperties = [
+    { name: "Homeless", stage: 0, cost: 0, reserve: 0, quality: 0 },
+    { name: "Tent", stage: 0, cost: 120, reserve: 0.06, quality: 0.04 },
+    { name: "Wooden Hut", stage: 1, cost: 900, reserve: 0.1, quality: 0.08 },
+    { name: "Cottage", stage: 2, cost: 4200, reserve: 0.14, quality: 0.12 },
+    { name: "House", stage: 3, cost: 18000, reserve: 0.18, quality: 0.16 },
+    { name: "Pocket Dimension", stage: 5, cost: 160000, reserve: 0.22, quality: 0.22 },
+    { name: "Observable Universe", stage: 10, cost: 1800000, reserve: 0.28, quality: 0.32 },
+]
+
+const observerBotItems = [
+    { name: "Cheap meal", stage: 0, cost: 55, quality: 0.025 },
+    { name: "Book", stage: 0, cost: 140, quality: 0.04 },
+    { name: "Dumbbells", stage: 1, cost: 600, quality: 0.045 },
+    { name: "Study Desk", stage: 2, cost: 2100, quality: 0.06 },
+    { name: "Sapphire Charm", stage: 3, cost: 12500, quality: 0.075 },
+    { name: "Void Necklace", stage: 4, cost: 65000, quality: 0.095 },
+    { name: "Universe Fragment", stage: 5, cost: 190000, quality: 0.12 },
+    { name: "Chronal Compass", stage: 7, cost: 780000, quality: 0.15 },
+    { name: "Observer Lens", stage: 13, cost: 3600000, quality: 0.2 },
+]
+
 function getSafeObserverNumber(value, fallback = 0, max = 1e308) {
     if (value == null || isNaN(value) || !isFinite(value))
         return fallback
@@ -127,6 +158,28 @@ function normalizeObserverSubject(subject, state = null) {
         subject.bot_mp = 0
     if (subject.bot_rebirths == null || isNaN(subject.bot_rebirths))
         subject.bot_rebirths = 0
+    if (subject.bot_job_level == null || isNaN(subject.bot_job_level))
+        subject.bot_job_level = 1
+    if (subject.bot_skill_level == null || isNaN(subject.bot_skill_level))
+        subject.bot_skill_level = 1
+    if (subject.bot_job_xp == null || isNaN(subject.bot_job_xp))
+        subject.bot_job_xp = 0
+    if (subject.bot_skill_xp == null || isNaN(subject.bot_skill_xp))
+        subject.bot_skill_xp = 0
+    if (subject.bot_property_index == null || isNaN(subject.bot_property_index))
+        subject.bot_property_index = 0
+    if (subject.bot_items == null || !Array.isArray(subject.bot_items))
+        subject.bot_items = []
+    if (subject.bot_focus_job == null)
+        subject.bot_focus_job = getObserverSubjectStage(subject).job
+    if (subject.bot_focus_skill == null)
+        subject.bot_focus_skill = getObserverSubjectStage(subject).skill
+    if (subject.bot_next_decision == null || isNaN(subject.bot_next_decision))
+        subject.bot_next_decision = 0
+    if (subject.bot_next_purchase == null || isNaN(subject.bot_next_purchase))
+        subject.bot_next_purchase = 0
+    if (subject.bot_route_quality == null || isNaN(subject.bot_route_quality))
+        subject.bot_route_quality = 1
     if (subject.bot_log == null || !Array.isArray(subject.bot_log))
         subject.bot_log = ["Started a fresh Progress Knight run."]
     if (subject.last_action == null)
@@ -134,6 +187,9 @@ function normalizeObserverSubject(subject, state = null) {
 
     subject.stage_index = Math.max(0, Math.min(observerSubjectStages.length - 1, Math.floor(subject.stage_index)))
     subject.progress = Math.max(0, subject.progress)
+    subject.bot_property_index = Math.max(0, Math.min(observerBotProperties.length - 1, Math.floor(subject.bot_property_index)))
+    subject.bot_job_level = Math.max(1, Math.floor(subject.bot_job_level))
+    subject.bot_skill_level = Math.max(1, Math.floor(subject.bot_skill_level))
 }
 
 function hasObserverFinalGate() {
@@ -307,6 +363,17 @@ function createObserverSubject(freeSubject) {
         bot_evil: 0,
         bot_mp: 0,
         bot_rebirths: 0,
+        bot_job_level: 1,
+        bot_skill_level: 1,
+        bot_job_xp: 0,
+        bot_skill_xp: 0,
+        bot_property_index: 0,
+        bot_items: [],
+        bot_focus_job: "Beggar",
+        bot_focus_skill: "Concentration",
+        bot_next_decision: 0,
+        bot_next_purchase: 0,
+        bot_route_quality: 1,
         bot_log: ["Started a fresh Progress Knight run."],
         last_action: "Started a fresh Progress Knight run.",
     }
@@ -413,7 +480,182 @@ function getObserverBotSkillLevel(subject) {
     const previous = getObserverPreviousThreshold(subject.stage_index)
     const stageSpan = Math.max(1, stage.threshold - previous)
     const localProgress = Math.max(0, subject.progress - previous) / stageSpan
-    return Math.max(1, Math.floor(subject.stage_index * 11 + localProgress * 35 + subject.ai_level * 0.8))
+    return Math.max(1, Math.max(
+        Math.floor(subject.stage_index * 11 + localProgress * 35 + subject.ai_level * 0.8),
+        subject.bot_skill_level || 1,
+    ))
+}
+
+function getObserverBotJobLevel(subject) {
+    const stage = getObserverSubjectStage(subject)
+    const previous = getObserverPreviousThreshold(subject.stage_index)
+    const stageSpan = Math.max(1, stage.threshold - previous)
+    const localProgress = Math.max(0, subject.progress - previous) / stageSpan
+    return Math.max(1, Math.max(
+        Math.floor(subject.stage_index * 10 + localProgress * 32 + subject.ai_level * 0.7),
+        subject.bot_job_level || 1,
+    ))
+}
+
+function getObserverBotRank(subject) {
+    return observerBotRankData[subject.rank] || observerBotRankData.common
+}
+
+function getObserverBotProperty(subject) {
+    return observerBotProperties[Math.max(0, Math.min(observerBotProperties.length - 1, subject.bot_property_index || 0))]
+}
+
+function getObserverBotTargetLevel(subject) {
+    return Math.max(5, subject.stage_index * 9 + getObserverSubjectStage(subject).universe * 8 + 14)
+}
+
+function getObserverBotXpToNext(level, stageIndex) {
+    return 16 + Math.pow(level + 2, 1.34) * (1 + stageIndex * 0.08)
+}
+
+function getObserverBotItemQuality(subject) {
+    if (subject.bot_items == null)
+        return 0
+
+    let quality = 0
+    for (const itemName of subject.bot_items) {
+        for (const item of observerBotItems) {
+            if (item.name == itemName) {
+                quality += item.quality
+                break
+            }
+        }
+    }
+    return quality
+}
+
+function getObserverSubjectRouteQuality(subject) {
+    const target = getObserverBotTargetLevel(subject)
+    const jobFit = Math.min(1.25, (subject.bot_job_level || 1) / target)
+    const skillFit = Math.min(1.25, (subject.bot_skill_level || 1) / target)
+    const property = getObserverBotProperty(subject)
+    const itemQuality = getObserverBotItemQuality(subject)
+    const mistakePenalty = Math.max(0.72, 1 - Math.min(0.28, subject.mistakes * 0.0035))
+    const quality = (0.56 + jobFit * 0.19 + skillFit * 0.22 + property.quality + itemQuality) * mistakePenalty
+    subject.bot_route_quality = getSafeObserverNumber(Math.max(0.52, Math.min(1.85, quality)), 1)
+    return subject.bot_route_quality
+}
+
+function getObserverBotWrongRouteName(subject, type) {
+    const index = Math.max(0, subject.stage_index - 1)
+    const fallback = getObserverSubjectStage(subject)
+    const stage = Math.random() < 0.5 ? observerSubjectStages[index] : fallback
+    return type == "job" ? stage.job : stage.skill
+}
+
+function updateObserverSubjectDecision(subject, dt) {
+    subject.bot_next_decision -= dt
+    if (subject.bot_next_decision > 0)
+        return
+
+    const stage = getObserverSubjectStage(subject)
+    const rank = getObserverBotRank(subject)
+    const aiBonus = Math.min(0.28, Math.log2(subject.ai_level + 1) * 0.035)
+    const rightChoiceChance = Math.min(0.98, rank.choice + aiBonus)
+    const oldJob = subject.bot_focus_job
+    const oldSkill = subject.bot_focus_skill
+
+    if (Math.random() < rank.wrongRoute * Math.max(0.35, 1 - aiBonus)) {
+        subject.bot_focus_job = getObserverBotWrongRouteName(subject, "job")
+        subject.bot_focus_skill = getObserverBotWrongRouteName(subject, "skill")
+    } else if (Math.random() < rightChoiceChance) {
+        subject.bot_focus_job = stage.job
+        subject.bot_focus_skill = stage.skill
+    }
+
+    subject.bot_next_decision = Math.max(1.8, 8.5 - rank.choice * 4.2 - Math.min(2.5, subject.ai_level * 0.035))
+
+    if (oldJob != subject.bot_focus_job || oldSkill != subject.bot_focus_skill) {
+        subject.last_action = "Switched route to " + subject.bot_focus_job + " / " + subject.bot_focus_skill + "."
+        pushObserverSubjectLog(subject, subject.last_action)
+    }
+}
+
+function updateObserverSubjectTraining(subject, dt) {
+    const stage = getObserverSubjectStage(subject)
+    const rank = getObserverBotRank(subject)
+    const speed = getObserverSpeedMultiplier(subject)
+    const routeQuality = getObserverSubjectRouteQuality(subject)
+    const xpBase = (0.9 + speed * 0.55) * rank.choice * (0.7 + routeQuality * 0.38)
+    const targetJob = subject.bot_focus_job == stage.job ? 1.18 : 0.58
+    const targetSkill = subject.bot_focus_skill == stage.skill ? 1.2 : 0.58
+
+    subject.bot_job_xp += getSafeObserverNumber(xpBase * targetJob * dt, 0)
+    subject.bot_skill_xp += getSafeObserverNumber(xpBase * targetSkill * rank.rebirth * dt, 0)
+
+    let leveled = false
+    let guard = 0
+    while (subject.bot_job_xp >= getObserverBotXpToNext(subject.bot_job_level, subject.stage_index) && guard < 20) {
+        subject.bot_job_xp -= getObserverBotXpToNext(subject.bot_job_level, subject.stage_index)
+        subject.bot_job_level += 1
+        leveled = true
+        guard += 1
+    }
+
+    guard = 0
+    while (subject.bot_skill_xp >= getObserverBotXpToNext(subject.bot_skill_level, subject.stage_index) && guard < 20) {
+        subject.bot_skill_xp -= getObserverBotXpToNext(subject.bot_skill_level, subject.stage_index)
+        subject.bot_skill_level += 1
+        leveled = true
+        guard += 1
+    }
+
+    if (leveled && (subject.bot_job_level + subject.bot_skill_level) % 16 == 0) {
+        subject.last_action = "Improved " + subject.bot_focus_job + " and " + subject.bot_focus_skill + " routing."
+        pushObserverSubjectLog(subject, subject.last_action)
+    }
+}
+
+function getObserverBotPurchaseReserve(subject) {
+    const rank = getObserverBotRank(subject)
+    const stage = getObserverSubjectStage(subject)
+    return Math.max(120, getObserverBotIncome(subject) * (1.2 + stage.difficulty * 0.22) / Math.max(0.4, rank.thrift))
+}
+
+function updateObserverSubjectPurchases(subject, dt) {
+    subject.bot_next_purchase -= dt
+    if (subject.bot_next_purchase > 0)
+        return
+
+    const rank = getObserverBotRank(subject)
+    const reserve = getObserverBotPurchaseReserve(subject)
+    const nextProperty = observerBotProperties[Math.min(observerBotProperties.length - 1, (subject.bot_property_index || 0) + 1)]
+
+    if (nextProperty != null && nextProperty.stage <= subject.stage_index && subject.bot_coins > nextProperty.cost + reserve * (1 + nextProperty.reserve)) {
+        subject.bot_coins -= nextProperty.cost
+        subject.bot_property_index += 1
+        subject.last_action = "Bought " + nextProperty.name + " for a safer route."
+        pushObserverSubjectLog(subject, subject.last_action)
+        subject.bot_next_purchase = Math.max(1.5, 8 - rank.purchase * 4)
+        return
+    }
+
+    for (const item of observerBotItems) {
+        if (item.stage > subject.stage_index || subject.bot_items.includes(item.name))
+            continue
+
+        if (subject.bot_coins > item.cost + reserve) {
+            subject.bot_coins -= item.cost
+            subject.bot_items.push(item.name)
+            subject.last_action = "Bought " + item.name + "."
+            pushObserverSubjectLog(subject, subject.last_action)
+            subject.bot_next_purchase = Math.max(1.5, 8.5 - rank.purchase * 4)
+            return
+        }
+    }
+
+    if (rank.debtLoss > 0.2 && Math.random() < rank.debtLoss * 0.018) {
+        subject.bot_coins = Math.max(0, subject.bot_coins * 0.82)
+        subject.last_action = "Wasted gold on a bad purchase and recovered the route."
+        pushObserverSubjectLog(subject, subject.last_action)
+    }
+
+    subject.bot_next_purchase = Math.max(2.5, 10 - rank.purchase * 3.2)
 }
 
 function pushObserverSubjectLog(subject, message) {
@@ -582,7 +824,9 @@ function getObserverSubjectOpGain(subject) {
     const stageValue = 0.03 + universeValue * stage.opWeight
     const cleanBonus = 1 + Math.min(0.85, Math.log10(subject.clean_time + 10) * 0.11)
     const clearBonus = 1 + Math.log2(subject.completed_universe_x + 1) * 0.35
-    return getSafeObserverNumber(stageValue * rank.op * getObserverRankStageOp(subject) * command.op * memory * getObserverPhaseOpMultiplier(stage) * cleanBonus * clearBonus * getObserverAiLevelOp(subject) * getObserverRosterSupportBonus(), 0)
+    const routeQuality = getObserverSubjectRouteQuality(subject)
+    const levelDepth = 1 + Math.min(0.55, Math.log2((subject.bot_job_level || 1) + (subject.bot_skill_level || 1)) * 0.045)
+    return getSafeObserverNumber(stageValue * rank.op * getObserverRankStageOp(subject) * command.op * memory * getObserverPhaseOpMultiplier(stage) * cleanBonus * clearBonus * getObserverAiLevelOp(subject) * getObserverRosterSupportBonus() * routeQuality * levelDepth, 0)
 }
 
 function getObserverPointsGain() {
@@ -632,14 +876,20 @@ function updateObserverSubjects() {
     for (const subject of state.subjects) {
         normalizeObserverSubject(subject, state)
 
+        const dt = 1 / updateSpeed
         subject.clean_time += 1 / updateSpeed
         subject.best_clean_time = Math.max(subject.best_clean_time, subject.clean_time)
-        subject.progress += getSafeObserverNumber(getObserverSpeedMultiplier(subject) / updateSpeed, 0)
-        subject.ai_xp += getSafeObserverNumber(getObserverAiXpGain(subject) / updateSpeed, 0)
+        updateObserverSubjectDecision(subject, dt)
+        updateObserverSubjectTraining(subject, dt)
+        updateObserverSubjectPurchases(subject, dt)
+
+        const routeQuality = getObserverSubjectRouteQuality(subject)
+        subject.progress += getSafeObserverNumber(getObserverSpeedMultiplier(subject) * (0.76 + routeQuality * 0.28) / updateSpeed, 0)
+        subject.ai_xp += getSafeObserverNumber(getObserverAiXpGain(subject) * (0.75 + routeQuality * 0.25) / updateSpeed, 0)
         subject.bot_age_days += getSafeObserverNumber((0.55 + getObserverSpeedMultiplier(subject) * 0.18) / updateSpeed, 0)
-        subject.bot_coins += getSafeObserverNumber(getObserverBotIncome(subject) / updateSpeed, 0, 1e300)
-        subject.bot_evil += getSafeObserverNumber((subject.stage_index >= 2 ? getObserverSubjectOpGain(subject) * 0.015 : 0) / updateSpeed, 0, 1e300)
-        subject.bot_mp += getSafeObserverNumber((subject.stage_index >= 4 ? getObserverSubjectOpGain(subject) * 0.01 * getObserverSubjectStage(subject).universe : 0) / updateSpeed, 0, 1e300)
+        subject.bot_coins += getSafeObserverNumber(getObserverBotIncome(subject) * (0.55 + routeQuality * 0.45) / updateSpeed, 0, 1e300)
+        subject.bot_evil += getSafeObserverNumber((subject.stage_index >= 2 ? getObserverSubjectOpGain(subject) * 0.014 * routeQuality : 0) / updateSpeed, 0, 1e300)
+        subject.bot_mp += getSafeObserverNumber((subject.stage_index >= 4 ? getObserverSubjectOpGain(subject) * 0.009 * routeQuality * getObserverSubjectStage(subject).universe : 0) / updateSpeed, 0, 1e300)
 
         let levelGuard = 0
         while (subject.ai_xp >= getObserverAiXpToNext(subject) && levelGuard < 100) {
@@ -684,6 +934,8 @@ function applyObserverSubjectMistake(subject) {
 
     subject.last_action = "Made a bad route choice and lost the clean streak."
     subject.bot_coins = Math.max(0, subject.bot_coins * 0.88)
+    subject.bot_job_xp = Math.max(0, subject.bot_job_xp * 0.72)
+    subject.bot_skill_xp = Math.max(0, subject.bot_skill_xp * 0.72)
     pushObserverSubjectLog(subject, subject.last_action)
 }
 
@@ -699,6 +951,16 @@ function advanceObserverSubject(subject) {
             subject.bot_age_days = 365 * 14
             subject.bot_coins = 0
             subject.bot_rebirths += 1
+            subject.bot_job_level = Math.max(1, Math.floor(subject.ai_level * 0.6))
+            subject.bot_skill_level = Math.max(1, Math.floor(subject.ai_level * 0.6))
+            subject.bot_job_xp = 0
+            subject.bot_skill_xp = 0
+            subject.bot_property_index = 0
+            subject.bot_items = []
+            subject.bot_focus_job = getObserverSubjectStage(subject).job
+            subject.bot_focus_skill = getObserverSubjectStage(subject).skill
+            subject.bot_next_decision = 0
+            subject.bot_next_purchase = 0
             subject.last_action = "Completed Universe X and restarted from zero."
             pushObserverSubjectLog(subject, subject.last_action)
             return
@@ -709,8 +971,15 @@ function advanceObserverSubject(subject) {
     }
 
     if (advanced) {
-        subject.last_action = "Reached " + getObserverSubjectStage(subject).name + "."
-        subject.bot_rebirths += getObserverSubjectStage(subject).id == "rebirth" ? 1 : 0
+        const stage = getObserverSubjectStage(subject)
+        subject.bot_focus_job = stage.job
+        subject.bot_focus_skill = stage.skill
+        subject.bot_job_xp = 0
+        subject.bot_skill_xp = 0
+        subject.bot_next_decision = 0
+        subject.bot_next_purchase = Math.min(subject.bot_next_purchase, 1.5)
+        subject.last_action = "Reached " + stage.name + " and rerouted to " + stage.job + "."
+        subject.bot_rebirths += stage.id == "rebirth" || stage.id == "evil" || stage.id == "void" ? 1 : 0
         pushObserverSubjectLog(subject, subject.last_action)
     }
 }
@@ -836,6 +1105,7 @@ function renderObserverSubjects() {
         const stage = getObserverSubjectStage(subject)
         const progress = getObserverStageProgress(subject)
         const aiProgress = Math.min(100, subject.ai_xp / getObserverAiXpToNext(subject) * 100)
+        const routeQuality = getObserverSubjectRouteQuality(subject)
         html +=
             `<div class="rb-observer-subject ${rank.colorClass}">` +
                 `<div class="rb-observer-subject-head">` +
@@ -843,10 +1113,11 @@ function renderObserverSubjects() {
                     `<div class="rb-observer-universe">U-${stage.universe}</div>` +
                 `</div>` +
                 `<div style="color:gray; margin-top:0.45em;">${stage.name}</div>` +
-                `<div class="rb-observer-mini-row"><span>Job</span><b>${stage.job}</b></div>` +
-                `<div class="rb-observer-mini-row"><span>Skill</span><b>${stage.skill}</b></div>` +
+                `<div class="rb-observer-mini-row"><span>Job</span><b>${subject.bot_focus_job} lvl ${formatWhole(getObserverBotJobLevel(subject))}</b></div>` +
+                `<div class="rb-observer-mini-row"><span>Skill</span><b>${subject.bot_focus_skill} lvl ${formatWhole(getObserverBotSkillLevel(subject))}</b></div>` +
                 `<div class="rb-observer-mini-row"><span>Goal</span><b>${getObserverSubjectGoal(subject)}</b></div>` +
                 `<div class="rb-observer-meter"><div style="width:${progress}%"></div></div>` +
+                `<div class="rb-observer-mini-row"><span>Route quality</span><b>x${format(routeQuality, 2)}</b></div>` +
                 `<div class="rb-observer-mini-row"><span>AI lvl</span><b>${formatWhole(subject.ai_level)} (${format(aiProgress, 1)}%)</b></div>` +
                 `<div class="rb-observer-mini-row"><span>Clean streak</span><b>${formatTime(subject.clean_time, true)}</b></div>` +
                 `<div class="rb-observer-mini-row"><span>OP/sec</span><b>${format(getObserverSubjectOpGain(subject), 3)}</b></div>` +
@@ -878,7 +1149,11 @@ function renderObservedObserverSubject() {
     const previousStage = observerSubjectStages[Math.max(0, subject.stage_index - 1)]
     const nextStage = observerSubjectStages[Math.min(observerSubjectStages.length - 1, subject.stage_index + 1)]
     const skillLevel = getObserverBotSkillLevel(subject)
+    const jobLevel = getObserverBotJobLevel(subject)
     const progress = getObserverStageProgress(subject)
+    const routeQuality = getObserverSubjectRouteQuality(subject)
+    const property = getObserverBotProperty(subject)
+    const items = subject.bot_items == null || subject.bot_items.length == 0 ? "None" : subject.bot_items.slice(-4).join(", ")
 
     document.getElementById("observerWatchName").textContent = subject.name
     document.getElementById("observerWatchRank").textContent = rank.name
@@ -890,18 +1165,23 @@ function renderObservedObserverSubject() {
 
     document.getElementById("observerWatchTable").innerHTML =
         `<tr style="background:#4caf50;"><th>Route</th><th>Level</th><th>State</th><th>Progress</th></tr>` +
-        `<tr class="rb-observer-bot-row-muted"><td>${previousStage.job}</td><td>${Math.max(1, skillLevel - 16)}</td><td>Completed</td><td>Max</td></tr>` +
-        `<tr class="rb-observer-bot-row-active"><td>${stage.job}</td><td>${skillLevel}</td><td>Current job</td><td>${format(progress, 1)}%</td></tr>` +
-        `<tr><td>${nextStage.job}</td><td>${Math.max(1, skillLevel - 7)}</td><td>Next route</td><td>Locked</td></tr>` +
+        `<tr class="rb-observer-bot-row-muted"><td>${previousStage.job}</td><td>${Math.max(1, jobLevel - 16)}</td><td>Completed</td><td>Max</td></tr>` +
+        `<tr class="rb-observer-bot-row-active"><td>${subject.bot_focus_job}</td><td>${jobLevel}</td><td>${subject.bot_focus_job == stage.job ? "Current job" : "Wrong focus"}</td><td>${format(progress, 1)}%</td></tr>` +
+        `<tr><td>${nextStage.job}</td><td>${Math.max(1, jobLevel - 7)}</td><td>Next route</td><td>Locked</td></tr>` +
         `<tr style="background:#18d2d9;"><th>Skill route</th><th>Level</th><th>State</th><th>Progress</th></tr>` +
         `<tr class="rb-observer-bot-row-muted"><td>${previousStage.skill}</td><td>${Math.max(1, skillLevel - 14)}</td><td>Completed</td><td>Max</td></tr>` +
-        `<tr class="rb-observer-bot-row-active"><td>${stage.skill}</td><td>${skillLevel}</td><td>Current skill</td><td>${format(progress, 1)}%</td></tr>` +
-        `<tr><td>${nextStage.skill}</td><td>${Math.max(1, skillLevel - 6)}</td><td>Next unlock</td><td>Waiting</td></tr>`
+        `<tr class="rb-observer-bot-row-active"><td>${subject.bot_focus_skill}</td><td>${skillLevel}</td><td>${subject.bot_focus_skill == stage.skill ? "Current skill" : "Wrong focus"}</td><td>${format(progress, 1)}%</td></tr>` +
+        `<tr><td>${nextStage.skill}</td><td>${Math.max(1, skillLevel - 6)}</td><td>Next unlock</td><td>Waiting</td></tr>` +
+        `<tr style="background:#c06578;"><th>Shop</th><th>Owned</th><th>Effect</th><th>State</th></tr>` +
+        `<tr><td>Property</td><td>${property.name}</td><td>Route x${format(1 + property.quality, 2)}</td><td>Active</td></tr>` +
+        `<tr><td>Items</td><td colspan="2">${items}</td><td>x${format(1 + getObserverBotItemQuality(subject), 2)}</td></tr>`
 
     document.getElementById("observerWatchDecisionState").innerHTML =
         `<b>AI decision state</b><br>` +
         `<span style="color:gray;">Goal:</span> ${getObserverSubjectGoal(subject)}<br>` +
         `<span style="color:gray;">Rank behavior:</span> ${getObserverSubjectRankStyle(subject)}<br>` +
+        `<span style="color:gray;">Route quality:</span> x${format(routeQuality, 2)}; ` +
+        `<span style="color:gray;">property:</span> ${property.name}<br>` +
         `<span style="color:gray;">Clean streak:</span> ${formatTime(subject.clean_time, true)}; ` +
         `<span style="color:gray;">mistakes:</span> ${formatWhole(subject.mistakes)}; ` +
         `<span style="color:gray;">rebirths:</span> ${formatWhole(subject.bot_rebirths)}`
