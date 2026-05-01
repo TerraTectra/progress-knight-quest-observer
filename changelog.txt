@@ -1,3 +1,17 @@
+version v0.1.0-beta / 02.05.2026
+* fork renamed and prepared as Progress Knight Quest: Observer beta
+* baseline game speed increased and admin speed controls added up to x1000
+* added Multiverse unlock after the Void route
+* added passive real-time Multiverse Points unaffected by Time Warp
+* added 10 universes with increasing distortions, local parameters, passive MP weights, and universe breaks
+* added Multiverse upgrades for XP, income, lifespan, Evil, Essence, Dark Matter, MP gain, and late-route support
+* added dynamic universe break costs that are softened by mastery memory and Fracture Memory
+* added Observer as the third global layer after Universe X
+* added Observer subjects that simulate their own Progress Knight runs from the start
+* added Observer Points, subject ranks, personalities, character strengthening, route memory, milestones, insights, and upgrades
+* fixed multiple tab crashes, early unlock regressions, Evil visibility issues, and button flicker in meta tabs
+* added save compatibility tests, meta path smoke tests, tab regression tests, release stability checks, long idle stress checks, and a unified release runner
+
 version 2.5.0 / 01.08.2024
 * Improved display on mobile devices
 * Added offline progress (up to 1 hour)
