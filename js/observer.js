@@ -110,20 +110,48 @@ function normalizeObserverSubject(subject, state = null) {
     subject.progress = Math.max(0, subject.progress)
 }
 
+function hasObserverFinalGate() {
+    if (gameData == null || typeof getMultiverseState !== "function" || typeof isMultiverseUnlocked !== "function" || typeof getHighestUniverseId !== "function")
+        return false
+
+    const multiverse = getMultiverseState()
+    return isMultiverseUnlocked()
+        && getHighestUniverseId() >= 10
+        && (multiverse.observer_signal_prepared || multiverse.observer_entry_claimed)
+}
+
+function canEnterObserverLayer() {
+    if (gameData == null || typeof getMultiverseState !== "function" || typeof isMultiverseUnlocked !== "function" || typeof getHighestUniverseId !== "function")
+        return false
+
+    const multiverse = getMultiverseState()
+    return isMultiverseUnlocked()
+        && getHighestUniverseId() >= 10
+        && multiverse.observer_signal_prepared
+}
+
 function isObserverUnlocked() {
     if (gameData == null)
         return false
 
-    return getObserverState().active
-        || (typeof getMultiverseState === "function" && getMultiverseState().observer_signal_prepared)
+    const state = getObserverState()
+    if (!state.active)
+        return false
+
+    if (!hasObserverFinalGate()) {
+        state.active = false
+        return false
+    }
+
+    return true
 }
 
 function isObserverActive() {
-    return getObserverState().active
+    return isObserverUnlocked()
 }
 
 function enterObserverLayer() {
-    if (!isObserverUnlocked())
+    if (!canEnterObserverLayer())
         return false
 
     const state = getObserverState()
@@ -152,8 +180,6 @@ function grantObserverEntryLegacy(multiverse) {
 
     if (state.subjects.length == 0) {
         const subject = createObserverSubject(true)
-        const signalRequirement = typeof getObserverSignalRequirement === "function" ? getObserverSignalRequirement() : 280
-        subject.rank = signal >= signalRequirement * 1.8 ? "common" : "trash"
         subject.ai_xp += Math.min(45, signal * 0.08)
         subject.last_action = "Inherited a fragment of the Observer Signal."
     }
@@ -460,10 +486,11 @@ function updateObserverVisibility() {
     if (observerButton == null)
         return
 
-    document.body.classList.toggle("rb-observer-active", isObserverActive())
-    observerButton.classList.toggle("hidden", !isObserverUnlocked())
+    const active = isObserverActive()
+    document.body.classList.toggle("rb-observer-active", active)
+    observerButton.classList.toggle("hidden", !active)
 
-    if (!isObserverActive())
+    if (!active)
         return
 
     const buttons = Array.prototype.slice.call(document.getElementsByClassName("tabButton"))
