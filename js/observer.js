@@ -331,13 +331,7 @@ function getObserverEntryLegacyBonus(signal) {
     const safeSignal = getSafeObserverNumber(signal, 0)
     const multiverse = typeof getMultiverseState === "function" ? getMultiverseState() : null
     const breaks = multiverse == null ? 0 : Math.max(0, multiverse.universe_breaks || 0)
-    const records = multiverse == null || multiverse.universe_break_records == null ? {} : multiverse.universe_break_records
-    let recordedBreaks = 0
-
-    for (const key in records) {
-        if (!isNaN(records[key]))
-            recordedBreaks += Math.max(0, records[key])
-    }
+    const recordedBreaks = getObserverRecordedUniverseBreakCount(multiverse)
 
     const signalBonus = Math.sqrt(Math.max(1, safeSignal)) * 2.15
     const breakBonus = Math.min(150, breaks * 14 + Math.sqrt(recordedBreaks) * 18)
@@ -350,6 +344,8 @@ function grantObserverEntryLegacy(multiverse) {
     const state = getObserverState()
     const signal = typeof getObserverSignalStrength === "function" ? getObserverSignalStrength() : 0
     const bonusPoints = getObserverEntryLegacyBonus(signal)
+    const recordedBreaks = getObserverRecordedUniverseBreakCount(multiverse)
+    const entryLoopMemory = getObserverEntryLoopMemory(signal, recordedBreaks)
 
     state.points += bonusPoints
     state.lifetime_points += bonusPoints
@@ -363,12 +359,33 @@ function grantObserverEntryLegacy(multiverse) {
         const subject = createObserverSubject(true)
         subject.ai_xp += Math.min(180, signal * 0.11 + bonusPoints * 0.28)
         subject.character_level = Math.max(subject.character_level || 0, Math.min(3, Math.floor(bonusPoints / 155)))
+        subject.loop_memory = Math.max(subject.loop_memory || 0, entryLoopMemory)
         subject.bot_mp += Math.min(5000, signal * 0.35)
-        subject.last_action = "Inherited a fragment of the Observer Signal and started the first watched run."
+        subject.last_action = "Inherited a fragment of the Observer Signal and started the first watched run from Prime World."
         pushObserverSubjectLog(subject, subject.last_action)
     }
 
     multiverse.observer_entry_claimed = true
+}
+
+function getObserverRecordedUniverseBreakCount(multiverse) {
+    const records = multiverse == null || multiverse.universe_break_records == null ? {} : multiverse.universe_break_records
+    let recordedBreaks = 0
+
+    for (const key in records) {
+        if (!isNaN(records[key]))
+            recordedBreaks += Math.max(0, records[key])
+    }
+
+    return recordedBreaks
+}
+
+function getObserverEntryLoopMemory(signal, recordedBreaks) {
+    const signalMemory = Math.sqrt(Math.max(0, signal)) * 0.012
+    const breakMemory = Math.sqrt(Math.max(0, recordedBreaks)) * 0.18
+    const lifetimeMemory = Math.log10(Math.max(0, gameData.multiverse_points_lifetime || 0) + 10) * 0.035
+
+    return getSafeObserverNumber(Math.min(2.8, signalMemory + breakMemory + lifetimeMemory), 0, 2.8)
 }
 
 function getObserverUpgradeLevel(upgrade) {

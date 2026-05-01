@@ -144,6 +144,8 @@ async function main() {
             failures.push("Observer entry did not create a subject")
         if (gameData.observer.subjects && gameData.observer.subjects[0] && gameData.observer.subjects[0].rank != "trash")
             failures.push("First Observer subject is not Trash")
+        if (gameData.observer.subjects && gameData.observer.subjects[0] && !((gameData.observer.subjects[0].loop_memory || 0) > 0))
+            failures.push("First Observer subject did not inherit loop memory")
         if (!(gameData.observer.points > 0))
             failures.push("Observer entry did not grant starting OP")
 

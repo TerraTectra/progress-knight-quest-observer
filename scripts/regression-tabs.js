@@ -1064,6 +1064,8 @@ async function runScenario(browser, name, setup) {
                     failures.push("Observer first subject is not Trash after entry")
                 if (!((subject.ai_xp || 0) > 0))
                     failures.push("Observer first subject did not inherit signal AI XP")
+                if (!((subject.loop_memory || 0) > 0))
+                    failures.push("Observer first subject did not inherit loop memory")
             }
 
             updateUI()
