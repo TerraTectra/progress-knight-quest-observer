@@ -219,6 +219,53 @@ async function runLateScenario(browser) {
     if (after.error)
         failures.push("late game set tempData.hasError")
 
+    const realTimeMetaFailures = await page.evaluate(() => {
+        const failures = []
+        const timeWarping = gameData.taskData["Time Warping"]
+        const originalAdminSpeed = gameData.settings.adminGameSpeedMultiplier
+        const originalTimeWarpingLevel = timeWarping == null ? 0 : timeWarping.level
+        const originalTimeWarpingMax = timeWarping == null ? 0 : timeWarping.maxLevel
+        const originalPoints = gameData.multiverse_points
+        const originalLifetime = gameData.multiverse_points_lifetime
+
+        gameData.settings.adminGameSpeedMultiplier = 1
+        if (timeWarping != null) {
+            timeWarping.level = 0
+            timeWarping.maxLevel = Math.max(timeWarping.maxLevel, 0)
+        }
+        const baseBefore = gameData.multiverse_points
+        increaseMultiversePoints()
+        const baseGain = gameData.multiverse_points - baseBefore
+
+        gameData.multiverse_points = originalPoints
+        gameData.multiverse_points_lifetime = originalLifetime
+        gameData.settings.adminGameSpeedMultiplier = 1000
+        if (timeWarping != null) {
+            timeWarping.level = 1000000
+            timeWarping.maxLevel = Math.max(timeWarping.maxLevel, 1000000)
+        }
+        const warpedBefore = gameData.multiverse_points
+        increaseMultiversePoints()
+        const warpedGain = gameData.multiverse_points - warpedBefore
+
+        gameData.multiverse_points = originalPoints
+        gameData.multiverse_points_lifetime = originalLifetime
+        gameData.settings.adminGameSpeedMultiplier = originalAdminSpeed
+        if (timeWarping != null) {
+            timeWarping.level = originalTimeWarpingLevel
+            timeWarping.maxLevel = originalTimeWarpingMax
+        }
+
+        const tolerance = Math.max(1e-12, Math.abs(baseGain) * 1e-9)
+        if (!(baseGain > 0))
+            failures.push("passive MP real-time baseline gain is not positive")
+        if (Math.abs(baseGain - warpedGain) > tolerance)
+            failures.push("passive MP is affected by Time Warp or admin speed")
+        return failures
+    })
+
+    failures.push(...realTimeMetaFailures.map(failure => `${name}: ${failure}`))
+
     failures.push(...await inspectTabs(page))
     const reloadFailures = await saveReloadAndCheck(page, () => {
         const failures = []
@@ -288,6 +335,58 @@ async function runObserverScenario(browser) {
         failures.push("Observer mode did not force Observer tab")
     if (after.error)
         failures.push("Observer set tempData.hasError")
+
+    const observerSchemaFailures = await page.evaluate(() => {
+        const failures = []
+        if (typeof observerUpgradeData == "undefined")
+            return ["Observer upgrade data is missing"]
+
+        for (const key in observerUpgradeData) {
+            if (!(key in gameData.observer.upgrades))
+                failures.push(`Observer upgrade ${key} is missing from base save schema`)
+        }
+
+        return failures
+    })
+
+    failures.push(...observerSchemaFailures.map(failure => `${name}: ${failure}`))
+
+    const observerRealTimeFailures = await page.evaluate(() => {
+        const failures = []
+        const timeWarping = gameData.taskData["Time Warping"]
+        const originalAdminSpeed = gameData.settings.adminGameSpeedMultiplier
+        const originalTimeWarpingLevel = timeWarping == null ? 0 : timeWarping.level
+        const originalTimeWarpingMax = timeWarping == null ? 0 : timeWarping.maxLevel
+
+        gameData.settings.adminGameSpeedMultiplier = 1
+        if (timeWarping != null) {
+            timeWarping.level = 0
+            timeWarping.maxLevel = Math.max(timeWarping.maxLevel, 0)
+        }
+        const baseGain = getObserverPointsGain() / updateSpeed
+
+        gameData.settings.adminGameSpeedMultiplier = 1000
+        if (timeWarping != null) {
+            timeWarping.level = 1000000
+            timeWarping.maxLevel = Math.max(timeWarping.maxLevel, 1000000)
+        }
+        const warpedGain = getObserverPointsGain() / updateSpeed
+
+        gameData.settings.adminGameSpeedMultiplier = originalAdminSpeed
+        if (timeWarping != null) {
+            timeWarping.level = originalTimeWarpingLevel
+            timeWarping.maxLevel = originalTimeWarpingMax
+        }
+
+        const tolerance = Math.max(1e-12, Math.abs(baseGain) * 1e-9)
+        if (!(baseGain > 0))
+            failures.push("Observer real-time baseline gain is not positive")
+        if (Math.abs(baseGain - warpedGain) > tolerance)
+            failures.push("Observer Points are affected by Time Warp or admin speed")
+        return failures
+    })
+
+    failures.push(...observerRealTimeFailures.map(failure => `${name}: ${failure}`))
 
     failures.push(...await inspectTabs(page))
     const reloadFailures = await saveReloadAndCheck(page, () => {
