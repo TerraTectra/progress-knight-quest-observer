@@ -193,8 +193,8 @@ function getUniverseBreakRequirement(id = getCurrentUniverseId()) {
         5: { parameter: 1.50, task: "Star Market", taskLevel: 44 },
         6: { parameter: 2.15, task: "Null Continuity", taskLevel: 48 },
         7: { parameter: 1.52, task: "Retroactive Training", taskLevel: 50 },
-        8: { parameter: 1.72, task: "Fractured Mastery", taskLevel: 54 },
-        9: { parameter: 1.82, task: "Last Signal", taskLevel: 60 },
+        8: { parameter: 1.74, task: "Recursive Promotion", taskLevel: 42 },
+        9: { parameter: 1.88, task: "Silence Drills", taskLevel: 46 },
     }
 
     return requirements[id] || null
@@ -741,12 +741,14 @@ function getUniverseEightLadderIntegrityGain() {
     const ladderReconstruction = gameData.taskData["Ladder Reconstruction"]
     const sidewaysPromotion = gameData.taskData["Sideways Promotion"]
     const fracturedMastery = gameData.taskData["Fractured Mastery"]
+    const recursivePromotion = gameData.taskData["Recursive Promotion"]
     const ascensionMap = getMultiverseItemEffect("Ascension Map")
 
     const ladderGain = ladderReconstruction == null ? 1 : 1 + ladderReconstruction.level * ladderReconstruction.baseData.effect
     const sidewaysGain = sidewaysPromotion == null ? 1 : 1 + sidewaysPromotion.level * sidewaysPromotion.baseData.effect
     const masteryGain = fracturedMastery == null ? 1 : 1 + fracturedMastery.level * fracturedMastery.baseData.effect
-    return ladderGain * sidewaysGain * masteryGain * ascensionMap()
+    const recursiveGain = recursivePromotion == null ? 1 : 1 + recursivePromotion.level * recursivePromotion.baseData.effect
+    return ladderGain * sidewaysGain * masteryGain * recursiveGain * ascensionMap()
 }
 
 function getUniverseEightXpGain() {
@@ -775,9 +777,21 @@ function getUniverseEightLifespanGain() {
         return 1
 
     const fracturedMastery = gameData.taskData["Fractured Mastery"]
+    const recursivePromotion = gameData.taskData["Recursive Promotion"]
     const ascensionMap = getMultiverseItemEffect("Ascension Map")
     const masteryGain = fracturedMastery == null ? 1 : 1 + fracturedMastery.level * 0.0025
-    return masteryGain * ascensionMap()
+    const recursiveGain = recursivePromotion == null ? 1 : 1 + recursivePromotion.level * 0.0012
+    return masteryGain * recursiveGain * ascensionMap()
+}
+
+function getUniverseEightGameSpeedGain() {
+    if (!isMultiverseUnlocked() || getCurrentUniverseId() != 8)
+        return 1
+
+    const recursivePromotion = gameData.taskData["Recursive Promotion"]
+    const ascensionMap = getMultiverseItemEffect("Ascension Map")
+    const recursiveGain = recursivePromotion == null ? 1 : 1 + recursivePromotion.level * 0.0018
+    return recursiveGain * Math.pow(ascensionMap(), 0.25)
 }
 
 function getUniverseEightSkillsXpGain() {
@@ -785,19 +799,24 @@ function getUniverseEightSkillsXpGain() {
         return 1
 
     const fracturedMastery = gameData.taskData["Fractured Mastery"]
-    return fracturedMastery == null ? 1 : 1 + fracturedMastery.level * 0.008
+    const recursivePromotion = gameData.taskData["Recursive Promotion"]
+    const masteryGain = fracturedMastery == null ? 1 : 1 + fracturedMastery.level * 0.008
+    const recursiveGain = recursivePromotion == null ? 1 : 1 + recursivePromotion.level * 0.004
+    return masteryGain * recursiveGain
 }
 
 function getUniverseNineCollapseControlGain() {
     const collapseContainment = gameData.taskData["Collapse Containment"]
     const lastSignal = gameData.taskData["Last Signal"]
+    const silenceDrills = gameData.taskData["Silence Drills"]
     const quietBeacon = getMultiverseItemEffect("Quiet Beacon")
     const lifetimeMemory = 1 + Math.log10(gameData.multiverse_points_lifetime + 10) * 0.018
     const breakMemory = 1 + Math.sqrt(getMultiverseState().universe_breaks) * 0.04
 
     const containmentGain = collapseContainment == null ? 1 : 1 + collapseContainment.level * collapseContainment.baseData.effect
     const signalGain = lastSignal == null ? 1 : 1 + lastSignal.level * lastSignal.baseData.effect
-    return containmentGain * signalGain * lifetimeMemory * breakMemory * quietBeacon()
+    const silenceGain = silenceDrills == null ? 1 : 1 + silenceDrills.level * silenceDrills.baseData.effect
+    return containmentGain * signalGain * silenceGain * lifetimeMemory * breakMemory * quietBeacon()
 }
 
 function getUniverseNineXpGain() {
@@ -823,7 +842,10 @@ function getUniverseNineExpenseGain() {
         return 1
 
     const silentEconomy = gameData.taskData["Silent Economy"]
-    const reduction = silentEconomy == null ? 0 : Math.min(0.32, Math.abs(silentEconomy.level * silentEconomy.baseData.effect))
+    const silenceDrills = gameData.taskData["Silence Drills"]
+    const economyReduction = silentEconomy == null ? 0 : Math.abs(silentEconomy.level * silentEconomy.baseData.effect)
+    const drillReduction = silenceDrills == null ? 0 : silenceDrills.level * 0.0008
+    const reduction = Math.min(0.38, economyReduction + drillReduction)
     return 1 - reduction
 }
 
@@ -853,10 +875,12 @@ function getUniverseNineDarkMatterGain() {
 
     const collapseContainment = gameData.taskData["Collapse Containment"]
     const lastSignal = gameData.taskData["Last Signal"]
+    const silenceDrills = gameData.taskData["Silence Drills"]
     const quietBeacon = getMultiverseItemEffect("Quiet Beacon")
     const containmentGain = collapseContainment == null ? 1 : 1 + collapseContainment.level * 0.002
     const signalGain = lastSignal == null ? 1 : 1 + lastSignal.level * 0.0025
-    return containmentGain * signalGain * quietBeacon()
+    const silenceGain = silenceDrills == null ? 1 : 1 + silenceDrills.level * 0.0018
+    return containmentGain * signalGain * silenceGain * quietBeacon()
 }
 
 function getUniverseNineSkillsXpGain() {
@@ -864,13 +888,17 @@ function getUniverseNineSkillsXpGain() {
         return 1
 
     const lastSignal = gameData.taskData["Last Signal"]
-    return lastSignal == null ? 1 : 1 + lastSignal.level * 0.008
+    const silenceDrills = gameData.taskData["Silence Drills"]
+    const signalGain = lastSignal == null ? 1 : 1 + lastSignal.level * 0.008
+    const silenceGain = silenceDrills == null ? 1 : 1 + silenceDrills.level * 0.005
+    return signalGain * silenceGain
 }
 
 function getUniverseTenObserverSignalGain() {
     const thresholdListening = gameData.taskData["Threshold Listening"]
     const impossibleRoutine = gameData.taskData["Impossible Routine"]
     const witnessPreparation = gameData.taskData["Witness Preparation"]
+    const observerAlignment = gameData.taskData["Observer Alignment"]
     const staticCrown = getMultiverseItemEffect("Static Crown")
     const lifetimeMemory = 1 + Math.log10(gameData.multiverse_points_lifetime + 10) * 0.02
     const breakMemory = 1 + Math.sqrt(getMultiverseState().universe_breaks) * 0.045
@@ -878,7 +906,8 @@ function getUniverseTenObserverSignalGain() {
     const listeningGain = thresholdListening == null ? 1 : 1 + thresholdListening.level * thresholdListening.baseData.effect
     const routineGain = impossibleRoutine == null ? 1 : 1 + impossibleRoutine.level * impossibleRoutine.baseData.effect
     const witnessGain = witnessPreparation == null ? 1 : 1 + witnessPreparation.level * witnessPreparation.baseData.effect
-    return listeningGain * routineGain * witnessGain * lifetimeMemory * breakMemory * staticCrown()
+    const alignmentGain = observerAlignment == null ? 1 : 1 + observerAlignment.level * observerAlignment.baseData.effect
+    return listeningGain * routineGain * witnessGain * alignmentGain * lifetimeMemory * breakMemory * staticCrown()
 }
 
 function getObserverSignalStrength() {
@@ -888,15 +917,17 @@ function getObserverSignalStrength() {
     const thresholdListening = gameData.taskData["Threshold Listening"]
     const impossibleRoutine = gameData.taskData["Impossible Routine"]
     const witnessPreparation = gameData.taskData["Witness Preparation"]
+    const observerAlignment = gameData.taskData["Observer Alignment"]
     const listening = thresholdListening == null ? 0 : thresholdListening.level
     const routine = impossibleRoutine == null ? 0 : impossibleRoutine.level
     const witness = witnessPreparation == null ? 0 : witnessPreparation.level
-    const signal = listening + routine * 1.45 + witness * 2.15
+    const alignment = observerAlignment == null ? 0 : observerAlignment.level
+    const signal = listening + routine * 1.45 + witness * 2.15 + alignment * 3.4
     return signal * getUniverseTenObserverSignalGain()
 }
 
 function getObserverSignalRequirement() {
-    return 420
+    return 620
 }
 
 function getObserverSignalProgress() {
@@ -975,10 +1006,12 @@ function getUniverseTenDarkMatterGain() {
 
     const thresholdListening = gameData.taskData["Threshold Listening"]
     const witnessPreparation = gameData.taskData["Witness Preparation"]
+    const observerAlignment = gameData.taskData["Observer Alignment"]
     const observerLens = getMultiverseItemEffect("Observer Lens")
     const listeningGain = thresholdListening == null ? 1 : 1 + thresholdListening.level * 0.0018
     const witnessGain = witnessPreparation == null ? 1 : 1 + witnessPreparation.level * 0.0022
-    return listeningGain * witnessGain * observerLens()
+    const alignmentGain = observerAlignment == null ? 1 : 1 + observerAlignment.level * 0.0016
+    return listeningGain * witnessGain * alignmentGain * observerLens()
 }
 
 function getUniverseTenSkillsXpGain() {
@@ -986,7 +1019,10 @@ function getUniverseTenSkillsXpGain() {
         return 1
 
     const witnessPreparation = gameData.taskData["Witness Preparation"]
-    return witnessPreparation == null ? 1 : 1 + witnessPreparation.level * 0.008
+    const observerAlignment = gameData.taskData["Observer Alignment"]
+    const witnessGain = witnessPreparation == null ? 1 : 1 + witnessPreparation.level * 0.008
+    const alignmentGain = observerAlignment == null ? 1 : 1 + observerAlignment.level * 0.006
+    return witnessGain * alignmentGain
 }
 
 function getMultiverseVoidResonance() {

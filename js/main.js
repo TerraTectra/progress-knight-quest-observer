@@ -453,7 +453,7 @@ function getUnpausedGameSpeed() {
     const timeWarpingSpeed = boostWarping * timeWarping.getEffect() * temporalDimension.getEffect() * timeLoop.getEffect() * warpDrive * speedSpeedSpeed * timeIsAFlatCircle
 
     const gameSpeed = baseGameSpeed * timeWarpingSpeed * getChallengeBonus("time_does_not_fly") * getGottaBeFastGain() * getDarkMatterSkillTimeWarping()
-        * getUniverseFourGameSpeedGain() * getUniverseTenGameSpeedGain() * gameData.settings.adminGameSpeedMultiplier
+        * getUniverseFourGameSpeedGain() * getUniverseEightGameSpeedGain() * getUniverseTenGameSpeedGain() * gameData.settings.adminGameSpeedMultiplier
 
     if (gameData.active_challenge == "time_does_not_fly" || gameData.active_challenge == "the_darkest_time")
         return Math.pow(gameSpeed, 0.7)

@@ -224,7 +224,7 @@ function getObserverSubjectCost() {
     if (state.subjects.length == 0)
         return 0
 
-    return 32 * Math.pow(1.82, state.subjects.length - 1)
+    return 40 * Math.pow(1.9, state.subjects.length - 1)
 }
 
 function buyObserverSubject() {

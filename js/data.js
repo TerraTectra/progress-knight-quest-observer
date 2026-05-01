@@ -316,14 +316,17 @@ const skillBaseData = {
     "Ladder Reconstruction": { name: "Ladder Reconstruction", maxXp: 4e15, heroxp: 900, effect: 0.0028, description: "U-VIII MP + All XP" },
     "Sideways Promotion": { name: "Sideways Promotion", maxXp: 1.3e16, heroxp: 915, effect: 0.003, description: "U-VIII Income + Job XP" },
     "Fractured Mastery": { name: "Fractured Mastery", maxXp: 4.5e16, heroxp: 930, effect: 0.003, description: "U-VIII Skill XP + Lifespan" },
+    "Recursive Promotion": { name: "Recursive Promotion", maxXp: 1.6e17, heroxp: 940, effect: 0.0024, description: "U-VIII Gamespeed + MP" },
 
     "Collapse Containment": { name: "Collapse Containment", maxXp: 1.4e17, heroxp: 950, effect: 0.0025, description: "U-IX MP + All XP" },
     "Silent Economy": { name: "Silent Economy", maxXp: 4.8e17, heroxp: 965, effect: -0.0025, description: "U-IX Expenses + Income" },
     "Last Signal": { name: "Last Signal", maxXp: 1.6e18, heroxp: 980, effect: 0.0025, description: "U-IX MP + Evil + Essence" },
+    "Silence Drills": { name: "Silence Drills", maxXp: 5.5e18, heroxp: 990, effect: 0.0022, description: "U-IX Skill XP + Collapse control" },
 
     "Threshold Listening": { name: "Threshold Listening", maxXp: 5e18, heroxp: 1000, effect: 0.0022, description: "U-X MP + Observer Signal" },
     "Impossible Routine": { name: "Impossible Routine", maxXp: 1.7e19, heroxp: 1015, effect: 0.0022, description: "U-X All XP + Gamespeed" },
     "Witness Preparation": { name: "Witness Preparation", maxXp: 6e19, heroxp: 1030, effect: 0.0022, description: "U-X Evil + Essence + Lifespan" },
+    "Observer Alignment": { name: "Observer Alignment", maxXp: 2.2e20, heroxp: 1045, effect: 0.002, description: "U-X Observer Signal + Threshold XP" },
 }
 
 const itemBaseData = {
@@ -589,14 +592,17 @@ const requirementsBaseData = {
     "Ladder Reconstruction": new MultiverseUniverseRequirement([getQuerySelector("Ladder Reconstruction")], [{ universe: 8 }]),
     "Sideways Promotion": new MultiverseUniverseRequirement([getQuerySelector("Sideways Promotion")], [{ universe: 8 }, { task: "Ladder Reconstruction", requirement: 20 }]),
     "Fractured Mastery": new MultiverseUniverseRequirement([getQuerySelector("Fractured Mastery")], [{ universe: 8 }, { task: "Sideways Promotion", requirement: 35 }]),
+    "Recursive Promotion": new MultiverseUniverseRequirement([getQuerySelector("Recursive Promotion")], [{ universe: 8 }, { task: "Fractured Mastery", requirement: 45 }]),
     "Universe IX Quiet Collapse": new MultiverseUniverseRequirement([removeSpaces(".Universe IX Quiet Collapse")], [{ universe: 9 }]),
     "Collapse Containment": new MultiverseUniverseRequirement([getQuerySelector("Collapse Containment")], [{ universe: 9 }]),
     "Silent Economy": new MultiverseUniverseRequirement([getQuerySelector("Silent Economy")], [{ universe: 9 }, { task: "Collapse Containment", requirement: 20 }]),
     "Last Signal": new MultiverseUniverseRequirement([getQuerySelector("Last Signal")], [{ universe: 9 }, { task: "Silent Economy", requirement: 35 }]),
+    "Silence Drills": new MultiverseUniverseRequirement([getQuerySelector("Silence Drills")], [{ universe: 9 }, { task: "Last Signal", requirement: 45 }]),
     "Universe X Observer Threshold": new MultiverseUniverseRequirement([removeSpaces(".Universe X Observer Threshold")], [{ universe: 10 }]),
     "Threshold Listening": new MultiverseUniverseRequirement([getQuerySelector("Threshold Listening")], [{ universe: 10 }]),
     "Impossible Routine": new MultiverseUniverseRequirement([getQuerySelector("Impossible Routine")], [{ universe: 10 }, { task: "Threshold Listening", requirement: 20 }]),
     "Witness Preparation": new MultiverseUniverseRequirement([getQuerySelector("Witness Preparation")], [{ universe: 10 }, { task: "Impossible Routine", requirement: 35 }]),
+    "Observer Alignment": new MultiverseUniverseRequirement([getQuerySelector("Observer Alignment")], [{ universe: 10 }, { task: "Witness Preparation", requirement: 45 }]),
 
     // Properties
     "Homeless": new CoinRequirement([getQuerySelector("Homeless")], [{ requirement: 0 }]),
@@ -748,9 +754,9 @@ const skillCategories = {
     "Universe V Commerce": ["Greed Accounting", "Debt Transmutation", "Star Market"],
     "Universe VI Void Studies": ["Dimming Resonance", "Abyssal Recycling", "Null Continuity"],
     "Universe VII Causality": ["Causal Threading", "Paradox Discipline", "Retroactive Training"],
-    "Universe VIII Broken Ladder": ["Ladder Reconstruction", "Sideways Promotion", "Fractured Mastery"],
-    "Universe IX Quiet Collapse": ["Collapse Containment", "Silent Economy", "Last Signal"],
-    "Universe X Observer Threshold": ["Threshold Listening", "Impossible Routine", "Witness Preparation"]
+    "Universe VIII Broken Ladder": ["Ladder Reconstruction", "Sideways Promotion", "Fractured Mastery", "Recursive Promotion"],
+    "Universe IX Quiet Collapse": ["Collapse Containment", "Silent Economy", "Last Signal", "Silence Drills"],
+    "Universe X Observer Threshold": ["Threshold Listening", "Impossible Routine", "Witness Preparation", "Observer Alignment"]
 }
 
 const itemCategories = {
