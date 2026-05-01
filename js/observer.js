@@ -108,8 +108,7 @@ function isObserverUnlocked() {
         return false
 
     return getObserverState().active
-        || (typeof getHighestUniverseId === "function" && getHighestUniverseId() >= 10)
-        || (typeof getMultiverseState === "function" && getMultiverseState().observer_stub_unlocked)
+        || (typeof getMultiverseState === "function" && getMultiverseState().observer_signal_prepared)
 }
 
 function isObserverActive() {
@@ -121,10 +120,11 @@ function enterObserverLayer() {
         return false
 
     const state = getObserverState()
+    const multiverse = typeof getMultiverseState === "function" ? getMultiverseState() : null
     state.active = true
 
-    if (typeof getMultiverseState === "function")
-        getMultiverseState().observer_stub_unlocked = true
+    if (multiverse != null && !multiverse.observer_entry_claimed)
+        grantObserverEntryLegacy(multiverse)
 
     if (state.subjects.length == 0)
         createObserverSubject(true)
@@ -132,6 +132,25 @@ function enterObserverLayer() {
     setTab("observer")
     updateObserverVisibility()
     return true
+}
+
+function grantObserverEntryLegacy(multiverse) {
+    const state = getObserverState()
+    const signal = typeof getObserverSignalStrength === "function" ? getObserverSignalStrength() : 0
+    const bonusPoints = Math.max(10, Math.sqrt(Math.max(1, signal)) * 2.5)
+
+    state.points += bonusPoints
+    state.lifetime_points += bonusPoints
+    state.upgrades.clear_instructions = Math.max(state.upgrades.clear_instructions || 0, 1)
+
+    if (state.subjects.length == 0) {
+        const subject = createObserverSubject(true)
+        subject.rank = signal >= getObserverSignalRequirement() * 1.8 ? "common" : "trash"
+        subject.ai_xp += Math.min(45, signal * 0.08)
+        subject.last_action = "Inherited a fragment of the Observer Signal."
+    }
+
+    multiverse.observer_entry_claimed = true
 }
 
 function getObserverUpgradeLevel(upgrade) {

@@ -38,6 +38,8 @@
             soft_constants: 0,
         },
         observer_stub_unlocked: false,
+        observer_signal_prepared: false,
+        observer_entry_claimed: false,
     },
     observer: {
         active: false,

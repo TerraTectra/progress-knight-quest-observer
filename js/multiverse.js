@@ -31,6 +31,8 @@ function getMultiverseState() {
             universe_break_unlocked: false,
             upgrades: {},
             observer_stub_unlocked: false,
+            observer_signal_prepared: false,
+            observer_entry_claimed: false,
         }
     }
 
@@ -50,6 +52,10 @@ function getMultiverseState() {
         gameData.multiverse.universe_breaks = 0
     if (gameData.multiverse.universe_break_unlocked == null)
         gameData.multiverse.universe_break_unlocked = false
+    if (gameData.multiverse.observer_signal_prepared == null)
+        gameData.multiverse.observer_signal_prepared = false
+    if (gameData.multiverse.observer_entry_claimed == null)
+        gameData.multiverse.observer_entry_claimed = false
 
     return gameData.multiverse
 }
@@ -688,6 +694,46 @@ function getUniverseTenObserverSignalGain() {
     const routineGain = impossibleRoutine == null ? 1 : 1 + impossibleRoutine.level * impossibleRoutine.baseData.effect
     const witnessGain = witnessPreparation == null ? 1 : 1 + witnessPreparation.level * witnessPreparation.baseData.effect
     return listeningGain * routineGain * witnessGain * lifetimeMemory * breakMemory * staticCrown()
+}
+
+function getObserverSignalStrength() {
+    if (!isMultiverseUnlocked() || getHighestUniverseId() < 10)
+        return 0
+
+    const thresholdListening = gameData.taskData["Threshold Listening"]
+    const impossibleRoutine = gameData.taskData["Impossible Routine"]
+    const witnessPreparation = gameData.taskData["Witness Preparation"]
+    const listening = thresholdListening == null ? 0 : thresholdListening.level
+    const routine = impossibleRoutine == null ? 0 : impossibleRoutine.level
+    const witness = witnessPreparation == null ? 0 : witnessPreparation.level
+    const signal = listening + routine * 1.45 + witness * 2.15
+    return signal * getUniverseTenObserverSignalGain()
+}
+
+function getObserverSignalRequirement() {
+    return 280
+}
+
+function getObserverSignalProgress() {
+    return Math.min(1, getObserverSignalStrength() / getObserverSignalRequirement())
+}
+
+function canPrepareObserverSignal() {
+    return isMultiverseUnlocked()
+        && getCurrentUniverseId() == 10
+        && getHighestUniverseId() >= 10
+        && !getMultiverseState().observer_signal_prepared
+        && getObserverSignalStrength() >= getObserverSignalRequirement()
+}
+
+function prepareObserverSignal() {
+    if (!canPrepareObserverSignal())
+        return false
+
+    const state = getMultiverseState()
+    state.observer_signal_prepared = true
+    state.observer_stub_unlocked = true
+    return true
 }
 
 function getUniverseTenXpGain() {

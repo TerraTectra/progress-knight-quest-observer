@@ -681,7 +681,7 @@ function renderMultiverseUniverses() {
         `<div class="rb-stat-box mp"><div><span class="color-hypercubes">Multiverse points:</span> <b>${format(gameData.multiverse_points, 2)}</b></div><div style="color:gray;">+${format(getMultiversePointGain(), 4)}/s real time</div></div>` +
         `<div class="rb-stat-box void"><div><span class="rb-void">Current universe:</span> <b>${currentUniverse.id} - ${currentUniverse.name}</b></div><div style="color:gray;">${getUniverseParameterName()} x${format(getUniverseParameterGain(), 2)}</div></div>` +
         `<div class="rb-stat-box gold"><div><span class="rb-gold">Highest universe:</span> <b>${state.highest_universe}/10</b></div><div style="color:gray;">Breaks: ${formatWhole(state.universe_breaks)}</div></div>` +
-        `<div class="rb-stat-box red"><div><span class="rb-locked">Next break:</span> <b>${nextUniverse == null ? "Observer seal" : "U-" + nextUniverse.id}</b></div><div style="color:gray;">${nextUniverse == null ? "Observer layer prepared" : (state.universe_break_unlocked ? "Cost: " + format(nextUniverse.unlockCost, 2) + " MP" : "Sealed until Metaverse altar: Break Universe")}</div></div>`
+        `<div class="rb-stat-box red"><div><span class="rb-locked">Next break:</span> <b>${nextUniverse == null ? "Observer signal" : "U-" + nextUniverse.id}</b></div><div style="color:gray;">${nextUniverse == null ? format(getObserverSignalStrength(), 2) + " / " + format(getObserverSignalRequirement(), 2) : (state.universe_break_unlocked ? "Cost: " + format(nextUniverse.unlockCost, 2) + " MP" : "Sealed until Metaverse altar: Break Universe")}</div></div>`
 
     if (summary.dataset.renderSignature != summaryHtml) {
         summary.innerHTML = summaryHtml
@@ -695,12 +695,14 @@ function renderMultiverseUniverses() {
         state.universe_breaks,
         state.universe_break_unlocked ? 1 : 0,
         state.observer_stub_unlocked ? 1 : 0,
+        state.observer_signal_prepared ? 1 : 0,
         canBreak ? 1 : 0,
         format(getUniverseParameterGain(), 2),
+        format(getObserverSignalStrength(), 2),
     ].join("|")
 
     if (grid.dataset.renderSignature == gridSignature) {
-        document.getElementById("observerStubPanel").classList.toggle("hidden", !state.observer_stub_unlocked)
+        renderObserverSignalPanel()
         return
     }
 
@@ -739,7 +741,32 @@ function renderMultiverseUniverses() {
 
     grid.innerHTML = html
     grid.dataset.renderSignature = gridSignature
-    document.getElementById("observerStubPanel").classList.toggle("hidden", !state.observer_stub_unlocked)
+    renderObserverSignalPanel()
+}
+
+function renderObserverSignalPanel() {
+    const panel = document.getElementById("observerStubPanel")
+    if (panel == null)
+        return
+
+    const state = getMultiverseState()
+    const shouldShow = getHighestUniverseId() >= 10 || state.observer_signal_prepared || state.observer_stub_unlocked
+    panel.classList.toggle("hidden", !shouldShow)
+    if (!shouldShow)
+        return
+
+    const signal = getObserverSignalStrength()
+    const required = getObserverSignalRequirement()
+    const progress = getObserverSignalProgress() * 100
+    const prepared = state.observer_signal_prepared
+
+    panel.innerHTML =
+        `<div class="text-caption"><b>Observer Signal</b></div>` +
+        `<div style="color:gray;">Universe X is not the end. Stabilize the signal with Threshold Listening, Impossible Routine, and Witness Preparation.</div>` +
+        `<div class="rb-distortion-list">Signal: <b>${format(signal, 2)}</b> / ${format(required, 2)} (${format(progress, 1)}%)</div>` +
+        `<div class="rb-observer-meter"><div style="width:${Math.min(100, progress)}%"></div></div>` +
+        `<div style="color:gray; padding-top:0.5em;">${prepared ? "The signal is prepared. The Observer can now be entered." : "Prepare the signal to unlock the third global layer."}</div>` +
+        `<button class="w3-button button" style="margin-top:0.7em;" onclick="${prepared ? "enterObserverLayer()" : "prepareObserverSignal()"}" ${prepared || canPrepareObserverSignal() ? "" : "disabled"}>${prepared ? "Enter Observer" : "Prepare Observer Signal"}</button>`
 }
 
 function renderMultiverseUpgrades() {
