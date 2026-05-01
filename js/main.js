@@ -1378,6 +1378,8 @@ function loadGameData() {
             replaceSaveDict(gameData.metaverse, gameDataSave.metaverse)
             replaceSaveDict(gameData.multiverse, gameDataSave.multiverse)
             replaceSaveDict(gameData.multiverse.upgrades, gameDataSave.multiverse.upgrades)
+            replaceSaveDict(gameData.observer, gameDataSave.observer)
+            replaceSaveDict(gameData.observer.upgrades, gameDataSave.observer.upgrades)
             replaceSaveDict(gameData.perks, gameDataSave.perks)
             gameData = gameDataSave
 
