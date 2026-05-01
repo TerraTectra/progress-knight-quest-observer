@@ -67,6 +67,9 @@ async function runScenario(browser, name, setup) {
     const globals = await page.evaluate(() => ({
         hasGameError: Boolean(window.tempData && window.tempData.hasError),
         selectedTab: window.gameData && window.gameData.settings && window.gameData.settings.selectedTab,
+        observerSubjects: window.gameData && window.gameData.observer && window.gameData.observer.subjects
+            ? window.gameData.observer.subjects.map(subject => ({ rank: subject.rank, personality: subject.personality }))
+            : [],
     }))
 
     await page.close()
@@ -87,6 +90,8 @@ async function runScenario(browser, name, setup) {
 
     if (globals.hasGameError)
         failures.push(`${name}: tempData.hasError is true`)
+    if (name == "observer" && (!globals.observerSubjects[0] || globals.observerSubjects[0].rank != "trash"))
+        failures.push(`${name}: first observer subject must be free Trash rank`)
     for (const error of errors)
         failures.push(`${name}: ${error}`)
 

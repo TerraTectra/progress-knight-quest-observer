@@ -353,7 +353,7 @@ function buyObserverSubject() {
         return false
 
     state.points -= cost
-    createObserverSubject(false)
+    createObserverSubject(state.subjects.length == 0)
     return true
 }
 
