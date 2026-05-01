@@ -753,6 +753,7 @@ function renderMultiverseUpgrades() {
         long_echo: "rb-upgrade-echo",
         abyss_tithe: "rb-upgrade-abyss",
         essence_prism: "rb-upgrade-prism",
+        dark_singularity: "rb-upgrade-dark",
         void_cartography: "rb-upgrade-cartography",
         soft_constants: "rb-upgrade-constants",
     }

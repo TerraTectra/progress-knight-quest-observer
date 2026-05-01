@@ -411,7 +411,7 @@ function getDarkMatterGain() {
     const TheEndIsNear = getUnspentPerksDarkmatterGainBuff() 
 
 
-    return 1 * darkRuler.getEffect() * darkMatterHarvester * darkMatterMining * darkMatterMillionaire * getChallengeBonus("the_darkest_time") * getDarkMatterSkillDarkMater() * darkMatterMultGain() *
+    return 1 * darkRuler.getEffect() * darkMatterHarvester * darkMatterMining * darkMatterMillionaire * getChallengeBonus("the_darkest_time") * getDarkMatterSkillDarkMater() * darkMatterMultGain() * getMultiverseDarkMatterGain() *
         (Desintegration == 0 ? 1 : Desintegration) * TheEndIsNear
 }
 

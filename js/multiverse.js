@@ -17,6 +17,7 @@ const multiverseUpgradeData = {
     long_echo: { name: "Long Echo", baseCost: 8, costMult: 2.6, description: "+5% lifespan per level." },
     abyss_tithe: { name: "Abyss Tithe", baseCost: 12, costMult: 2.7, description: "+12% Evil gain per level." },
     essence_prism: { name: "Essence Prism", baseCost: 16, costMult: 2.85, description: "+10% Essence gain per level." },
+    dark_singularity: { name: "Dark Singularity", baseCost: 22, costMult: 3.05, description: "+15% Dark Matter gain per level." },
     void_cartography: { name: "Void Cartography", baseCost: 10, costMult: 2.75, description: "+18% Multiverse Point gain per level." },
     soft_constants: { name: "Soft Constants", baseCost: 18, costMult: 3, description: "-3% expenses per level, capped at -45%." },
 }
@@ -184,6 +185,13 @@ function getMultiverseEssenceGain() {
         return 1
 
     return (1 + getMultiverseUpgradeLevel("essence_prism") * 0.10) * getUniverseThreeEssenceGain() * getUniverseSixEssenceGain() * getUniverseNineEssenceGain() * getUniverseTenEssenceGain()
+}
+
+function getMultiverseDarkMatterGain() {
+    if (!isMultiverseUnlocked())
+        return 1
+
+    return 1 + getMultiverseUpgradeLevel("dark_singularity") * 0.15
 }
 
 function getMultiverseCategoryPower(category, scale) {
