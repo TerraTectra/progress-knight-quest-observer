@@ -642,11 +642,30 @@ function renderMultiverseUniverses() {
     const currentUniverse = getUniverseInfo()
     const nextUniverse = state.highest_universe < 10 ? getUniverseInfo(state.highest_universe + 1) : null
 
-    summary.innerHTML =
+    const summaryHtml =
         `<div class="rb-stat-box mp"><div><span class="color-hypercubes">Multiverse points:</span> <b>${format(gameData.multiverse_points, 2)}</b></div><div style="color:gray;">+${format(getMultiversePointGain(), 4)}/s real time</div></div>` +
         `<div class="rb-stat-box void"><div><span class="rb-void">Current universe:</span> <b>${currentUniverse.id} - ${currentUniverse.name}</b></div><div style="color:gray;">Void resonance x${format(getMultiverseVoidResonance(), 2)}</div></div>` +
         `<div class="rb-stat-box gold"><div><span class="rb-gold">Highest universe:</span> <b>${state.highest_universe}/10</b></div><div style="color:gray;">Breaks: ${formatWhole(state.universe_breaks)}</div></div>` +
         `<div class="rb-stat-box red"><div><span class="rb-locked">Next break:</span> <b>${nextUniverse == null ? "Observer seal" : "U-" + nextUniverse.id}</b></div><div style="color:gray;">${nextUniverse == null ? "Observer layer prepared" : "Cost: " + format(nextUniverse.unlockCost, 2) + " MP"}</div></div>`
+
+    if (summary.dataset.renderSignature != summaryHtml) {
+        summary.innerHTML = summaryHtml
+        summary.dataset.renderSignature = summaryHtml
+    }
+
+    const canBreak = canBreakCurrentUniverse()
+    const gridSignature = [
+        state.current_universe,
+        state.highest_universe,
+        state.universe_breaks,
+        state.observer_stub_unlocked ? 1 : 0,
+        canBreak ? 1 : 0,
+    ].join("|")
+
+    if (grid.dataset.renderSignature == gridSignature) {
+        document.getElementById("observerStubPanel").classList.toggle("hidden", !state.observer_stub_unlocked)
+        return
+    }
 
     let html = ""
     for (const universe of multiverseUniverses) {
@@ -681,6 +700,7 @@ function renderMultiverseUniverses() {
     }
 
     grid.innerHTML = html
+    grid.dataset.renderSignature = gridSignature
     document.getElementById("observerStubPanel").classList.toggle("hidden", !state.observer_stub_unlocked)
 }
 
@@ -697,6 +717,13 @@ function renderMultiverseUpgrades() {
         soft_constants: "rb-upgrade-constants",
     }
 
+    const upgradeSignature = Object.keys(multiverseUpgradeData).map(function(upgrade) {
+        return upgrade + ":" + getMultiverseUpgradeLevel(upgrade) + ":" + (canBuyMultiverseUpgrade(upgrade) ? 1 : 0)
+    }).join("|")
+
+    if (rows.dataset.renderSignature == upgradeSignature)
+        return
+
     let html = ""
     for (const upgrade in multiverseUpgradeData) {
         const data = multiverseUpgradeData[upgrade]
@@ -712,6 +739,7 @@ function renderMultiverseUpgrades() {
     }
 
     rows.innerHTML = html
+    rows.dataset.renderSignature = upgradeSignature
 }
 
 function renderPerks() {
