@@ -221,6 +221,13 @@ async function runLateScenario(browser) {
 
     const realTimeMetaFailures = await page.evaluate(() => {
         const failures = []
+        if (typeof multiverseUpgradeData != "undefined") {
+            for (const key in multiverseUpgradeData) {
+                if (!(key in gameData.multiverse.upgrades))
+                    failures.push(`Multiverse upgrade ${key} is missing from base save schema`)
+            }
+        }
+
         const timeWarping = gameData.taskData["Time Warping"]
         const originalAdminSpeed = gameData.settings.adminGameSpeedMultiplier
         const originalTimeWarpingLevel = timeWarping == null ? 0 : timeWarping.level

@@ -38,6 +38,8 @@
             dark_singularity: 0,
             void_cartography: 0,
             soft_constants: 0,
+            fracture_memory: 0,
+            threshold_prism: 0,
         },
         observer_stub_unlocked: false,
         observer_signal_prepared: false,

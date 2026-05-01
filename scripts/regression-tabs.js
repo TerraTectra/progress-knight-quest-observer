@@ -699,9 +699,32 @@ async function runScenario(browser, name, setup) {
                 dark_singularity: { metric: "dm", direction: "up" },
                 void_cartography: { metric: "mp", direction: "up" },
                 soft_constants: { metric: "expense", direction: "down" },
+                fracture_memory: { metric: "breakProgress", direction: "up" },
+                threshold_prism: { metric: "signal", direction: "up" },
             }
 
             function metrics() {
+                const originalUniverse = gameData.multiverse.current_universe
+                const originalHighest = gameData.multiverse.highest_universe
+                const originalBreaks = gameData.multiverse.universe_breaks
+
+                gameData.multiverse.current_universe = 5
+                gameData.multiverse.highest_universe = 5
+                gameData.multiverse.universe_breaks = 4
+                if (gameData.taskData["Star Market"] != null) {
+                    gameData.taskData["Star Market"].level = 60
+                    gameData.taskData["Star Market"].maxLevel = 60
+                }
+                const breakProgress = getUniverseBreakProgress(5)
+
+                gameData.multiverse.current_universe = 10
+                gameData.multiverse.highest_universe = 10
+                const signal = getObserverSignalStrength()
+
+                gameData.multiverse.current_universe = originalUniverse
+                gameData.multiverse.highest_universe = originalHighest
+                gameData.multiverse.universe_breaks = originalBreaks
+
                 return {
                     mp: getMultiversePointGain(),
                     xp: getMultiverseXpGain(),
@@ -711,6 +734,8 @@ async function runScenario(browser, name, setup) {
                     evil: getMultiverseEvilGain(),
                     essence: getMultiverseEssenceGain(),
                     dm: getMultiverseDarkMatterGain(),
+                    breakProgress,
+                    signal,
                 }
             }
 
@@ -870,6 +895,33 @@ async function runScenario(browser, name, setup) {
                 failures.push("Universe II parameter relief does not improve income")
             if (!(u2ImprovedExpense < u2BaseExpense))
                 failures.push("Universe II parameter relief does not reduce expenses")
+
+            clearRouteProgress()
+            gameData.multiverse.current_universe = 8
+            gameData.multiverse.highest_universe = 8
+            gameData.multiverse.universe_breaks = 7
+            if (typeof getMultiverseState == "function")
+                getMultiverseState()
+            trainRoute(universeRoutes[8], 96)
+            for (const key in gameData.multiverse.upgrades)
+                gameData.multiverse.upgrades[key] = 0
+            const u8BreakBase = getUniverseBreakProgress(8)
+            gameData.multiverse.upgrades.fracture_memory = 6
+            const u8BreakRelieved = getUniverseBreakProgress(8)
+            if (!(u8BreakRelieved > u8BreakBase))
+                failures.push("Fracture Memory does not improve universe break progress")
+
+            clearRouteProgress()
+            gameData.multiverse.current_universe = 10
+            gameData.multiverse.highest_universe = 10
+            trainRoute(universeRoutes[10], 160)
+            for (const key in gameData.multiverse.upgrades)
+                gameData.multiverse.upgrades[key] = 0
+            const signalBase = getObserverSignalStrength()
+            gameData.multiverse.upgrades.threshold_prism = 5
+            const signalImproved = getObserverSignalStrength()
+            if (!(signalImproved > signalBase))
+                failures.push("Threshold Prism does not improve Observer signal strength")
 
             for (let universeId = 2; universeId <= 9; universeId++) {
                 clearRouteProgress()

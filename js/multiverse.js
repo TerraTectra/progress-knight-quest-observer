@@ -20,6 +20,8 @@ const multiverseUpgradeData = {
     dark_singularity: { name: "Dark Singularity", baseCost: 22, costMult: 3.05, effect: 0.18, description: "+18% Dark Matter gain per level and improves MP income from the dark layer." },
     void_cartography: { name: "Void Cartography", baseCost: 10, costMult: 2.75, effect: 0.14, description: "Increases Multiverse Point gain with diminishing returns." },
     soft_constants: { name: "Soft Constants", baseCost: 18, costMult: 3, effect: 0.04, cap: 0.50, description: "-4% expenses per level, capped at -50%." },
+    fracture_memory: { name: "Fracture Memory", baseCost: 35, costMult: 3.05, effect: 0.045, cap: 0.42, description: "Makes repeated universe breaks less strict without removing local route requirements." },
+    threshold_prism: { name: "Threshold Prism", baseCost: 90, costMult: 3.2, effect: 0.10, description: "+10% Observer Signal strength per level in Universe X." },
 }
 
 function getMultiverseState() {
@@ -190,6 +192,15 @@ function getMultiverseExpenseReduction() {
     return Math.min(data.cap, getMultiverseUpgradeLevel("soft_constants") * data.effect)
 }
 
+function getMultiverseFractureMemoryRelief() {
+    const data = multiverseUpgradeData.fracture_memory
+    return Math.min(data.cap, getMultiverseUpgradeLevel("fracture_memory") * data.effect)
+}
+
+function getMultiverseObserverSignalUpgradeGain() {
+    return getMultiverseUpgradeMultiplier("threshold_prism")
+}
+
 function getMultiverseDarkLayerMpGain() {
     return getSafeMultiverseNumber(
         1
@@ -241,7 +252,7 @@ function getUniverseBreakParameterProgress(id = getCurrentUniverseId()) {
     if (requirement == null || requirement.parameter <= 0)
         return 1
 
-    return Math.min(1, getUniverseParameterGain(id) / requirement.parameter)
+    return Math.min(1, getUniverseParameterGain(id) / requirement.parameter * (1 + getMultiverseFractureMemoryRelief()))
 }
 
 function getUniverseBreakTaskProgress(id = getCurrentUniverseId()) {
@@ -253,7 +264,7 @@ function getUniverseBreakTaskProgress(id = getCurrentUniverseId()) {
     if (task == null || requirement.taskLevel <= 0)
         return 0
 
-    return Math.min(1, task.level / requirement.taskLevel)
+    return Math.min(1, task.level / requirement.taskLevel * (1 + getMultiverseFractureMemoryRelief() * 0.65))
 }
 
 function getUniverseBreakProgress(id = getCurrentUniverseId()) {
@@ -1061,7 +1072,7 @@ function getUniverseTenObserverSignalGain() {
     const routineGain = impossibleRoutine == null ? 1 : 1 + impossibleRoutine.level * impossibleRoutine.baseData.effect
     const witnessGain = witnessPreparation == null ? 1 : 1 + witnessPreparation.level * witnessPreparation.baseData.effect
     const alignmentGain = observerAlignment == null ? 1 : 1 + observerAlignment.level * observerAlignment.baseData.effect
-    return listeningGain * routineGain * witnessGain * alignmentGain * lifetimeMemory * breakMemory * Math.pow(observerLens(), 0.18) * staticCrown()
+    return listeningGain * routineGain * witnessGain * alignmentGain * lifetimeMemory * breakMemory * Math.pow(observerLens(), 0.18) * staticCrown() * getMultiverseObserverSignalUpgradeGain()
 }
 
 function getObserverSignalStrength() {
