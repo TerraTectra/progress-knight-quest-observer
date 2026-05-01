@@ -695,59 +695,99 @@ async function runScenario(browser, name, setup) {
                 return ["Universe passive helpers are missing"]
 
             gameData.multiverse_unlocked = true
-            gameData.multiverse_points = 1e9
-            gameData.multiverse_points_lifetime = 1e10
-            gameData.multiverse.current_universe = 2
-            gameData.multiverse.highest_universe = 2
+            gameData.multiverse_points = 1e14
+            gameData.multiverse_points_lifetime = 1e15
+            gameData.evil = 1e80
+            gameData.essence = 1e75
+            gameData.dark_matter = 1e70
+            gameData.hypercubes = 1e65
+            gameData.multiverse.current_universe = 10
+            gameData.multiverse.highest_universe = 10
             gameData.multiverse.universe_break_unlocked = true
 
-            for (const key in gameData.taskData) {
-                gameData.taskData[key].level = 0
-                gameData.taskData[key].maxLevel = 0
+            const universeRoutes = {
+                1: { skills: ["Corrupted", "Void Slave", "Void Fiend", "Void Amplification", "Mind Release"], items: [] },
+                2: { skills: ["Royal Administration", "Paperwork Evasion", "Reality Surveying"], items: ["Royal Ledger", "Tax Seal"] },
+                3: { skills: ["Arcane Taxation", "Mana Tariff", "Spell Auditing"], items: ["Taxed Grimoire", "Arcane Abacus"] },
+                4: { skills: ["Temporal Anchoring", "Borrowed Seconds", "Entropy Calendar"], items: ["Broken Hourglass", "Chronal Compass"] },
+                5: { skills: ["Greed Accounting", "Debt Transmutation", "Star Market"], items: ["Star Ledger", "Debt Engine"] },
+                6: { skills: ["Dimming Resonance", "Abyssal Recycling", "Null Continuity"], items: ["Dimmed Compass", "Null Contract"] },
+                7: { skills: ["Causal Threading", "Paradox Discipline", "Retroactive Training"], items: ["Causality Needle", "Paradox Anchor"] },
+                8: { skills: ["Ladder Reconstruction", "Sideways Promotion", "Fractured Mastery", "Recursive Promotion"], items: ["Broken Rung", "Ascension Map"] },
+                9: { skills: ["Collapse Containment", "Silent Economy", "Last Signal", "Silence Drills"], items: ["Collapse Gauge", "Quiet Beacon"] },
+                10: { skills: ["Threshold Listening", "Impossible Routine", "Witness Preparation", "Observer Alignment"], items: ["Observer Lens", "Static Crown"] },
             }
 
-            const u2BaseParameter = getUniverseParameterGain(2)
-            const u2BaseWeight = getUniversePassiveWeight(2)
+            function clearRouteProgress() {
+                for (const key in gameData.taskData) {
+                    gameData.taskData[key].level = 0
+                    gameData.taskData[key].maxLevel = 0
+                }
+                gameData.currentMisc = []
+            }
+
+            function trainRoute(route, level) {
+                for (const skill of route.skills) {
+                    if (gameData.taskData[skill] != null) {
+                        gameData.taskData[skill].level = level
+                        gameData.taskData[skill].maxLevel = level
+                    }
+                }
+                for (const item of route.items) {
+                    if (gameData.itemData[item] != null && !gameData.currentMisc.includes(gameData.itemData[item]))
+                        gameData.currentMisc.push(gameData.itemData[item])
+                }
+            }
+
+            for (let universeId = 1; universeId <= 10; universeId++) {
+                clearRouteProgress()
+                gameData.multiverse.current_universe = universeId
+                gameData.multiverse.highest_universe = Math.max(10, universeId)
+
+                const route = universeRoutes[universeId]
+                const baseParameter = getUniverseParameterGain(universeId)
+                const baseWeight = getUniversePassiveWeight(universeId)
+                const baseMpGain = getMultiversePointGain()
+                trainRoute(route, universeId >= 8 ? 360 : 220)
+                const improvedParameter = getUniverseParameterGain(universeId)
+                const improvedWeight = getUniversePassiveWeight(universeId)
+                const improvedMpGain = getMultiversePointGain()
+
+                if (!(improvedParameter > baseParameter))
+                    failures.push(`Universe ${universeId} parameter does not grow from its local route`)
+                if (!(improvedWeight > baseWeight))
+                    failures.push(`Universe ${universeId} passive MP weight does not grow from its parameter`)
+                if (!(improvedMpGain > baseMpGain))
+                    failures.push(`Universe ${universeId} route does not improve total passive MP gain`)
+            }
+
+            clearRouteProgress()
+            gameData.multiverse.current_universe = 2
+            gameData.multiverse.highest_universe = 2
             const u2BaseIncome = getMultiverseIncomeGain()
             const u2BaseExpense = getMultiverseExpenseGain()
-            gameData.taskData["Royal Administration"].level = 160
-            gameData.taskData["Paperwork Evasion"].level = 160
-            gameData.taskData["Reality Surveying"].level = 120
-            const u2ImprovedParameter = getUniverseParameterGain(2)
-            const u2ImprovedWeight = getUniversePassiveWeight(2)
+            trainRoute(universeRoutes[2], 160)
             const u2ImprovedIncome = getMultiverseIncomeGain()
             const u2ImprovedExpense = getMultiverseExpenseGain()
-
-            if (!(u2ImprovedParameter > u2BaseParameter))
-                failures.push("Universe II parameter does not grow from its skills")
-            if (!(u2ImprovedWeight > u2BaseWeight))
-                failures.push("Universe II passive MP weight does not grow from its parameter")
             if (!(u2ImprovedIncome > u2BaseIncome))
                 failures.push("Universe II parameter relief does not improve income")
             if (!(u2ImprovedExpense < u2BaseExpense))
                 failures.push("Universe II parameter relief does not reduce expenses")
 
-            gameData.multiverse.current_universe = 5
-            gameData.multiverse.highest_universe = 5
-            const u5BaseWeight = getUniversePassiveWeight(5)
-            gameData.taskData["Greed Accounting"].level = 180
-            gameData.taskData["Star Market"].level = 140
-            const u5ImprovedWeight = getUniversePassiveWeight(5)
-            if (!(u5ImprovedWeight > u5BaseWeight))
-                failures.push("Universe V passive MP weight does not grow from commerce skills")
+            for (let universeId = 2; universeId <= 9; universeId++) {
+                clearRouteProgress()
+                gameData.multiverse.current_universe = universeId
+                gameData.multiverse.highest_universe = universeId
+                gameData.multiverse.universe_breaks = universeId - 1
 
-            gameData.multiverse.current_universe = 9
-            gameData.multiverse.highest_universe = 9
-            const canBreakBefore = canBreakCurrentUniverse()
-            gameData.taskData["Collapse Containment"].level = 320
-            gameData.taskData["Silent Economy"].level = 320
-            gameData.taskData["Last Signal"].level = 320
-            gameData.taskData["Silence Drills"].level = 320
-            const canBreakAfter = canBreakCurrentUniverse()
-            if (canBreakBefore)
-                failures.push("Universe IX can break before its required skill route")
-            if (!canBreakAfter)
-                failures.push("Universe IX cannot break after its required skill route")
+                const canBreakBefore = canBreakCurrentUniverse()
+                trainRoute(universeRoutes[universeId], universeId >= 8 ? 420 : 320)
+                const canBreakAfter = canBreakCurrentUniverse()
+                if (canBreakBefore)
+                    failures.push(`Universe ${universeId} can break before its required local route`)
+                if (!canBreakAfter)
+                    failures.push(`Universe ${universeId} cannot break after its required local route`)
+            }
 
             return failures
         })

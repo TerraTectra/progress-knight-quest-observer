@@ -576,12 +576,15 @@ function getMultiverseSkillsXpGain() {
 
 function getUniverseThreeArcaneComplianceGain() {
     const arcaneTaxation = gameData.taskData["Arcane Taxation"]
+    const manaTariff = gameData.taskData["Mana Tariff"]
     const spellAuditing = gameData.taskData["Spell Auditing"]
+    const taxedGrimoire = getMultiverseItemEffect("Taxed Grimoire")
     const arcaneAbacus = getMultiverseItemEffect("Arcane Abacus")
 
     const taxationGain = arcaneTaxation == null ? 1 : 1 + arcaneTaxation.level * arcaneTaxation.baseData.effect + getTaskLevelPower("Arcane Taxation", 0.01, 1.7) - 1
+    const tariffGain = manaTariff == null ? 1 : 1 + Math.abs(manaTariff.level * manaTariff.baseData.effect) + getTaskLevelPower("Mana Tariff", 0.0085, 1.45) - 1
     const auditingGain = spellAuditing == null ? 1 : 1 + spellAuditing.level * spellAuditing.baseData.effect + getTaskLevelPower("Spell Auditing", 0.009, 1.6) - 1
-    return taxationGain * auditingGain * arcaneAbacus()
+    return taxationGain * tariffGain * auditingGain * Math.pow(taxedGrimoire(), 0.28) * arcaneAbacus()
 }
 
 function getUniverseThreeMagicGain() {
@@ -623,12 +626,15 @@ function getUniverseThreeSkillsXpGain() {
 
 function getUniverseFourTemporalAnchorGain() {
     const temporalAnchoring = gameData.taskData["Temporal Anchoring"]
+    const borrowedSeconds = gameData.taskData["Borrowed Seconds"]
     const entropyCalendar = gameData.taskData["Entropy Calendar"]
+    const brokenHourglass = getMultiverseItemEffect("Broken Hourglass")
     const chronalCompass = getMultiverseItemEffect("Chronal Compass")
 
     const anchorGain = temporalAnchoring == null ? 1 : 1 + temporalAnchoring.level * temporalAnchoring.baseData.effect + getTaskLevelPower("Temporal Anchoring", 0.009, 1.65) - 1
+    const secondsGain = borrowedSeconds == null ? 1 : 1 + borrowedSeconds.level * borrowedSeconds.baseData.effect + getTaskLevelPower("Borrowed Seconds", 0.0075, 1.35) - 1
     const calendarGain = entropyCalendar == null ? 1 : 1 + entropyCalendar.level * entropyCalendar.baseData.effect + getTaskLevelPower("Entropy Calendar", 0.008, 1.55) - 1
-    return anchorGain * calendarGain * chronalCompass()
+    return anchorGain * secondsGain * calendarGain * Math.pow(brokenHourglass(), 0.25) * chronalCompass()
 }
 
 function getUniverseFourLifespanGain() {
@@ -659,13 +665,16 @@ function getUniverseFourSkillsXpGain() {
 
 function getUniverseFiveGreedIndexGain() {
     const greedAccounting = gameData.taskData["Greed Accounting"]
+    const debtTransmutation = gameData.taskData["Debt Transmutation"]
     const starMarket = gameData.taskData["Star Market"]
+    const starLedger = getMultiverseItemEffect("Star Ledger")
     const debtEngine = getMultiverseItemEffect("Debt Engine")
     const netPressure = Math.max(0, Math.log10(Math.max(1, getIncome()) / Math.max(1, getExpense()))) * 0.025
 
     const accountingGain = greedAccounting == null ? 1 : 1 + greedAccounting.level * greedAccounting.baseData.effect + getTaskLevelPower("Greed Accounting", 0.0085, 1.55) - 1
+    const debtGain = debtTransmutation == null ? 1 : 1 + Math.abs(debtTransmutation.level * debtTransmutation.baseData.effect) + getTaskLevelPower("Debt Transmutation", 0.0072, 1.35) - 1
     const marketGain = starMarket == null ? 1 : 1 + starMarket.level * starMarket.baseData.effect + getTaskLevelPower("Star Market", 0.008, 1.5) - 1
-    return (accountingGain + netPressure) * marketGain * debtEngine()
+    return (accountingGain + netPressure) * debtGain * marketGain * Math.pow(starLedger(), 0.24) * debtEngine()
 }
 
 function getUniverseFiveIncomeGain() {
@@ -698,12 +707,15 @@ function getUniverseFiveSkillsXpGain() {
 function getUniverseSixDimmingResonanceGain() {
     const dimmingResonance = gameData.taskData["Dimming Resonance"]
     const abyssalRecycling = gameData.taskData["Abyssal Recycling"]
+    const nullContinuity = gameData.taskData["Null Continuity"]
+    const dimmedCompass = getMultiverseItemEffect("Dimmed Compass")
     const nullContract = getMultiverseItemEffect("Null Contract")
     const voidDepth = Math.log10(gameData.evil + 10) * 0.015 + Math.log10(gameData.essence + 10) * 0.01
 
     const resonanceGain = dimmingResonance == null ? 1 : 1 + dimmingResonance.level * dimmingResonance.baseData.effect + getTaskLevelPower("Dimming Resonance", 0.008, 1.5) - 1
     const recyclingGain = abyssalRecycling == null ? 1 : 1 + abyssalRecycling.level * abyssalRecycling.baseData.effect + getTaskLevelPower("Abyssal Recycling", 0.007, 1.45) - 1
-    return (resonanceGain + voidDepth) * recyclingGain * nullContract()
+    const continuityGain = nullContinuity == null ? 1 : 1 + nullContinuity.level * nullContinuity.baseData.effect + getTaskLevelPower("Null Continuity", 0.0065, 1.35) - 1
+    return (resonanceGain + voidDepth) * recyclingGain * continuityGain * Math.pow(dimmedCompass(), 0.24) * nullContract()
 }
 
 function getUniverseSixVoidGain() {
@@ -756,13 +768,16 @@ function getUniverseSixSkillsXpGain() {
 
 function getUniverseSevenCausalStabilityGain() {
     const causalThreading = gameData.taskData["Causal Threading"]
+    const paradoxDiscipline = gameData.taskData["Paradox Discipline"]
     const retroactiveTraining = gameData.taskData["Retroactive Training"]
+    const causalityNeedle = getMultiverseItemEffect("Causality Needle")
     const paradoxAnchor = getMultiverseItemEffect("Paradox Anchor")
     const breakMemory = 1 + Math.sqrt(getMultiverseState().universe_breaks) * 0.035
 
     const threadingGain = causalThreading == null ? 1 : 1 + causalThreading.level * causalThreading.baseData.effect + getTaskLevelPower("Causal Threading", 0.0072, 1.45) - 1
+    const disciplineGain = paradoxDiscipline == null ? 1 : 1 + paradoxDiscipline.level * paradoxDiscipline.baseData.effect + getTaskLevelPower("Paradox Discipline", 0.0068, 1.35) - 1
     const retroactiveGain = retroactiveTraining == null ? 1 : 1 + retroactiveTraining.level * retroactiveTraining.baseData.effect + getTaskLevelPower("Retroactive Training", 0.0065, 1.4) - 1
-    return threadingGain * retroactiveGain * breakMemory * paradoxAnchor()
+    return threadingGain * disciplineGain * retroactiveGain * breakMemory * Math.pow(causalityNeedle(), 0.24) * paradoxAnchor()
 }
 
 function getUniverseSevenXpGain() {
@@ -800,13 +815,14 @@ function getUniverseEightLadderIntegrityGain() {
     const sidewaysPromotion = gameData.taskData["Sideways Promotion"]
     const fracturedMastery = gameData.taskData["Fractured Mastery"]
     const recursivePromotion = gameData.taskData["Recursive Promotion"]
+    const brokenRung = getMultiverseItemEffect("Broken Rung")
     const ascensionMap = getMultiverseItemEffect("Ascension Map")
 
     const ladderGain = ladderReconstruction == null ? 1 : 1 + ladderReconstruction.level * ladderReconstruction.baseData.effect + getTaskLevelPower("Ladder Reconstruction", 0.006, 1.35) - 1
     const sidewaysGain = sidewaysPromotion == null ? 1 : 1 + sidewaysPromotion.level * sidewaysPromotion.baseData.effect
     const masteryGain = fracturedMastery == null ? 1 : 1 + fracturedMastery.level * fracturedMastery.baseData.effect
     const recursiveGain = recursivePromotion == null ? 1 : 1 + recursivePromotion.level * recursivePromotion.baseData.effect
-    return ladderGain * sidewaysGain * masteryGain * recursiveGain * ascensionMap()
+    return ladderGain * sidewaysGain * masteryGain * recursiveGain * Math.pow(brokenRung(), 0.22) * ascensionMap()
 }
 
 function getUniverseEightXpGain() {
@@ -865,16 +881,19 @@ function getUniverseEightSkillsXpGain() {
 
 function getUniverseNineCollapseControlGain() {
     const collapseContainment = gameData.taskData["Collapse Containment"]
+    const silentEconomy = gameData.taskData["Silent Economy"]
     const lastSignal = gameData.taskData["Last Signal"]
     const silenceDrills = gameData.taskData["Silence Drills"]
+    const collapseGauge = getMultiverseItemEffect("Collapse Gauge")
     const quietBeacon = getMultiverseItemEffect("Quiet Beacon")
     const lifetimeMemory = 1 + Math.log10(gameData.multiverse_points_lifetime + 10) * 0.018
     const breakMemory = 1 + Math.sqrt(getMultiverseState().universe_breaks) * 0.04
 
     const containmentGain = collapseContainment == null ? 1 : 1 + collapseContainment.level * collapseContainment.baseData.effect + getTaskLevelPower("Collapse Containment", 0.0055, 1.25) - 1
+    const economyGain = silentEconomy == null ? 1 : 1 + Math.abs(silentEconomy.level * silentEconomy.baseData.effect) + getTaskLevelPower("Silent Economy", 0.005, 1.18) - 1
     const signalGain = lastSignal == null ? 1 : 1 + lastSignal.level * lastSignal.baseData.effect
     const silenceGain = silenceDrills == null ? 1 : 1 + silenceDrills.level * silenceDrills.baseData.effect
-    return containmentGain * signalGain * silenceGain * lifetimeMemory * breakMemory * quietBeacon()
+    return containmentGain * economyGain * signalGain * silenceGain * lifetimeMemory * breakMemory * Math.pow(collapseGauge(), 0.2) * quietBeacon()
 }
 
 function getUniverseNineXpGain() {
@@ -957,6 +976,7 @@ function getUniverseTenObserverSignalGain() {
     const impossibleRoutine = gameData.taskData["Impossible Routine"]
     const witnessPreparation = gameData.taskData["Witness Preparation"]
     const observerAlignment = gameData.taskData["Observer Alignment"]
+    const observerLens = getMultiverseItemEffect("Observer Lens")
     const staticCrown = getMultiverseItemEffect("Static Crown")
     const lifetimeMemory = 1 + Math.log10(gameData.multiverse_points_lifetime + 10) * 0.02
     const breakMemory = 1 + Math.sqrt(getMultiverseState().universe_breaks) * 0.045
@@ -965,7 +985,7 @@ function getUniverseTenObserverSignalGain() {
     const routineGain = impossibleRoutine == null ? 1 : 1 + impossibleRoutine.level * impossibleRoutine.baseData.effect
     const witnessGain = witnessPreparation == null ? 1 : 1 + witnessPreparation.level * witnessPreparation.baseData.effect
     const alignmentGain = observerAlignment == null ? 1 : 1 + observerAlignment.level * observerAlignment.baseData.effect
-    return listeningGain * routineGain * witnessGain * alignmentGain * lifetimeMemory * breakMemory * staticCrown()
+    return listeningGain * routineGain * witnessGain * alignmentGain * lifetimeMemory * breakMemory * Math.pow(observerLens(), 0.18) * staticCrown()
 }
 
 function getObserverSignalStrength() {
