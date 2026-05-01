@@ -67,6 +67,21 @@ const observerSubjectMilestoneData = {
     first_u10_clear: { name: "First U-X clear", description: "Completed Universe X and restarted from zero.", speed: 0.08, op: 0.12, xp: 0.065, mistake: 0.055 },
 }
 
+const observerSubjectInsightData = {
+    timid_composure: { personality: "timid", name: "Composure", description: "Kept a long safe route.", speed: 0.015, op: 0.025, xp: 0.01, mistake: 0.035, route: 0.03 },
+    timid_shelter: { personality: "timid", name: "Shelter Sense", description: "Learned when to buy safer housing.", speed: 0.01, op: 0.02, purchase: 0.045, mistake: 0.025 },
+    impulsive_control: { personality: "impulsive", name: "Controlled Rush", description: "Reached the Void route without losing all tempo.", speed: 0.055, xp: 0.025, mistake: 0.035, route: 0.02 },
+    impulsive_recovery: { personality: "impulsive", name: "Crash Recovery", description: "Recovered from repeated bad routes.", speed: 0.025, op: 0.02, mistake: 0.045, route: 0.035 },
+    studious_notes: { personality: "studious", name: "Living Notebook", description: "Built a stable AI study loop.", xp: 0.055, aiXp: 0.075, op: 0.015, route: 0.025 },
+    studious_thesis: { personality: "studious", name: "Multiverse Thesis", description: "Turned late-stage failures into route knowledge.", xp: 0.045, aiXp: 0.06, mistake: 0.035, route: 0.035 },
+    greedy_ledger: { personality: "greedy", name: "Golden Ledger", description: "Learned to turn purchases into route power.", income: 0.065, purchase: 0.055, op: 0.035, mistake: 0.02 },
+    greedy_investor: { personality: "greedy", name: "Universe Investor", description: "Used accumulated wealth to stabilize distorted runs.", income: 0.055, speed: 0.025, op: 0.055, route: 0.025 },
+    methodical_routine: { personality: "methodical", name: "Perfect Routine", description: "Kept a very long clean route.", speed: 0.025, op: 0.03, mistake: 0.055, route: 0.055 },
+    methodical_loop: { personality: "methodical", name: "Loop Memory", description: "Converted a Universe X clear into repeatable structure.", speed: 0.035, xp: 0.025, op: 0.055, mistake: 0.04 },
+    visionary_signal: { personality: "visionary", name: "Distortion Sight", description: "Understood the first distorted universes.", speed: 0.035, xp: 0.025, op: 0.04, route: 0.045 },
+    visionary_threshold: { personality: "visionary", name: "Threshold Dream", description: "Recognized the Observer pattern near Universe X.", speed: 0.055, op: 0.075, xp: 0.035, mistake: 0.045, route: 0.055 },
+}
+
 const observerBotRankData = {
     trash: { choice: 0.42, thrift: 0.45, rebirth: 0.38, purchase: 0.45, wrongRoute: 0.34, debtLoss: 0.42 },
     common: { choice: 0.6, thrift: 0.62, rebirth: 0.58, purchase: 0.6, wrongRoute: 0.18, debtLoss: 0.22 },
@@ -176,6 +191,12 @@ function normalizeObserverSubject(subject, state = null) {
     for (const key in observerSubjectMilestoneData) {
         if (subject.milestones[key] == null)
             subject.milestones[key] = false
+    }
+    if (subject.insights == null || Array.isArray(subject.insights))
+        subject.insights = {}
+    for (const key in observerSubjectInsightData) {
+        if (subject.insights[key] == null)
+            subject.insights[key] = false
     }
     if (subject.name == null)
         subject.name = "Subject " + subject.id
@@ -471,6 +492,7 @@ function createObserverSubject(freeSubject) {
         personality: rollObserverPersonality(),
         character_level: 0,
         milestones: {},
+        insights: {},
         stage_index: 0,
         progress: 0,
         mistakes: 0,
@@ -615,6 +637,26 @@ function applyObserverCharacterMasteryToProfile(subject, profile, stage) {
     }
 }
 
+function applyObserverInsightProfile(subject, profile) {
+    if (subject.insights == null)
+        return
+
+    for (const key in observerSubjectInsightData) {
+        const insight = observerSubjectInsightData[key]
+        if (!subject.insights[key] || insight.personality != subject.personality)
+            continue
+
+        profile.speed *= 1 + (insight.speed || 0)
+        profile.xp *= 1 + (insight.xp || 0)
+        profile.op *= 1 + (insight.op || 0)
+        profile.purchase *= 1 + (insight.purchase || 0)
+        profile.income *= 1 + (insight.income || 0)
+        profile.route *= 1 + (insight.route || 0)
+        profile.aiXp *= 1 + (insight.aiXp || 0)
+        profile.mistake *= Math.max(0.55, 1 - (insight.mistake || 0))
+    }
+}
+
 function getObserverPersonalityStageProfile(subject, stage = null) {
     stage = stage || getObserverSubjectStage(subject)
     const band = getObserverStageBand(stage)
@@ -660,6 +702,7 @@ function getObserverPersonalityStageProfile(subject, stage = null) {
     }
 
     applyObserverCharacterMasteryToProfile(subject, profile, stage)
+    applyObserverInsightProfile(subject, profile)
 
     const characterLevel = Math.max(0, subject.character_level || 0)
     const characterBoost = 1 + Math.min(0.75, characterLevel * 0.035)
@@ -735,6 +778,16 @@ function getObserverSubjectMilestoneCount(subject) {
     return count
 }
 
+function getObserverSubjectInsightCount(subject) {
+    normalizeObserverSubject(subject)
+    let count = 0
+    for (const key in observerSubjectInsightData) {
+        if (subject.insights[key])
+            count += 1
+    }
+    return count
+}
+
 function getObserverSubjectMilestoneMultiplier(subject, type) {
     normalizeObserverSubject(subject)
     let bonus = 0
@@ -743,6 +796,54 @@ function getObserverSubjectMilestoneMultiplier(subject, type) {
             bonus += observerSubjectMilestoneData[key][type] || 0
     }
     return type == "mistake" ? Math.max(0.48, 1 - bonus) : 1 + bonus
+}
+
+function shouldUnlockObserverSubjectInsight(subject, key) {
+    const insight = observerSubjectInsightData[key]
+    if (insight == null || insight.personality != subject.personality)
+        return false
+
+    const stage = getObserverSubjectStage(subject)
+
+    if (key == "timid_composure")
+        return subject.clean_time >= 300 || subject.best_clean_time >= 300
+    if (key == "timid_shelter")
+        return subject.bot_property_index >= 2
+    if (key == "impulsive_control")
+        return subject.stage_index >= 3
+    if (key == "impulsive_recovery")
+        return subject.mistakes >= 3 || subject.route_resets >= 1
+    if (key == "studious_notes")
+        return subject.ai_level >= 6
+    if (key == "studious_thesis")
+        return subject.stage_index >= 4 && subject.bot_skill_level >= getObserverBotTargetLevel(subject) * 0.7
+    if (key == "greedy_ledger")
+        return subject.bot_items.length >= 3
+    if (key == "greedy_investor")
+        return subject.stage_index >= 5 && subject.bot_coins >= getObserverBotPurchaseReserve(subject) * 2
+    if (key == "methodical_routine")
+        return subject.clean_time >= 1800 || subject.best_clean_time >= 1800
+    if (key == "methodical_loop")
+        return subject.completed_universe_x > 0
+    if (key == "visionary_signal")
+        return stage.universe >= 2
+    if (key == "visionary_threshold")
+        return stage.universe >= 8 || subject.completed_universe_x > 0
+
+    return false
+}
+
+function updateObserverSubjectInsights(subject) {
+    normalizeObserverSubject(subject)
+    for (const key in observerSubjectInsightData) {
+        if (subject.insights[key] || !shouldUnlockObserverSubjectInsight(subject, key))
+            continue
+
+        const insight = observerSubjectInsightData[key]
+        subject.insights[key] = true
+        subject.last_action = "Insight awakened: " + insight.name + "."
+        pushObserverSubjectLog(subject, subject.last_action)
+    }
 }
 
 function shouldUnlockObserverSubjectMilestone(subject, key) {
@@ -1304,6 +1405,7 @@ function updateObserverSubjects() {
 
         advanceObserverSubject(subject)
         updateObserverSubjectMilestones(subject)
+        updateObserverSubjectInsights(subject)
     }
 }
 
@@ -1648,6 +1750,7 @@ function renderObserverSubjects() {
         const rankCost = getObserverRankUpgradeCost(subject)
         const characterCost = getObserverSubjectCharacterCost(subject)
         const milestones = getObserverSubjectMilestoneCount(subject)
+        const insights = getObserverSubjectInsightCount(subject)
         html +=
             `<div class="rb-observer-subject ${rank.colorClass}">` +
                 `<div class="rb-observer-subject-head">` +
@@ -1662,7 +1765,7 @@ function renderObserverSubjects() {
                 `<div class="rb-observer-meter"><div style="width:${progress}%"></div></div>` +
                 `<div class="rb-observer-mini-row"><span>Route quality</span><b>x${format(routeQuality, 2)}</b></div>` +
                 `<div class="rb-observer-mini-row"><span>AI lvl</span><b>${formatWhole(subject.ai_level)} (${format(aiProgress, 1)}%)</b></div>` +
-                `<div class="rb-observer-mini-row"><span>Character</span><b>Lvl ${formatWhole(subject.character_level)} · ${formatWhole(milestones)} milestones</b></div>` +
+                `<div class="rb-observer-mini-row"><span>Character</span><b>Lvl ${formatWhole(subject.character_level)} · ${formatWhole(milestones)} milestones · ${formatWhole(insights)} insights</b></div>` +
                 `<div class="rb-observer-mini-row"><span>Clean streak</span><b>${formatTime(subject.clean_time, true)}</b></div>` +
                 `<div class="rb-observer-mini-row"><span>OP/sec</span><b>${format(getObserverSubjectOpGain(subject), 3)}</b></div>` +
                 `<div class="rb-observer-mini-row"><span>Mistakes</span><b>${formatWhole(subject.mistakes)}</b></div>` +
@@ -1709,7 +1812,7 @@ function renderObservedObserverSubject() {
     document.getElementById("observerWatchRank").textContent = rank.name
     document.getElementById("observerWatchPersonality").textContent = personality.name
     document.getElementById("observerWatchCharacter").textContent = "Lvl " + formatWhole(subject.character_level)
-    document.getElementById("observerWatchMilestones").textContent = formatWhole(getObserverSubjectMilestoneCount(subject))
+    document.getElementById("observerWatchMilestones").textContent = formatWhole(getObserverSubjectMilestoneCount(subject)) + " / " + formatWhole(getObserverSubjectInsightCount(subject)) + " insights"
     document.getElementById("observerWatchAge").textContent = format(Math.floor(subject.bot_age_days / 365), 0) + " Day " + formatWhole(Math.floor(subject.bot_age_days % 365))
     document.getElementById("observerWatchUniverse").textContent = "U-" + stage.universe
     document.getElementById("observerWatchPhase").textContent = stage.name

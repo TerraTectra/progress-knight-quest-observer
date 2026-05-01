@@ -277,6 +277,7 @@ async function runScenario(browser, name, setup) {
                 bot_skill_level: 40,
                 bot_items: [],
                 milestones: {},
+                insights: {},
                 bot_log: [],
             }
             const legendary = {
@@ -291,6 +292,7 @@ async function runScenario(browser, name, setup) {
                 bot_skill_level: 40,
                 bot_items: [],
                 milestones: {},
+                insights: {},
                 bot_log: [],
             }
             normalizeObserverSubject(trash)
@@ -328,6 +330,7 @@ async function runScenario(browser, name, setup) {
                 bot_skill_level: 45,
                 bot_items: [],
                 milestones: {},
+                insights: {},
                 bot_log: [],
             }
             normalizeObserverSubject(reserveSubject)
@@ -353,6 +356,7 @@ async function runScenario(browser, name, setup) {
                 bot_skill_level: 28,
                 bot_items: [],
                 milestones: {},
+                insights: {},
                 bot_log: [],
             }
             const streakImproved = {
@@ -368,6 +372,7 @@ async function runScenario(browser, name, setup) {
                 bot_skill_level: 28,
                 bot_items: [],
                 milestones: {},
+                insights: {},
                 bot_log: [],
             }
             normalizeObserverSubject(streakBase)
@@ -395,6 +400,7 @@ async function runScenario(browser, name, setup) {
                 bot_skill_level: 65,
                 bot_items: [],
                 milestones: {},
+                insights: {},
                 bot_log: [],
             }
             const trainedVisionary = {
@@ -409,6 +415,7 @@ async function runScenario(browser, name, setup) {
                 bot_skill_level: 65,
                 bot_items: [],
                 milestones: {},
+                insights: {},
                 bot_log: [],
             }
             normalizeObserverSubject(baseVisionary)
@@ -432,6 +439,7 @@ async function runScenario(browser, name, setup) {
                 bot_skill_level: 38,
                 bot_items: [],
                 milestones: {},
+                insights: {},
                 bot_log: [],
             }
             const trainedImpulsive = {
@@ -446,6 +454,7 @@ async function runScenario(browser, name, setup) {
                 bot_skill_level: 38,
                 bot_items: [],
                 milestones: {},
+                insights: {},
                 bot_log: [],
             }
             normalizeObserverSubject(baseImpulsive)
@@ -456,6 +465,84 @@ async function runScenario(browser, name, setup) {
                 failures.push("Character mastery does not improve Impulsive speed")
             if (!(trainedImpulsiveProfile.mistake < baseImpulsiveProfile.mistake))
                 failures.push("Character mastery does not soften Impulsive mistakes")
+
+            const studiousInsightBase = {
+                id: 9010,
+                rank: "skilled",
+                personality: "studious",
+                stage_index: 4,
+                progress: 980,
+                ai_level: 6,
+                character_level: 0,
+                bot_job_level: 25,
+                bot_skill_level: 80,
+                bot_items: [],
+                milestones: {},
+                insights: {},
+                bot_log: [],
+            }
+            const studiousInsight = {
+                id: 9011,
+                rank: "skilled",
+                personality: "studious",
+                stage_index: 4,
+                progress: 980,
+                ai_level: 6,
+                character_level: 0,
+                bot_job_level: 25,
+                bot_skill_level: 80,
+                bot_items: [],
+                milestones: {},
+                insights: {},
+                bot_log: [],
+            }
+            normalizeObserverSubject(studiousInsightBase)
+            normalizeObserverSubject(studiousInsight)
+            const studiousBaseXp = getObserverAiXpGain(studiousInsightBase)
+            updateObserverSubjectInsights(studiousInsight)
+            if (!studiousInsight.insights.studious_notes)
+                failures.push("Studious subject did not unlock Living Notebook insight")
+            if (!(getObserverAiXpGain(studiousInsight) > studiousBaseXp))
+                failures.push("Studious insight does not improve AI XP gain")
+
+            const visionaryInsightBase = {
+                id: 9012,
+                rank: "rare",
+                personality: "visionary",
+                stage_index: 12,
+                progress: 9000,
+                ai_level: 9,
+                character_level: 0,
+                bot_job_level: 55,
+                bot_skill_level: 55,
+                bot_items: [],
+                milestones: {},
+                insights: {},
+                bot_log: [],
+            }
+            const visionaryInsight = {
+                id: 9013,
+                rank: "rare",
+                personality: "visionary",
+                stage_index: 12,
+                progress: 9000,
+                ai_level: 9,
+                character_level: 0,
+                bot_job_level: 55,
+                bot_skill_level: 55,
+                bot_items: [],
+                milestones: {},
+                insights: {},
+                bot_log: [],
+            }
+            normalizeObserverSubject(visionaryInsightBase)
+            normalizeObserverSubject(visionaryInsight)
+            const visionaryBaseOp = getObserverSubjectOpGain(visionaryInsightBase)
+            updateObserverSubjectInsights(visionaryInsight)
+            if (!visionaryInsight.insights.visionary_threshold)
+                failures.push("Visionary subject did not unlock Threshold Dream insight")
+            if (!(getObserverSubjectOpGain(visionaryInsight) > visionaryBaseOp))
+                failures.push("Visionary insight does not improve late OP gain")
 
             subject.bot_evil = 0
             subject.stage_index = 1
