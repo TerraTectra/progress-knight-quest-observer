@@ -6,11 +6,68 @@ function getEvilPerksGeneration()
 	const essence = Math.max(0, gameData.essence || 0)
 	const essencePower = essence > 0 ? math.log10(essence + 10) : 1
 	const essenceBoost = 2 + Math.sqrt(Math.max(1, essencePower))
-	const generation = evilPower * essenceBoost / 365
+	const generation = evilPower * essenceBoost * getEvilPerksDarkProgressMultiplier() * getEvilPerksVoidProgressMultiplier() / 365
 
 	if (!Number.isFinite(generation) || generation <= 0)
 		return 0
 	return Math.min(generation, 1e308)
+}
+
+function getEvilPerksTaskPower(taskNames) {
+	let power = 0
+
+	for (const taskName of taskNames) {
+		const task = gameData.taskData[taskName]
+		if (task == null)
+			continue
+
+		power += Math.sqrt(Math.max(0, task.level) + Math.max(0, task.maxLevel) * 0.2)
+	}
+
+	return power
+}
+
+function getEvilPerksDarkProgressMultiplier() {
+	const power = getEvilPerksTaskPower([
+		"Dark Influence",
+		"Evil Control",
+		"Intimidation",
+		"Demon Training",
+		"Blood Meditation",
+		"Demon's Wealth",
+		"Dark Knowledge",
+		"Void Influence",
+		"Time Loop",
+		"Evil Incarnate",
+	])
+
+	return Math.min(3.5, 1 + power * 0.012)
+}
+
+function getEvilPerksVoidProgressMultiplier() {
+	const voidRequirement = gameData.requirements["The Void"]
+	if (gameData.rebirthThreeCount <= 0 && (voidRequirement == null || !voidRequirement.isCompleted()))
+		return 1
+
+	const power = getEvilPerksTaskPower([
+		"Corrupted",
+		"Void Slave",
+		"Void Fiend",
+		"Abyss Anomaly",
+		"Void Wraith",
+		"Void Reaver",
+		"Void Lord",
+		"Abyss God",
+		"Absolute Wish",
+		"Void Amplification",
+		"Mind Release",
+		"Ceaseless Abyss",
+		"Void Symbiosis",
+		"Void Embodiment",
+		"Abyss Manipulation",
+	])
+
+	return Math.min(2.35, 1 + power * 0.006)
 }
 
 function getEvilPerkLevel(evilperknum){

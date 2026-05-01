@@ -433,7 +433,15 @@ function renderRebirth() {
 }
 
 function renderEvilPerks() {
-    document.getElementById("eppInfo").textContent = (gameData.essence > 0) ? "Evil and Essence" : "Evil"
+    let eppSources = "Evil"
+    if (gameData.essence > 0)
+        eppSources += ", Essence"
+    if (typeof getEvilPerksDarkProgressMultiplier == "function" && getEvilPerksDarkProgressMultiplier() > 1.01)
+        eppSources += ", Dark Magic"
+    if (typeof getEvilPerksVoidProgressMultiplier == "function" && getEvilPerksVoidProgressMultiplier() > 1.01)
+        eppSources += ", Void progress"
+
+    document.getElementById("eppInfo").textContent = eppSources
     document.getElementById("evilperksDisplay").textContent = format(gameData.evil_perks_points)
     document.getElementById("evilperksGainDisplay").textContent = format(getEvilPerksGeneration() * 365)
 

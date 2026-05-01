@@ -155,6 +155,50 @@ async function runScenario(browser, name, setup) {
         })
 
         failures.push(...upgradeFailures.map(failure => `${name}: ${failure}`))
+
+        const evilBridgeFailures = await page.evaluate(() => {
+            const failures = []
+            if (typeof getEvilPerksGeneration != "function")
+                return ["Evil perk generation is missing"]
+
+            gameData.evil = 1e12
+            gameData.essence = 0
+            gameData.rebirthTwoCount = 1
+            gameData.rebirthThreeCount = 0
+            for (const key in gameData.taskData) {
+                gameData.taskData[key].level = 0
+                gameData.taskData[key].maxLevel = 0
+            }
+            const base = getEvilPerksGeneration()
+
+            for (const taskName of ["Dark Influence", "Evil Control", "Demon Training", "Blood Meditation", "Dark Knowledge"]) {
+                if (gameData.taskData[taskName] != null) {
+                    gameData.taskData[taskName].level = 350
+                    gameData.taskData[taskName].maxLevel = 350
+                }
+            }
+            const dark = getEvilPerksGeneration()
+
+            gameData.rebirthThreeCount = 1
+            for (const taskName of ["Corrupted", "Void Slave", "Void Fiend", "Void Amplification", "Mind Release"]) {
+                if (gameData.taskData[taskName] != null) {
+                    gameData.taskData[taskName].level = 250
+                    gameData.taskData[taskName].maxLevel = 250
+                }
+            }
+            const voidGain = getEvilPerksGeneration()
+
+            if (!(base > 0))
+                failures.push("base EPP generation is zero")
+            if (!(dark > base))
+                failures.push("Dark Magic does not improve EPP generation")
+            if (!(voidGain > dark))
+                failures.push("Void progress does not improve EPP generation")
+
+            return failures
+        })
+
+        failures.push(...evilBridgeFailures.map(failure => `${name}: ${failure}`))
     }
     for (const error of errors)
         failures.push(`${name}: ${error}`)
