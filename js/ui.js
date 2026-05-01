@@ -1046,7 +1046,13 @@ function renderHeaderRows(categories) {
     for (const categoryName in categories) {
         const className = removeSpaces(categoryName)
         const headerRow = document.getElementsByClassName(className)[0]
+        if (headerRow == null)
+            continue
+
         const maxLevelElement = headerRow.querySelector(".maxLevel")
+        if (maxLevelElement == null)
+            continue
+
         gameData.rebirthOneCount > 0 ? maxLevelElement.classList.remove("hidden") : maxLevelElement.classList.add("hidden")
     }
 }
@@ -1274,6 +1280,9 @@ function updateRequiredRows(data, categoryType) {
 
 function getHeroicRequiredTooltip(task) {
     const requirementObject = gameData.requirements[task]
+    if (requirementObject == null || requirementObject.requirements == null)
+        return ""
+
     const requirements = requirementObject.requirements
     const prev = getPreviousTaskInCategory(task)
 
@@ -1283,8 +1292,8 @@ function getHeroicRequiredTooltip(task) {
 
     if (prev != "") {
         var prevTask = gameData.taskData[prev]
-        var prevlvl = (prevTask.isHero ? prevTask.level : 0)
-        if (prevlvl < 20)
+        var prevlvl = (prevTask != null && prevTask.isHero ? prevTask.level : 0)
+        if (prevTask != null && prevlvl < 20)
             prevReq = "Great " + prev + " " + prevlvl + "/20<br>"
     }
 
@@ -1298,12 +1307,26 @@ function getHeroicRequiredTooltip(task) {
         reqlist += format((requirements[0].herequirement == undefined) ? requirements[0].requirement : requirements[0].herequirement) + " Dark Matter<br>"
     } else {
         for (const requirement of requirements) {
+            if (requirement == null)
+                continue
+
+            if (requirement.universe != null) {
+                if (typeof getHighestUniverseId == "function" && getHighestUniverseId() < requirement.universe)
+                    reqlist += " Universe " + getHighestUniverseId() + "/" + requirement.universe + "<br>"
+                continue
+            }
+
+            if (requirement.coins != null || requirement.requirement == null || requirement.task == null)
+                continue
+
             const task_check = gameData.taskData[requirement.task]
+            if (task_check == null)
+                continue
 
             const reqvalue = (requirement.herequirement == null ? requirement.requirement : requirement.herequirement)
 
             if (task_check.isHero && task_check.level >= reqvalue) continue
-            if (prev != "" && task_check.name == prevTask.name) {
+            if (prevTask != null && prev != "" && task_check.name == prevTask.name) {
                 if (reqvalue <= 20)
                     continue
                 else
@@ -1315,6 +1338,9 @@ function getHeroicRequiredTooltip(task) {
     }
 
     reqlist += prevReq
+    if (reqlist.length == 0)
+        return ""
+
     reqlist = reqlist.substring(0, reqlist.length - 4)
     tooltip += reqlist + "</span>"
     return tooltip
@@ -1581,7 +1607,9 @@ function setTab(selectedTab) {
     for (tabButton of tabButtons) {
         tabButton.classList.remove("w3-blue-gray")
     }
-    element.classList.add("w3-blue-gray")
+
+    if (element != null)
+        element.classList.add("w3-blue-gray")
 }
 
 function setTabSettings(tab) {
