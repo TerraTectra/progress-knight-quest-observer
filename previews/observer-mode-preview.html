@@ -1,0 +1,405 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>Observer mode preview</title>
+    <link rel="stylesheet" href="../css/w3.css">
+    <link rel="stylesheet" href="../css/styles.css">
+    <link rel="stylesheet" href="../css/dark.css">
+    <style>
+        :root {
+            --pk-bg: rgb(32, 32, 32);
+            --pk-panel: rgb(46, 46, 46);
+            --pk-panel-2: rgb(38, 38, 38);
+            --pk-border: rgb(73, 73, 73);
+            --pk-muted: rgb(165, 165, 165);
+            --observer: #18d2d9;
+            --observer-soft: #168aa5;
+            --void: #762b91;
+            --evil: #a72d34;
+            --gold: #d5c010;
+            --good: #55a630;
+            --warn: #ff7a1a;
+            --bad: #e63946;
+        }
+
+        body.preview-body {
+            background: var(--pk-bg);
+            color: white;
+            padding: 24px;
+        }
+
+        .preview-title-row {
+            display: flex;
+            align-items: baseline;
+            gap: 1em;
+            margin-bottom: 12px;
+        }
+
+        .preview-subtitle,
+        .muted {
+            color: var(--pk-muted);
+        }
+
+        .observer-shell {
+            display: flex;
+            align-items: flex-start;
+            gap: 0.8em;
+        }
+
+        .observer-sidebar {
+            width: 310px;
+            border-left: 0.3em solid var(--observer);
+        }
+
+        .observer-main {
+            min-width: 980px;
+            max-width: 1180px;
+        }
+
+        .tab-preview {
+            display: flex;
+            border-bottom: 1px solid var(--pk-border);
+        }
+
+        .tab-preview .baritem {
+            border-right: 1px solid var(--pk-border);
+        }
+
+        .tab-preview .disabled-tab {
+            color: #777;
+            opacity: 0.65;
+        }
+
+        .tab-preview .active-tab {
+            background: var(--observer-soft) !important;
+            color: white !important;
+        }
+
+        .section-title {
+            padding: 0.45em 0.7em;
+            color: white;
+            margin-bottom: 0.8em;
+        }
+
+        .section-title.observer { background: var(--observer-soft); }
+        .section-title.subjects { background: #4f5d75; }
+        .section-title.commands { background: var(--void); }
+        .section-title.upgrades { background: var(--gold); color: purple; }
+
+        .stat-box {
+            margin-top: 1em;
+            padding: 0.7em 0.8em;
+            background: var(--pk-panel-2);
+            border: 1px solid var(--pk-border);
+        }
+
+        .stat-box.observer { border-left: 0.35em solid var(--observer); }
+        .stat-box.void { border-left: 0.35em solid var(--void); }
+        .stat-box.gold { border-left: 0.35em solid var(--gold); }
+        .stat-box.good { border-left: 0.35em solid var(--good); }
+
+        .subject-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 0.8em;
+        }
+
+        .subject-card {
+            background: var(--pk-panel-2);
+            border: 1px solid var(--pk-border);
+            padding: 0.8em;
+        }
+
+        .subject-card.active { border-left: 0.35em solid var(--observer); }
+        .subject-card.trash { border-left: 0.35em solid #777; }
+        .subject-card.common { border-left: 0.35em solid #bdbdbd; }
+        .subject-card.skilled { border-left: 0.35em solid var(--good); }
+        .subject-card.rare { border-left: 0.35em solid #4ea5ff; }
+        .subject-card.epic { border-left: 0.35em solid #b14cff; }
+        .subject-card.legendary { border-left: 0.35em solid var(--gold); }
+
+        .subject-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            gap: 0.8em;
+        }
+
+        .subject-name {
+            font-weight: bold;
+            color: white;
+        }
+
+        .rank {
+            display: inline-block;
+            border: 1px solid currentColor;
+            padding: 0.12em 0.45em;
+            font-size: 0.9em;
+            white-space: nowrap;
+        }
+
+        .rank-trash { color: #aaa; }
+        .rank-common { color: white; }
+        .rank-skilled { color: var(--good); }
+        .rank-rare { color: #4ea5ff; }
+        .rank-epic { color: #b14cff; }
+        .rank-legendary { color: var(--gold); }
+
+        .subject-stats {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 0.45em;
+            margin-top: 0.7em;
+        }
+
+        .mini-stat {
+            background: rgb(33, 33, 33);
+            border: 1px solid var(--pk-border);
+            padding: 0.45em 0.55em;
+            min-height: 54px;
+        }
+
+        .mini-stat b {
+            display: block;
+            color: white;
+        }
+
+        .progress-shell {
+            height: 14px;
+            background: rgb(26, 26, 26);
+            border: 1px solid var(--pk-border);
+            margin-top: 0.7em;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: var(--observer);
+        }
+
+        .progress-fill.bad { background: var(--bad); }
+        .progress-fill.good { background: var(--good); }
+        .progress-fill.gold { background: var(--gold); }
+
+        .command-row {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 0.8em;
+        }
+
+        .command-card {
+            background: var(--pk-panel-2);
+            border: 1px solid var(--pk-border);
+            padding: 0.75em;
+        }
+
+        .command-card.active {
+            border-color: var(--observer);
+            box-shadow: inset 0 0 0 1px rgba(24, 210, 217, 0.18);
+        }
+
+        .upgrade-table {
+            margin-top: 0.6em;
+        }
+
+        .upgrade-table tr:nth-child(even) {
+            background: rgba(255, 255, 255, 0.025);
+        }
+
+        .observer-note {
+            border: 1px solid var(--pk-border);
+            border-left: 0.35em solid var(--observer);
+            background: var(--pk-panel-2);
+            padding: 0.8em;
+            margin-bottom: 1em;
+        }
+    </style>
+</head>
+<body class="dark preview-body">
+    <div class="preview-title-row">
+        <h1>Progress Knight</h1>
+        <div class="preview-subtitle">Observer v0 preview - unlocks after Universe X, then replaces normal play with watched runs.</div>
+    </div>
+
+    <div class="observer-shell">
+        <div class="panel w3-padding observer-sidebar">
+            <div class="text-caption">Observer Layer</div>
+            <div class="muted">Normal tabs are sealed.</div>
+
+            <div class="stat-box observer">
+                <div><span style="color: var(--observer);">Observer Points:</span> <b>128.40</b></div>
+                <div class="muted">+0.84/s from subjects</div>
+            </div>
+
+            <div class="stat-box void">
+                <div><span style="color: var(--void);">Active subjects:</span> <b>3 / 6</b></div>
+                <div class="muted">First subject is free.</div>
+            </div>
+
+            <div class="stat-box gold">
+                <div><span style="color: var(--gold);">Best run:</span> <b>Universe VI</b></div>
+                <div class="muted">Target: reach Universe X again.</div>
+            </div>
+
+            <div class="stat-box good">
+                <div><span style="color: var(--good);">Global subject boost:</span> <b>x1.18</b></div>
+                <div class="muted">From Observer upgrades.</div>
+            </div>
+        </div>
+
+        <div class="observer-main">
+            <div class="panel tab-preview">
+                <div class="w3-button w3-bar-item baritem disabled-tab">Jobs</div>
+                <div class="w3-button w3-bar-item baritem disabled-tab">Skills</div>
+                <div class="w3-button w3-bar-item baritem disabled-tab">Shop</div>
+                <div class="w3-button w3-bar-item baritem disabled-tab">Multiverse</div>
+                <div class="w3-button w3-bar-item baritem active-tab">Observer</div>
+            </div>
+
+            <div class="panel w3-margin-top w3-padding">
+                <div class="section-title observer text-caption"><b>Observer</b></div>
+                <div class="observer-note">
+                    After the Observer threshold, the player no longer advances one life directly. Subjects run their own Progress Knight timelines from zero, and their progress generates Observer Points.
+                </div>
+
+                <div class="section-title subjects text-caption"><b>Subjects</b></div>
+                <div class="subject-grid">
+                    <div class="subject-card trash">
+                        <div class="subject-header">
+                            <div>
+                                <div class="subject-name">Subject 01 - First Echo</div>
+                                <div class="muted">Style: confused, wasteful, slow rebirths</div>
+                            </div>
+                            <span class="rank rank-trash">Trash</span>
+                        </div>
+                        <div class="subject-stats">
+                            <div class="mini-stat"><span class="muted">Stage</span><b>Evil</b></div>
+                            <div class="mini-stat"><span class="muted">Universe</span><b>I / X</b></div>
+                            <div class="mini-stat"><span class="muted">OP/sec</span><b>0.06</b></div>
+                            <div class="mini-stat"><span class="muted">Job</span><b>Merchant 42</b></div>
+                            <div class="mini-stat"><span class="muted">Skill</span><b>Evil Control 18</b></div>
+                            <div class="mini-stat"><span class="muted">Mistakes</span><b>37</b></div>
+                        </div>
+                        <div class="progress-shell"><div class="progress-fill bad" style="width: 18%;"></div></div>
+                        <div class="muted">Progress to next layer: 18%</div>
+                    </div>
+
+                    <div class="subject-card skilled active">
+                        <div class="subject-header">
+                            <div>
+                                <div class="subject-name">Subject 02 - Stable Runner</div>
+                                <div class="muted">Style: balanced, safe economy, steady routing</div>
+                            </div>
+                            <span class="rank rank-skilled">Skilled</span>
+                        </div>
+                        <div class="subject-stats">
+                            <div class="mini-stat"><span class="muted">Stage</span><b>Multiverse</b></div>
+                            <div class="mini-stat"><span class="muted">Universe</span><b>IV / X</b></div>
+                            <div class="mini-stat"><span class="muted">OP/sec</span><b>0.31</b></div>
+                            <div class="mini-stat"><span class="muted">Job</span><b>Abyss God 27</b></div>
+                            <div class="mini-stat"><span class="muted">Skill</span><b>Temporal Anchoring 16</b></div>
+                            <div class="mini-stat"><span class="muted">Mistakes</span><b>8</b></div>
+                        </div>
+                        <div class="progress-shell"><div class="progress-fill" style="width: 52%;"></div></div>
+                        <div class="muted">Progress to next universe: 52%</div>
+                    </div>
+
+                    <div class="subject-card legendary">
+                        <div class="subject-header">
+                            <div>
+                                <div class="subject-name">Subject 03 - Golden Line</div>
+                                <div class="muted">Style: near-optimal, rushes unlocks, avoids bad purchases</div>
+                            </div>
+                            <span class="rank rank-legendary">Legendary</span>
+                        </div>
+                        <div class="subject-stats">
+                            <div class="mini-stat"><span class="muted">Stage</span><b>Multiverse</b></div>
+                            <div class="mini-stat"><span class="muted">Universe</span><b>VII / X</b></div>
+                            <div class="mini-stat"><span class="muted">OP/sec</span><b>0.47</b></div>
+                            <div class="mini-stat"><span class="muted">Job</span><b>One Above All 11</b></div>
+                            <div class="mini-stat"><span class="muted">Skill</span><b>Causal Threading 24</b></div>
+                            <div class="mini-stat"><span class="muted">Mistakes</span><b>1</b></div>
+                        </div>
+                        <div class="progress-shell"><div class="progress-fill gold" style="width: 76%;"></div></div>
+                        <div class="muted">Progress to next universe: 76%</div>
+                    </div>
+
+                    <div class="subject-card common">
+                        <div class="subject-header">
+                            <div>
+                                <div class="subject-name">Empty subject slot</div>
+                                <div class="muted">Next subject cost scales with owned subjects and rank upgrades.</div>
+                            </div>
+                            <span class="rank rank-common">Free slot</span>
+                        </div>
+                        <div style="margin-top: 0.8em;">
+                            <button class="w3-button button">Buy subject - 75 OP</button>
+                            <button class="w3-button button">First subject free</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div style="border-bottom: 0.1em solid var(--observer); padding-top: 1.6em;"></div>
+
+                <div style="padding-top:1em"></div>
+                <div class="section-title commands text-caption"><b>Global Commands</b></div>
+                <div class="command-row">
+                    <div class="command-card active">
+                        <b>Balanced</b>
+                        <div class="muted">No modifier. Subjects choose safe routes.</div>
+                    </div>
+                    <div class="command-card">
+                        <b>Rush unlocks</b>
+                        <div class="muted">More speed, more mistakes, faster universe attempts.</div>
+                    </div>
+                    <div class="command-card">
+                        <b>Safe economy</b>
+                        <div class="muted">Slower, but fewer bankruptcies and bad shop choices.</div>
+                    </div>
+                    <div class="command-card">
+                        <b>Meta focus</b>
+                        <div class="muted">Subjects prioritize MP, Evil, Essence and universe breaks.</div>
+                    </div>
+                </div>
+
+                <div style="border-bottom: 0.1em solid var(--observer); padding-top: 1.6em;"></div>
+
+                <div style="padding-top:1em"></div>
+                <div class="section-title upgrades text-caption"><b>Observer Upgrades</b></div>
+                <table class="w3-table w3-bordered upgrade-table">
+                    <tr>
+                        <th>Upgrade</th>
+                        <th>Level</th>
+                        <th>Cost</th>
+                        <th></th>
+                    </tr>
+                    <tr>
+                        <td><b style="color: var(--observer);">Clear Instructions</b><br><span class="muted">Subjects make fewer route mistakes.</span></td>
+                        <td>2</td>
+                        <td>95 OP</td>
+                        <td><button class="w3-button button">Buy</button></td>
+                    </tr>
+                    <tr>
+                        <td><b style="color: var(--good);">Shared Memory</b><br><span class="muted">All subjects gain more XP and preserve better heuristics.</span></td>
+                        <td>1</td>
+                        <td>140 OP</td>
+                        <td><button class="w3-button button">Buy</button></td>
+                    </tr>
+                    <tr>
+                        <td><b style="color: var(--gold);">Talent Shaping</b><br><span class="muted">Improves odds for Skilled, Rare, Epic and Legendary subjects.</span></td>
+                        <td>0</td>
+                        <td>220 OP</td>
+                        <td><button class="w3-button button">Buy</button></td>
+                    </tr>
+                    <tr>
+                        <td><b style="color: var(--warn);">Universe Briefing</b><br><span class="muted">Subjects adapt faster to U-II through U-X distortions.</span></td>
+                        <td>0</td>
+                        <td>300 OP</td>
+                        <td><button class="w3-button button">Buy</button></td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

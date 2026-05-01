@@ -1229,6 +1229,9 @@ function normalizeMetaLayerUnlocks() {
 
     if (gameData.settings.selectedTab == "multiverse" && !isMultiverseUnlocked())
         gameData.settings.selectedTab = "jobs"
+
+    if (gameData.settings.selectedTab == "observer" && (typeof isObserverUnlocked !== "function" || !isObserverUnlocked()))
+        gameData.settings.selectedTab = "jobs"
 }
 
 function replaceSaveDict(dict, saveDict) {
@@ -1418,10 +1421,21 @@ function stopOffline(){
 function update(needUpdateUI = true) {
     if (in_offline_progress && needUpdateUI)
         return
-    makeHeroes()
     increaseRealtime()
+
+    if (typeof isObserverActive === "function" && isObserverActive()) {
+        if (typeof updateObserver === "function")
+            updateObserver()
+        if (needUpdateUI)
+            updateUI()
+        return
+    }
+
+    makeHeroes()
     increaseDays()
     increaseMultiversePoints()
+    if (typeof updateObserver === "function")
+        updateObserver()
     autoPerks()
     autoPromote()
     autoBuy()

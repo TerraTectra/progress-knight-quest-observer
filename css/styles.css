@@ -707,3 +707,169 @@ button:focus {
     border: 1px solid #9b5cff;
     background-color: rgb(40, 40, 40);
 }
+
+.rb-observer-page {
+    max-width: 980px;
+}
+
+.rb-observer-title {
+    display: flex;
+    justify-content: space-between;
+    gap: 1em;
+    align-items: flex-start;
+    border-bottom: 0.1em solid rgb(73, 73, 73);
+    padding-bottom: 0.8em;
+    margin-bottom: 1em;
+}
+
+.rb-observer-summary {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 0.8em;
+    margin-bottom: 1em;
+}
+
+.rb-observer-stat {
+    background-color: rgb(38, 38, 38);
+    border: 1px solid rgb(73, 73, 73);
+    border-left: 0.35em solid #9b5cff;
+    padding: 0.75em 0.85em;
+}
+
+.rb-observer-label {
+    color: rgb(165, 165, 165);
+    font-size: 0.9em;
+}
+
+.rb-observer-value {
+    color: white;
+    font-size: 1.35em;
+    font-weight: bold;
+    padding-top: 0.15em;
+}
+
+.rb-observer-note {
+    color: rgb(165, 165, 165);
+    font-size: 0.9em;
+    margin-top: 0.25em;
+}
+
+.rb-observer-section {
+    margin-top: 1em;
+}
+
+.rb-observer-command-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 0.7em;
+}
+
+.rb-observer-command {
+    min-height: 6em;
+    text-align: left;
+    white-space: normal;
+}
+
+.rb-observer-command.active {
+    border-color: #18d2d9 !important;
+    color: white !important;
+    background-color: rgb(45, 60, 65) !important;
+}
+
+.rb-observer-command span {
+    color: rgb(165, 165, 165);
+    font-size: 0.88em;
+}
+
+.rb-observer-subject-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0.8em;
+}
+
+.rb-observer-subject {
+    background-color: rgb(38, 38, 38);
+    border: 1px solid rgb(73, 73, 73);
+    padding: 0.85em;
+}
+
+.rb-observer-subject.trash { border-left: 0.35em solid #777; }
+.rb-observer-subject.common { border-left: 0.35em solid #c5c5c5; }
+.rb-observer-subject.skilled { border-left: 0.35em solid #3fb950; }
+.rb-observer-subject.rare { border-left: 0.35em solid #18d2d9; }
+.rb-observer-subject.epic { border-left: 0.35em solid #9b5cff; }
+.rb-observer-subject.legendary { border-left: 0.35em solid #e5c100; }
+
+.rb-observer-subject-head {
+    display: flex;
+    justify-content: space-between;
+    gap: 0.7em;
+}
+
+.rb-observer-universe {
+    color: #18d2d9;
+    border: 1px solid #18d2d9;
+    padding: 0.1em 0.45em;
+    align-self: flex-start;
+}
+
+.rb-rank.trash { color: #aaa; }
+.rb-rank.common { color: white; }
+.rb-rank.skilled { color: #3fb950; }
+.rb-rank.rare { color: #18d2d9; }
+.rb-rank.epic { color: #9b5cff; }
+.rb-rank.legendary { color: #e5c100; }
+
+.rb-observer-mini-row {
+    display: flex;
+    justify-content: space-between;
+    gap: 0.7em;
+    margin-top: 0.35em;
+}
+
+.rb-observer-mini-row span {
+    color: rgb(165, 165, 165);
+}
+
+.rb-observer-meter {
+    margin-top: 0.65em;
+    height: 0.55em;
+    border: 1px solid rgb(73, 73, 73);
+    background-color: rgb(28, 28, 28);
+}
+
+.rb-observer-meter div {
+    height: 100%;
+    background-color: #9b5cff;
+}
+
+body.rb-observer-active #tabcolumn {
+    border-color: #9b5cff;
+}
+
+body.rb-observer-active #maincolumn {
+    box-shadow: 0 0 0 1px rgba(155, 92, 255, 0.25);
+}
+
+@media (max-width: 1100px) {
+    .rb-observer-summary,
+    .rb-observer-command-grid,
+    .rb-observer-subject-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 760px) {
+    .rb-observer-title,
+    .rb-observer-summary,
+    .rb-observer-command-grid,
+    .rb-observer-subject-grid {
+        display: block;
+    }
+
+    .rb-observer-stat,
+    .rb-observer-command,
+    .rb-observer-subject {
+        margin-bottom: 0.7em;
+    }
+}

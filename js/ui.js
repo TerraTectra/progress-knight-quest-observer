@@ -78,6 +78,9 @@ function updateUI() {
     if (currentTab == Tab.MULTIVERSE)
         renderMultiverse()
 
+    if (currentTab == Tab.OBSERVER)
+        renderObserver()
+
     if (currentTab == Tab.METAVERSE)
         renderMetaverse()
 
@@ -86,6 +89,9 @@ function updateUI() {
 
     if (currentTab == Tab.REBIRTH)
         renderRebirth()
+
+    if (typeof updateObserverVisibility === "function")
+        updateObserverVisibility()
 }
 
 function renderSideBar() {
@@ -1473,6 +1479,7 @@ const Tab = Object.freeze({
     REBIRTH: "rebirth",
     DARK_MATTER: "darkMatter",
     MULTIVERSE: "multiverse",
+    OBSERVER: "observer",
     METAVERSE: "metaverse",
     SETTINGS: "settings",
     INFO: "info"
@@ -1482,6 +1489,9 @@ const Tab = Object.freeze({
  * @param {Tab} selectedTab
  */
 function setTab(selectedTab) {
+    if (typeof isObserverActive === "function" && isObserverActive() && selectedTab != Tab.OBSERVER)
+        selectedTab = Tab.OBSERVER
+
     const tabElement = document.getElementById(selectedTab)
 
     if (tabElement == null) {
@@ -1591,6 +1601,11 @@ function createPerk(template, name) {
 
 // Keyboard shortcuts + Loadouts ( courtesy of Pseiko )
 function changeTab(direction){
+    if (typeof isObserverActive === "function" && isObserverActive()) {
+        setTab(Tab.OBSERVER)
+        return
+    }
+
     const tabs = Array.prototype.slice.call(document.getElementsByClassName("tab"))
     const tabButtons = Array.prototype.slice.call(document.getElementsByClassName("tabButton"))
 

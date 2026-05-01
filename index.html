@@ -43,6 +43,7 @@
 						<div class="w3-button w3-bar-item tabButton baritem" id="rebirthTabButton" onClick="setTab('rebirth')">Amulet</div>
 						<div class="w3-button w3-bar-item tabButton baritem" id="darkMatterTabButton" onClick="setTab('darkMatter')">Dark Matter</div>
 						<div class="w3-button w3-bar-item tabButton baritem" id="multiverseTabButton" onClick="setTab('multiverse')">Multiverse</div>
+						<div class="w3-button w3-bar-item tabButton baritem hidden" id="observerTabButton" onClick="setTab('observer')">Observer</div>
 						<div class="w3-button w3-bar-item tabButton baritem" id="metaverseTabButton" onClick="setTab('metaverse')">Metaverse</div>
 						<div class="w3-button w3-bar-item tabButton baritem" id="settingsTabButton" onClick="setTab('settings')">Settings</div>
 					</div>
@@ -895,8 +896,58 @@
 										</div>
 										<div id="observerStubPanel" class="rb-observer-stub hidden">
 											<div class="text-caption"><b>Observer layer</b></div>
-											<div style="color:gray;">A sealed third meta layer. It will open after Universe X is completed.</div>
+											<div style="color:gray;">The third global layer opens after Universe X. Entering it locks the old tabs and turns your progress into management of autonomous subjects.</div>
+											<button class="w3-button button" id="enterObserverButton" style="margin-top:0.7em;" onclick="enterObserverLayer()">Enter Observer</button>
 										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+						<div class="tab column" style="display:none" id="observer">
+							<div id="maincolumnObserver" class="panel w3-margin-left w3-margin-top">
+								<div id="observerPage" class="page panel page-column w3-padding rb-observer-page">
+									<div class="rb-observer-title">
+										<div>
+											<div class="text-caption"><b>Observer</b></div>
+											<div style="color:gray;">Your old run is sealed. Subjects now play Progress Knight from zero and generate Observer Points from their progress.</div>
+										</div>
+										<button class="w3-button button" id="buyObserverSubjectButton" onclick="buyObserverSubject()">Add subject</button>
+									</div>
+									<div class="rb-observer-summary">
+										<div class="rb-observer-stat">
+											<div class="rb-observer-label">Observer Points</div>
+											<div class="rb-observer-value" id="observerPointsDisplay">0</div>
+											<div class="rb-observer-note">+<span id="observerPointsGainDisplay">0</span>/s</div>
+										</div>
+										<div class="rb-observer-stat">
+											<div class="rb-observer-label">Subjects</div>
+											<div class="rb-observer-value" id="observerSubjectCountDisplay">0</div>
+											<div class="rb-observer-note">first subject is free</div>
+										</div>
+										<div class="rb-observer-stat">
+											<div class="rb-observer-label">Best subject run</div>
+											<div class="rb-observer-value" id="observerBestRunDisplay">U-I</div>
+											<div class="rb-observer-note">target: Universe X</div>
+										</div>
+										<div class="rb-observer-stat">
+											<div class="rb-observer-label">Global guidance</div>
+											<div class="rb-observer-value" id="observerGlobalBoostDisplay">x1.00</div>
+											<div class="rb-observer-note">from Observer upgrades</div>
+										</div>
+									</div>
+									<div class="rb-observer-section">
+										<div class="rb-section-title text-caption"><b>Command doctrine</b></div>
+										<div id="observerCommandRows" class="rb-observer-command-grid"></div>
+									</div>
+									<div class="rb-observer-section">
+										<div class="rb-section-title text-caption"><b>Subjects</b></div>
+										<div id="observerSubjectGrid" class="rb-observer-subject-grid"></div>
+									</div>
+									<div class="rb-observer-section">
+										<div class="rb-section-title text-caption"><b>Observer upgrades</b></div>
+										<table class="w3-table w3-bordered rb-upgrade-table">
+											<tbody id="observerUpgradeRows"></tbody>
+										</table>
 									</div>
 								</div>
 							</div>
@@ -1098,6 +1149,7 @@
 	<script type="text/javascript" src="js/dark_matter.js"></script>
 	<script type="text/javascript" src="js/metaverse.js"></script>
 	<script type="text/javascript" src="js/multiverse.js"></script>
+	<script type="text/javascript" src="js/observer.js"></script>
 	<script type="text/javascript" src="js/tooltips.js"></script>
 	<script type="text/javascript" src="js/milestones.js"></script>
 	<script type="text/javascript" src="js/data.js"></script>

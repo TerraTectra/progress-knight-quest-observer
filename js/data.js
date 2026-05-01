@@ -38,6 +38,20 @@
         },
         observer_stub_unlocked: false,
     },
+    observer: {
+        active: false,
+        points: 0,
+        lifetime_points: 0,
+        subjects: [],
+        command: "balanced",
+        next_subject_id: 1,
+        upgrades: {
+            clear_instructions: 0,
+            shared_memory: 0,
+            talent_shaping: 0,
+            universe_briefing: 0,
+        },
+    },
     perks_points: 0,
     perks: {
         auto_dark_orb: 0,
