@@ -96,14 +96,20 @@ td {
     top: 5%;
     left: 0.5em;
     bottom: 0%;
-    color: white
+    color: white;
+    max-width: calc(100% - 1em);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 .progress-bar {
     margin-top: 0.05em;
     position: relative;
-    background-color: rgb(12, 101, 173);    
+    background-color: rgb(12, 101, 173);
     width: 100%;
+    min-width: 11em;
+    overflow: hidden;
 }
 
 .progress-fill {
@@ -116,6 +122,8 @@ td {
     position: relative;
     background-color: rgb(108, 59, 59);
     width: 100%;
+    min-width: 11em;
+    overflow: hidden;
 }
 
 .progress-fill-hero {
@@ -126,8 +134,10 @@ td {
 .progress-bar-finished {
     margin-top: 0.05em;
     position: relative;
-    background-color: rgb(165, 60, 21);    
+    background-color: rgb(165, 60, 21);
     width: 100%;
+    min-width: 11em;
+    overflow: hidden;
 }
 
 .progress-fill-finished {
