@@ -1,14 +1,14 @@
 const multiverseUniverses = [
-    { id: 1, name: "Prime World", mpMult: 0.45, xpMult: 1, incomeMult: 1, expenseMult: 1, lifespanMult: 1, unlockCost: 0, rule: "The original rules remain stable." },
-    { id: 2, name: "Strained Kingdom", mpMult: 2.2, xpMult: 0.96, incomeMult: 0.92, expenseMult: 1.08, lifespanMult: 0.98, unlockCost: 30, rule: "Work pays less and upkeep bites harder." },
-    { id: 3, name: "Taxed Arcana", mpMult: 4.8, xpMult: 0.94, incomeMult: 0.88, expenseMult: 1.18, lifespanMult: 0.98, unlockCost: 140, rule: "Magic remains powerful, but every shortcut has a cost." },
-    { id: 4, name: "Thin Time", mpMult: 8.8, xpMult: 0.9, incomeMult: 0.88, expenseMult: 1.25, lifespanMult: 0.92, unlockCost: 420, rule: "Life is shorter; lifespan upgrades matter more." },
-    { id: 5, name: "Greedy Stars", mpMult: 15, xpMult: 0.86, incomeMult: 0.82, expenseMult: 1.4, lifespanMult: 0.9, unlockCost: 1200, rule: "Economy pressure becomes the main enemy." },
-    { id: 6, name: "Dimming Void", mpMult: 25, xpMult: 0.8, incomeMult: 0.78, expenseMult: 1.55, lifespanMult: 0.86, unlockCost: 4500, rule: "Void progress feeds MP, but ordinary progress slows." },
-    { id: 7, name: "Hostile Causality", mpMult: 41, xpMult: 0.72, incomeMult: 0.72, expenseMult: 1.8, lifespanMult: 0.8, unlockCost: 15000, rule: "Runs need careful preparation before every break." },
-    { id: 8, name: "Broken Ladder", mpMult: 68, xpMult: 0.62, incomeMult: 0.68, expenseMult: 2.15, lifespanMult: 0.72, unlockCost: 52000, rule: "Old growth routes no longer carry the run alone." },
-    { id: 9, name: "Quiet Collapse", mpMult: 108, xpMult: 0.5, incomeMult: 0.6, expenseMult: 2.7, lifespanMult: 0.62, unlockCost: 165000, rule: "Only layered meta upgrades keep the world playable." },
-    { id: 10, name: "Observer Threshold", mpMult: 178, xpMult: 0.38, incomeMult: 0.5, expenseMult: 3.4, lifespanMult: 0.5, unlockCost: 520000, rule: "The final universe is unstable enough to reveal the Observer." },
+    { id: 1, name: "Prime World", mpMult: 0.32, xpMult: 1, incomeMult: 1, expenseMult: 1, lifespanMult: 1, unlockCost: 0, rule: "The original rules remain stable. Void mastery is the only early MP source." },
+    { id: 2, name: "Strained Kingdom", mpMult: 1.9, xpMult: 0.96, incomeMult: 0.92, expenseMult: 1.1, lifespanMult: 0.98, unlockCost: 80, rule: "Taxes and paperwork punish poor economic routing." },
+    { id: 3, name: "Taxed Arcana", mpMult: 4.2, xpMult: 0.93, incomeMult: 0.87, expenseMult: 1.2, lifespanMult: 0.97, unlockCost: 380, rule: "Magic becomes the best route, but every spell carries a tariff." },
+    { id: 4, name: "Thin Time", mpMult: 7.6, xpMult: 0.9, incomeMult: 0.86, expenseMult: 1.28, lifespanMult: 0.9, unlockCost: 1400, rule: "Time thins out. Lifespan and controlled speed matter more than raw XP." },
+    { id: 5, name: "Greedy Stars", mpMult: 13.5, xpMult: 0.84, incomeMult: 0.84, expenseMult: 1.48, lifespanMult: 0.88, unlockCost: 5200, rule: "Income can explode, but expenses punish careless shop choices." },
+    { id: 6, name: "Dimming Void", mpMult: 23, xpMult: 0.78, incomeMult: 0.76, expenseMult: 1.62, lifespanMult: 0.84, unlockCost: 19000, rule: "Void and Evil are the main engine; ordinary routes fade." },
+    { id: 7, name: "Hostile Causality", mpMult: 39, xpMult: 0.7, incomeMult: 0.7, expenseMult: 1.9, lifespanMult: 0.78, unlockCost: 76000, rule: "Causality resists shortcuts. Balanced route preparation is required." },
+    { id: 8, name: "Broken Ladder", mpMult: 66, xpMult: 0.6, incomeMult: 0.66, expenseMult: 2.28, lifespanMult: 0.7, unlockCost: 300000, rule: "Progress comes in broken steps. Rebuilding the ladder is mandatory." },
+    { id: 9, name: "Quiet Collapse", mpMult: 112, xpMult: 0.48, incomeMult: 0.58, expenseMult: 2.88, lifespanMult: 0.6, unlockCost: 1200000, rule: "Most routes collapse unless previous universes are reinforced." },
+    { id: 10, name: "Observer Threshold", mpMult: 205, xpMult: 0.36, incomeMult: 0.48, expenseMult: 3.65, lifespanMult: 0.48, unlockCost: 5200000, rule: "The final universe bends every rule enough to reveal the Observer." },
 ]
 
 const multiverseUpgradeData = {
@@ -136,6 +136,16 @@ function getMultiverseUpgradeCost(upgrade) {
     return data.baseCost * Math.pow(data.costMult, getMultiverseUpgradeLevel(upgrade))
 }
 
+function getTaskLevelPower(taskName, scale = 0.01, maxBonus = 3) {
+    const task = gameData.taskData[taskName]
+    if (task == null)
+        return 1
+
+    const current = Math.max(0, task.level)
+    const memory = Math.max(0, task.maxLevel) * 0.35
+    return getSafeMultiverseNumber(1 + Math.min(maxBonus, Math.sqrt(current + memory) * scale))
+}
+
 function canBuyMultiverseUpgrade(upgrade) {
     const cost = getMultiverseUpgradeCost(upgrade)
     return isMultiverseUnlocked() && Number.isFinite(cost) && gameData.multiverse_points >= cost
@@ -194,15 +204,15 @@ function enterUniverse(id) {
 
 function getUniverseBreakRequirement(id = getCurrentUniverseId()) {
     const requirements = {
-        1: { parameter: 1.18, task: null, taskLevel: 0 },
-        2: { parameter: 1.45, task: "Reality Surveying", taskLevel: 32 },
-        3: { parameter: 1.44, task: "Spell Auditing", taskLevel: 36 },
-        4: { parameter: 1.44, task: "Entropy Calendar", taskLevel: 40 },
-        5: { parameter: 1.50, task: "Star Market", taskLevel: 44 },
-        6: { parameter: 2.15, task: "Null Continuity", taskLevel: 48 },
-        7: { parameter: 1.52, task: "Retroactive Training", taskLevel: 50 },
-        8: { parameter: 1.74, task: "Recursive Promotion", taskLevel: 42 },
-        9: { parameter: 1.88, task: "Silence Drills", taskLevel: 46 },
+        1: { parameter: 1.24, task: null, taskLevel: 0 },
+        2: { parameter: 1.72, task: "Reality Surveying", taskLevel: 48 },
+        3: { parameter: 1.86, task: "Spell Auditing", taskLevel: 58 },
+        4: { parameter: 2.05, task: "Entropy Calendar", taskLevel: 68 },
+        5: { parameter: 2.35, task: "Star Market", taskLevel: 82 },
+        6: { parameter: 2.95, task: "Null Continuity", taskLevel: 96 },
+        7: { parameter: 3.25, task: "Retroactive Training", taskLevel: 112 },
+        8: { parameter: 3.85, task: "Recursive Promotion", taskLevel: 126 },
+        9: { parameter: 4.55, task: "Silence Drills", taskLevel: 144 },
     }
 
     return requirements[id] || null
@@ -471,11 +481,12 @@ function getUniversePassiveWeight(id) {
         return 0
 
     const parameter = getUniverseParameterGain(id)
-    const breakMemory = 1 + Math.sqrt(getMultiverseState().universe_breaks) * 0.028
-    const activeBonus = id == getCurrentUniverseId() ? 1.1 : 1
-    const ageFalloff = 1 / Math.pow(id, 0.36)
+    const breakMemory = 1 + Math.sqrt(getMultiverseState().universe_breaks) * 0.035
+    const activeBonus = id == getCurrentUniverseId() ? 1.18 : 1
+    const depthBonus = 1 + Math.pow(id - 1, 1.12) * 0.025
+    const ageFalloff = 1 / Math.pow(id, 0.42)
 
-    return getSafeMultiverseNumber(universe.mpMult * parameter * breakMemory * activeBonus * ageFalloff, 0, 1e300)
+    return getSafeMultiverseNumber(universe.mpMult * parameter * breakMemory * activeBonus * depthBonus * ageFalloff, 0, 1e300)
 }
 
 function getTotalUniversePassiveWeight() {
@@ -494,8 +505,8 @@ function getUniverseTwoBureaucraticOrderGain() {
     const realitySurveying = gameData.taskData["Reality Surveying"]
     const taxSeal = getMultiverseItemEffect("Tax Seal")
 
-    const adminGain = royalAdministration == null ? 1 : 1 + royalAdministration.level * royalAdministration.baseData.effect
-    const surveyGain = realitySurveying == null ? 1 : 1 + realitySurveying.level * realitySurveying.baseData.effect
+    const adminGain = royalAdministration == null ? 1 : 1 + royalAdministration.level * royalAdministration.baseData.effect + getTaskLevelPower("Royal Administration", 0.012, 1.8) - 1
+    const surveyGain = realitySurveying == null ? 1 : 1 + realitySurveying.level * realitySurveying.baseData.effect + getTaskLevelPower("Reality Surveying", 0.009, 1.5) - 1
     return adminGain * surveyGain * taxSeal()
 }
 
@@ -529,8 +540,8 @@ function getUniverseThreeArcaneComplianceGain() {
     const spellAuditing = gameData.taskData["Spell Auditing"]
     const arcaneAbacus = getMultiverseItemEffect("Arcane Abacus")
 
-    const taxationGain = arcaneTaxation == null ? 1 : 1 + arcaneTaxation.level * arcaneTaxation.baseData.effect
-    const auditingGain = spellAuditing == null ? 1 : 1 + spellAuditing.level * spellAuditing.baseData.effect
+    const taxationGain = arcaneTaxation == null ? 1 : 1 + arcaneTaxation.level * arcaneTaxation.baseData.effect + getTaskLevelPower("Arcane Taxation", 0.01, 1.7) - 1
+    const auditingGain = spellAuditing == null ? 1 : 1 + spellAuditing.level * spellAuditing.baseData.effect + getTaskLevelPower("Spell Auditing", 0.009, 1.6) - 1
     return taxationGain * auditingGain * arcaneAbacus()
 }
 
@@ -576,8 +587,8 @@ function getUniverseFourTemporalAnchorGain() {
     const entropyCalendar = gameData.taskData["Entropy Calendar"]
     const chronalCompass = getMultiverseItemEffect("Chronal Compass")
 
-    const anchorGain = temporalAnchoring == null ? 1 : 1 + temporalAnchoring.level * temporalAnchoring.baseData.effect
-    const calendarGain = entropyCalendar == null ? 1 : 1 + entropyCalendar.level * entropyCalendar.baseData.effect
+    const anchorGain = temporalAnchoring == null ? 1 : 1 + temporalAnchoring.level * temporalAnchoring.baseData.effect + getTaskLevelPower("Temporal Anchoring", 0.009, 1.65) - 1
+    const calendarGain = entropyCalendar == null ? 1 : 1 + entropyCalendar.level * entropyCalendar.baseData.effect + getTaskLevelPower("Entropy Calendar", 0.008, 1.55) - 1
     return anchorGain * calendarGain * chronalCompass()
 }
 
@@ -613,8 +624,8 @@ function getUniverseFiveGreedIndexGain() {
     const debtEngine = getMultiverseItemEffect("Debt Engine")
     const netPressure = Math.max(0, Math.log10(Math.max(1, getIncome()) / Math.max(1, getExpense()))) * 0.025
 
-    const accountingGain = greedAccounting == null ? 1 : 1 + greedAccounting.level * greedAccounting.baseData.effect
-    const marketGain = starMarket == null ? 1 : 1 + starMarket.level * starMarket.baseData.effect
+    const accountingGain = greedAccounting == null ? 1 : 1 + greedAccounting.level * greedAccounting.baseData.effect + getTaskLevelPower("Greed Accounting", 0.0085, 1.55) - 1
+    const marketGain = starMarket == null ? 1 : 1 + starMarket.level * starMarket.baseData.effect + getTaskLevelPower("Star Market", 0.008, 1.5) - 1
     return (accountingGain + netPressure) * marketGain * debtEngine()
 }
 
@@ -651,8 +662,8 @@ function getUniverseSixDimmingResonanceGain() {
     const nullContract = getMultiverseItemEffect("Null Contract")
     const voidDepth = Math.log10(gameData.evil + 10) * 0.015 + Math.log10(gameData.essence + 10) * 0.01
 
-    const resonanceGain = dimmingResonance == null ? 1 : 1 + dimmingResonance.level * dimmingResonance.baseData.effect
-    const recyclingGain = abyssalRecycling == null ? 1 : 1 + abyssalRecycling.level * abyssalRecycling.baseData.effect
+    const resonanceGain = dimmingResonance == null ? 1 : 1 + dimmingResonance.level * dimmingResonance.baseData.effect + getTaskLevelPower("Dimming Resonance", 0.008, 1.5) - 1
+    const recyclingGain = abyssalRecycling == null ? 1 : 1 + abyssalRecycling.level * abyssalRecycling.baseData.effect + getTaskLevelPower("Abyssal Recycling", 0.007, 1.45) - 1
     return (resonanceGain + voidDepth) * recyclingGain * nullContract()
 }
 
@@ -710,8 +721,8 @@ function getUniverseSevenCausalStabilityGain() {
     const paradoxAnchor = getMultiverseItemEffect("Paradox Anchor")
     const breakMemory = 1 + Math.sqrt(getMultiverseState().universe_breaks) * 0.035
 
-    const threadingGain = causalThreading == null ? 1 : 1 + causalThreading.level * causalThreading.baseData.effect
-    const retroactiveGain = retroactiveTraining == null ? 1 : 1 + retroactiveTraining.level * retroactiveTraining.baseData.effect
+    const threadingGain = causalThreading == null ? 1 : 1 + causalThreading.level * causalThreading.baseData.effect + getTaskLevelPower("Causal Threading", 0.0072, 1.45) - 1
+    const retroactiveGain = retroactiveTraining == null ? 1 : 1 + retroactiveTraining.level * retroactiveTraining.baseData.effect + getTaskLevelPower("Retroactive Training", 0.0065, 1.4) - 1
     return threadingGain * retroactiveGain * breakMemory * paradoxAnchor()
 }
 
@@ -752,7 +763,7 @@ function getUniverseEightLadderIntegrityGain() {
     const recursivePromotion = gameData.taskData["Recursive Promotion"]
     const ascensionMap = getMultiverseItemEffect("Ascension Map")
 
-    const ladderGain = ladderReconstruction == null ? 1 : 1 + ladderReconstruction.level * ladderReconstruction.baseData.effect
+    const ladderGain = ladderReconstruction == null ? 1 : 1 + ladderReconstruction.level * ladderReconstruction.baseData.effect + getTaskLevelPower("Ladder Reconstruction", 0.006, 1.35) - 1
     const sidewaysGain = sidewaysPromotion == null ? 1 : 1 + sidewaysPromotion.level * sidewaysPromotion.baseData.effect
     const masteryGain = fracturedMastery == null ? 1 : 1 + fracturedMastery.level * fracturedMastery.baseData.effect
     const recursiveGain = recursivePromotion == null ? 1 : 1 + recursivePromotion.level * recursivePromotion.baseData.effect
@@ -821,7 +832,7 @@ function getUniverseNineCollapseControlGain() {
     const lifetimeMemory = 1 + Math.log10(gameData.multiverse_points_lifetime + 10) * 0.018
     const breakMemory = 1 + Math.sqrt(getMultiverseState().universe_breaks) * 0.04
 
-    const containmentGain = collapseContainment == null ? 1 : 1 + collapseContainment.level * collapseContainment.baseData.effect
+    const containmentGain = collapseContainment == null ? 1 : 1 + collapseContainment.level * collapseContainment.baseData.effect + getTaskLevelPower("Collapse Containment", 0.0055, 1.25) - 1
     const signalGain = lastSignal == null ? 1 : 1 + lastSignal.level * lastSignal.baseData.effect
     const silenceGain = silenceDrills == null ? 1 : 1 + silenceDrills.level * silenceDrills.baseData.effect
     return containmentGain * signalGain * silenceGain * lifetimeMemory * breakMemory * quietBeacon()
@@ -911,7 +922,7 @@ function getUniverseTenObserverSignalGain() {
     const lifetimeMemory = 1 + Math.log10(gameData.multiverse_points_lifetime + 10) * 0.02
     const breakMemory = 1 + Math.sqrt(getMultiverseState().universe_breaks) * 0.045
 
-    const listeningGain = thresholdListening == null ? 1 : 1 + thresholdListening.level * thresholdListening.baseData.effect
+    const listeningGain = thresholdListening == null ? 1 : 1 + thresholdListening.level * thresholdListening.baseData.effect + getTaskLevelPower("Threshold Listening", 0.005, 1.2) - 1
     const routineGain = impossibleRoutine == null ? 1 : 1 + impossibleRoutine.level * impossibleRoutine.baseData.effect
     const witnessGain = witnessPreparation == null ? 1 : 1 + witnessPreparation.level * witnessPreparation.baseData.effect
     const alignmentGain = observerAlignment == null ? 1 : 1 + observerAlignment.level * observerAlignment.baseData.effect
@@ -1047,9 +1058,11 @@ function getMultiversePointGain() {
     const cartography = getMultiverseCartographyMpGain()
     const voidResonance = Math.pow(getMultiverseVoidResonance(), 0.52)
     const universeWeight = getTotalUniversePassiveWeight()
+    const highestDepth = 1 + Math.pow(Math.max(0, getHighestUniverseId() - 1), 1.08) * 0.035
+    const lifetimeMemory = 1 + Math.min(1.2, Math.log10(Math.max(0, gameData.multiverse_points_lifetime) + 10) * 0.018)
     const observerThreshold = getHighestUniverseId() >= 10 ? 1.12 : 1
 
-    return getSafeMultiverseNumber(0.0024 * voidResonance * universeWeight * cartography * getMultiverseBreakRewardGain() * observerThreshold, 0, 1e300)
+    return getSafeMultiverseNumber(0.00185 * voidResonance * universeWeight * cartography * highestDepth * lifetimeMemory * getMultiverseBreakRewardGain() * observerThreshold, 0, 1e300)
 }
 
 function breakUniverseAltarCost() {

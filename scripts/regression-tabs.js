@@ -95,6 +95,18 @@ async function runScenario(browser, name, setup) {
 
     if (globals.hasGameError)
         failures.push(`${name}: tempData.hasError is true`)
+    if (name == "early") {
+        const earlyMultiverseFailures = await page.evaluate(() => {
+            const failures = []
+            if (typeof isMultiverseUnlocked == "function" && isMultiverseUnlocked())
+                failures.push("Multiverse is unlocked too early")
+            if (typeof getMultiversePointGain == "function" && getMultiversePointGain() != 0)
+                failures.push("Early game generates passive Multiverse Points")
+            return failures
+        })
+
+        failures.push(...earlyMultiverseFailures.map(failure => `${name}: ${failure}`))
+    }
     if (name == "observer" && (!globals.observerSubjects[0] || globals.observerSubjects[0].rank != "trash"))
         failures.push(`${name}: first observer subject must be free Trash rank`)
     if (name == "observer" && (!globals.observerSubjects[0] || !(globals.observerSubjects[0].opGain > 0)))
@@ -232,6 +244,62 @@ async function runScenario(browser, name, setup) {
         })
 
         failures.push(...upgradeFailures.map(failure => `${name}: ${failure}`))
+
+        const universeFailures = await page.evaluate(() => {
+            const failures = []
+            if (typeof getUniversePassiveWeight != "function" || typeof getUniverseParameterGain != "function")
+                return ["Universe passive helpers are missing"]
+
+            gameData.multiverse_unlocked = true
+            gameData.multiverse_points = 1e9
+            gameData.multiverse_points_lifetime = 1e10
+            gameData.multiverse.current_universe = 2
+            gameData.multiverse.highest_universe = 2
+            gameData.multiverse.universe_break_unlocked = true
+
+            for (const key in gameData.taskData) {
+                gameData.taskData[key].level = 0
+                gameData.taskData[key].maxLevel = 0
+            }
+
+            const u2BaseParameter = getUniverseParameterGain(2)
+            const u2BaseWeight = getUniversePassiveWeight(2)
+            gameData.taskData["Royal Administration"].level = 160
+            gameData.taskData["Reality Surveying"].level = 120
+            const u2ImprovedParameter = getUniverseParameterGain(2)
+            const u2ImprovedWeight = getUniversePassiveWeight(2)
+
+            if (!(u2ImprovedParameter > u2BaseParameter))
+                failures.push("Universe II parameter does not grow from its skills")
+            if (!(u2ImprovedWeight > u2BaseWeight))
+                failures.push("Universe II passive MP weight does not grow from its parameter")
+
+            gameData.multiverse.current_universe = 5
+            gameData.multiverse.highest_universe = 5
+            const u5BaseWeight = getUniversePassiveWeight(5)
+            gameData.taskData["Greed Accounting"].level = 180
+            gameData.taskData["Star Market"].level = 140
+            const u5ImprovedWeight = getUniversePassiveWeight(5)
+            if (!(u5ImprovedWeight > u5BaseWeight))
+                failures.push("Universe V passive MP weight does not grow from commerce skills")
+
+            gameData.multiverse.current_universe = 9
+            gameData.multiverse.highest_universe = 9
+            const canBreakBefore = canBreakCurrentUniverse()
+            gameData.taskData["Collapse Containment"].level = 320
+            gameData.taskData["Silent Economy"].level = 320
+            gameData.taskData["Last Signal"].level = 320
+            gameData.taskData["Silence Drills"].level = 320
+            const canBreakAfter = canBreakCurrentUniverse()
+            if (canBreakBefore)
+                failures.push("Universe IX can break before its required skill route")
+            if (!canBreakAfter)
+                failures.push("Universe IX cannot break after its required skill route")
+
+            return failures
+        })
+
+        failures.push(...universeFailures.map(failure => `${name}: ${failure}`))
 
         const evilBridgeFailures = await page.evaluate(() => {
             const failures = []
