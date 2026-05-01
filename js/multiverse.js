@@ -187,14 +187,14 @@ function enterUniverse(id) {
 function getUniverseBreakRequirement(id = getCurrentUniverseId()) {
     const requirements = {
         1: { parameter: 1.18, task: null, taskLevel: 0 },
-        2: { parameter: 1.55, task: "Reality Surveying", taskLevel: 35 },
-        3: { parameter: 1.65, task: "Spell Auditing", taskLevel: 40 },
-        4: { parameter: 1.72, task: "Entropy Calendar", taskLevel: 42 },
-        5: { parameter: 1.85, task: "Star Market", taskLevel: 45 },
-        6: { parameter: 2.00, task: "Null Continuity", taskLevel: 48 },
-        7: { parameter: 1.55, task: "Retroactive Training", taskLevel: 50 },
-        8: { parameter: 1.85, task: "Fractured Mastery", taskLevel: 54 },
-        9: { parameter: 1.75, task: "Last Signal", taskLevel: 58 },
+        2: { parameter: 1.45, task: "Reality Surveying", taskLevel: 32 },
+        3: { parameter: 1.44, task: "Spell Auditing", taskLevel: 36 },
+        4: { parameter: 1.44, task: "Entropy Calendar", taskLevel: 40 },
+        5: { parameter: 1.50, task: "Star Market", taskLevel: 44 },
+        6: { parameter: 2.15, task: "Null Continuity", taskLevel: 48 },
+        7: { parameter: 1.52, task: "Retroactive Training", taskLevel: 50 },
+        8: { parameter: 1.72, task: "Fractured Mastery", taskLevel: 54 },
+        9: { parameter: 1.82, task: "Last Signal", taskLevel: 60 },
     }
 
     return requirements[id] || null
